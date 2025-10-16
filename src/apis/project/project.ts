@@ -47,6 +47,12 @@ export interface ProjectQuery {
 export interface ProjectPageQuery extends ProjectQuery, PageQuery {}
 
 /** @desc 查询项目列表 */
+export function orgGetProjectList(params: string) {
+    return http.get<PageRes<ProjectResp[]>>(`exam/project/org/getAllProject?${params}`)
+  }
+
+
+/** @desc 查询项目列表 */
 export function getProjectList(params: string) {
   return http.get<PageRes<ProjectResp[]>>(`exam/project/getAllProject?${params}`)
 }

@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import {ref, onMounted} from 'vue'
-import {getProjectList, getProjectStatusList} from '@/apis/project/project'
+import {getProjectList, getProjectStatusList,orgGetProjectList} from '@/apis/project/project'
 import {Message} from '@arco-design/web-vue'
 import StatusTabs from './StatusTabs.vue'
 import type {ProjectResp} from "@/apis/project/project";
@@ -110,13 +110,7 @@ const fetchProjectList = async () => {
   loading.value = true
   try {
     const params = `page=${currentPage.value}&size=${pageSize.value}`
-    let response
-
-    if (currentStatus.value === 'all') {
-      response = await getProjectList(params)
-    } else {
-      response = await getProjectStatusList(currentStatus.value, params)
-    }
+    let response = await orgGetProjectList(params)
 
     if (response?.data) {
       // 修改数据获取方式，使用 list 字段
@@ -124,7 +118,6 @@ const fetchProjectList = async () => {
       total.value = response.data.total || 0
     }
   } catch (error) {
-    console.error('获取项目列表失败：', error)
     Message.error('获取项目列表失败')
     projectList.value = []
     total.value = 0
@@ -132,6 +125,32 @@ const fetchProjectList = async () => {
     loading.value = false
   }
 }
+// const fetchProjectList = async () => {
+//   loading.value = true
+//   try {
+//     const params = `page=${currentPage.value}&size=${pageSize.value}`
+//     let response
+
+//     if (currentStatus.value === 'all') {
+//       response = await getProjectList(params)
+//     } else {
+//       response = await getProjectStatusList(currentStatus.value, params)
+//     }
+
+//     if (response?.data) {
+//       // 修改数据获取方式，使用 list 字段
+//       projectList.value = response.data.list || []
+//       total.value = response.data.total || 0
+//     }
+//   } catch (error) {
+//     console.error('获取项目列表失败：', error)
+//     Message.error('获取项目列表失败')
+//     projectList.value = []
+//     total.value = 0
+//   } finally {
+//     loading.value = false
+//   }
+// }
 
 // 处理分页变化
 const handlePageChange = async (page: number) => {

@@ -56,6 +56,11 @@ interface PageQuery {
   size: number;
 }
 
+/** @desc 机构获取符合自身八大类的考试计划 */
+export function orgGetPlanList(params: string) {
+  return http.get<PageRes<OrgExamPlanVO[]>>(`/exam/examPlan/org/page?${params}`)
+}
+
 /** @desc 获取所有考试计划 */
 export function getExamPlanList(params: string) {
   return http.get<PageRes<EnrollResp[]>>(`exam/enroll/getEnrollList?${params}`)

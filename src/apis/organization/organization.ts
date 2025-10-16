@@ -65,7 +65,7 @@ export interface ExpertAddReq {
 
 // 修改后的请求函数（路径参数方式）
 export function queryExpertFree(current: number, size: number) {
-  return http.get<ExpertFreeResp>(`/expertFree?current=${current}&size=${size}`)
+  return http.get<ExpertFreeResp>(`/expertFree/org?current=${current}&size=${size}`)
 }
 
 // 添加新的查询接口

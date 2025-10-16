@@ -74,7 +74,7 @@ import { onMounted, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { IconCalendar, IconRight } from '@arco-design/web-vue/es/icon'
 import type { EnrollResp } from '@/apis/plan/examPlan'
-import { getExamPlanStatusList } from '@/apis/plan/examPlan'
+import { getExamPlanStatusList,orgGetPlanList } from '@/apis/plan/examPlan'
 
 const currentStatus = ref('all')
 const currentPage = ref(1)
@@ -90,11 +90,31 @@ const props = defineProps<{
 
 const emit = defineEmits(['select'])
 
+// const fetchExamList = async () => {
+//   loading.value = true
+//   try {
+//     const params = `page=${currentPage.value}&size=${pageSize.value}`
+//     const response = await getExamPlanStatusList(currentStatus.value, params)
+
+//     if (response?.data) {
+//       examList.value = response.data.list || []
+//       total.value = response.data.total || 0
+//     }
+//   } catch (error) {
+//     console.error('获取考试计划列表失败：', error)
+//     Message.error('获取考试计划列表失败')
+//     examList.value = []
+//     total.value = 0
+//   } finally {
+//     loading.value = false
+//   }
+// }
+
 const fetchExamList = async () => {
   loading.value = true
   try {
-    const params = `page=${currentPage.value}&size=${pageSize.value}`
-    const response = await getExamPlanStatusList(currentStatus.value, params)
+    const params = `status=3&page=${currentPage.value}&size=1`
+    const response = await orgGetPlanList(params)
 
     if (response?.data) {
       examList.value = response.data.list || []
