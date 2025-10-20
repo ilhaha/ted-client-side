@@ -12,9 +12,9 @@
             <a-menu-item key="1">
               考试计划
             </a-menu-item>
-            <a-menu-item key="2">
-              班级管理
-            </a-menu-item>
+            <!-- <a-menu-item key="2">
+              考试项目
+            </a-menu-item> -->
             <a-menu-item key="3">
               学员名单
             </a-menu-item>
@@ -43,7 +43,7 @@
             <organizationExamPlanList :exams="examPlanList" @select="showExamDetail" />
           </div>
           <div v-if="activeTab === '2'" class="project-list">
-            <orgClassList />
+            <orgProjectList :projects="projectList" @select="handleProjectSelect" />
           </div>
           <div v-if="activeTab === '3'" class="tab-content">
             <div class="action-buttons">
@@ -421,8 +421,8 @@ import {
   refuseStudent,
 } from '@/apis/org/org'
 import organizationExamPlanList from '@/components/organizationExamPlanList.vue'
-import orgClassList from "@/views/training/orgClass/index.vue";
 import { type ProjectResp, getProjectDetail } from '@/apis/project/project'
+import orgProjectList from '@/components/orgProjectList.vue'
 import TrainingLesson from '@/components/TrainingLesson.vue'
 import ExpertList from '@/components/ExpertList.vue'
 import { getCertificateByCandidateId } from '@/apis/certificates/certificates'
@@ -670,6 +670,7 @@ const studentApplyFortColumns = [
   },
 ]
 
+const projectList = ref([])
 
 // 获取证件状态颜色
 const getCertStatusColor = (status: number) => {
@@ -1138,6 +1139,15 @@ const handleStudentUploadOk = async () => {
   } finally {
     studentUploadLoading.value = false
   }
+}
+
+const handleProjectSelect = async (project: ProjectResp) => {
+  // 在这里处理项目选择后的逻辑
+  visible.value = true
+  selectedType.value = 'project'
+  selectedItem.value = null // 清空之前的数据
+  // 获取详细信息
+  await fetchProjectDetail(project.id)
 }
 
 // 获取资料状态颜色

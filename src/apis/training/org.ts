@@ -44,7 +44,20 @@ export interface OrgQuery {
   code: string | undefined
   sort: Array<string>
 }
+
+export interface ProjectCategoryVO {
+  label: string
+  value: number
+  parentId?: number
+  children?: ProjectCategoryVO[]
+}
+
 export interface OrgPageQuery extends OrgQuery, PageQuery {}
+
+/** @desc 获取机构八大类-项目级联选择器 */
+export function getSelectCategoryProject() {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project`)
+}
 
 /** @desc 查询机构信息列表 */
 export function listOrg(query: OrgPageQuery) {

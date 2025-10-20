@@ -1,349 +1,301 @@
 <template>
-  <div class="list-container">
+  <div class="gi_table_page">
+    <GiTable row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
+      <template #examType="{ record }">
+        <a-tag :color="getExamTypeColor(record.examType)" bordered>{{
+          getExamTypeText(record.examType)
+        }}</a-tag>
+      </template>
+      <template #toolbar-left>
+        <div class="search-container">
+          <a-input v-model="queryForm.examPlanName" placeholder="搜索计划名称" allow-clear class="search-input" />
+          <a-input v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear class="search-input ml-2" />
+          <a-select v-model="queryForm.status" placeholder="计划状态" allow-clear class="search-input ml-2"
+            style="margin-left: 8px;">
+            <a-option value="3">发布中</a-option>
+            <a-option value="5">考试中</a-option>
+            <a-option value="6">已结束</a-option>
+          </a-select>
+          <a-space class="ml-2">
+            <a-button type="primary" @click="search">
+              <template #icon><icon-search /></template>
+              搜索
+            </a-button>
+            <a-button class="ml-2" @click="reset">
+              <template #icon><icon-refresh /></template>
+              重置
+            </a-button>
+          </a-space>
+        </div>
+      </template>
+      <template #examPlanName="{ record }">
+        <a-link title="查看计划证书" @click="openCertificateInfo(record)">{{ record.examPlanName }}</a-link>
+      </template>
+      <template #projectName="{ record }">
+        <a-link title="查看项目详情" @click="openProjectInfo(record)">{{ record.projectName }}</a-link>
+      </template>
+      <template #startTime="{ record }">
+        {{ record.startTime + " ~ " + record.endTime }}
+      </template>
+      <template #enrollStartTime="{ record }">
+        {{ record.enrollStartTime + " ~ " + record.enrollEndTime }}
+      </template>
 
-    <div class="list-wrapper">
-      <div class="cert-list">
-        <div v-if="loading" class="loading-state">
-          <a-spin />
-        </div>
-        <template v-else-if="examList && examList.length > 0">
-          <div class="exam-list">
-            <div
-              v-for="exam in examList"
-              :key="exam.examPlanId || exam.id"
-              class="exam-item"
-              @click="handleExamClick(exam)"
-            >
-              <a-card class="exam-card" :bordered="false">
-                <div class="exam-content">
-                  <div class="exam-left">
-                    <div class="exam-image-wrapper">
-                      <img
-                        class="exam-image"
-                        :src="exam.imageUrl || '/static/images/test.jpg'"
-                        alt="考试图片"
-                      />
-                    </div>
-                  </div>
-                  <div class="exam-main">
-                    <h3 class="exam-name">{{ exam.examPlanName }}</h3>
-                    <div class="exam-info">
-                      <span class="exam-id">计划编号：{{ exam.examPlanId || exam.id }}</span>
-                    </div>
-                    <div class="exam-dates">
-                      <span>考试时间：{{ exam.examStartTime || exam.startTime }}</span>
-                      <span>报名截止：{{ exam.enrollEndTime }}</span>
-                    </div>
-                  </div>
-                  <div class="exam-arrow">
-                    <icon-right />
-                  </div>
-                </div>
-              </a-card>
-            </div>
-          </div>
-          <div class="pagination-wrapper">
-            <a-pagination
-              :total="total"
-              :page-size="pageSize"
-              v-model:current="currentPage"
-              size="small"
-              show-total
-              :hide-on-single-page="false"
-              @change="handlePageChange"
-            />
-          </div>
-        </template>
-        <div v-else class="empty-state">
-          <a-empty>
-            <template #image>
-              <icon-calendar style="font-size: 48px; color: var(--color-text-3);" />
-            </template>
-            <template #description>
-              {{ currentStatus === 'all' ? '暂无考试计划' : '暂无相关状态的考试计划' }}
-            </template>
-          </a-empty>
-        </div>
-      </div>
-    </div>
+      <template #status="{ record }">
+        <a-tag :color="getStatusColor(record.status)" bordered>
+          {{ getStatusText(record.status) }}
+        </a-tag>
+      </template>
+      <template #action="{ record }">
+        <a-space>
+          <a-link v-if="record.status == 3" title="报名" @click="openClassSignUp(record)">报名</a-link>
+        </a-space>
+        <a-space>
+          <a-link v-if="record.status == 5 || record.status == 6" title="考生信息"
+            @click="openExamInfo(record)">考生信息</a-link>
+        </a-space>
+      </template>
+    </GiTable>
+
+    <ProjectDetailDrawer ref="ProjectDetailDrawerRef" />
+    <CertificateDetailDrawer ref="CertificateDetailDrawerRef" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { Message } from '@arco-design/web-vue'
-import { IconCalendar, IconRight } from '@arco-design/web-vue/es/icon'
-import type { EnrollResp } from '@/apis/plan/examPlan'
-import { getExamPlanStatusList,orgGetPlanList } from '@/apis/plan/examPlan'
+import ProjectDetailDrawer from "@/views/organization/project/ProjectDetailDrawer.vue";
+import CertificateDetailDrawer from "@/views/organization/certificate/CertificateDetailDrawer.vue";
+import { onMounted, ref, computed } from 'vue'
+import type { TableInstanceColumns } from "@/components/GiTable/type";
+import { isMobile } from "@/utils";
+import has from "@/utils/has";
+import { orgGetPlanList } from '@/apis/plan/examPlan'
 
-const currentStatus = ref('all')
-const currentPage = ref(1)
+defineOptions({ name: "ExamPlan" });
+
+const queryForm = reactive<ExamPlanQuery>({
+  sort: ["tep.enroll_end_time,asc"],
+});
+
+const rowSelection = reactive({
+  type: "checkbox",
+  showCheckedAll: true,
+  onlyCurrent: false,
+});
+
 const pageSize = ref(10)
 const total = ref(0)
-const examList = ref([])
-const loading = ref(false)
+const dataList = ref([])
 
-// props
-const props = defineProps<{
-  exams: EnrollResp[]
-}>()
+const currentPage = ref(1)
 
-const emit = defineEmits(['select'])
+const pagination = computed(() => ({
+  current: currentPage.value,
+  pageSize: pageSize.value,
+  total: total.value,
+  showTotal: true,
+  showPageSize: true,
+  onChange: async (page: number) => {
+    currentPage.value = page
+    await search()
+  },
+  onPageSizeChange: async (size: number) => {
+    pageSize.value = size
+    currentPage.value = 1
+    await search()
+  },
+}))
 
-// const fetchExamList = async () => {
-//   loading.value = true
-//   try {
-//     const params = `page=${currentPage.value}&size=${pageSize.value}`
-//     const response = await getExamPlanStatusList(currentStatus.value, params)
 
-//     if (response?.data) {
-//       examList.value = response.data.list || []
-//       total.value = response.data.total || 0
-//     }
-//   } catch (error) {
-//     console.error('获取考试计划列表失败：', error)
-//     Message.error('获取考试计划列表失败')
-//     examList.value = []
-//     total.value = 0
-//   } finally {
-//     loading.value = false
-//   }
-// }
+const openClassSignUp = (record: any) => {
+  console.log("报名", record);
 
-const fetchExamList = async () => {
-  loading.value = true
-  try {
-    const params = `status=3&page=${currentPage.value}&size=1`
-    const response = await orgGetPlanList(params)
+};
 
-    if (response?.data) {
-      examList.value = response.data.list || []
-      total.value = response.data.total || 0
-    }
-  } catch (error) {
-    console.error('获取考试计划列表失败：', error)
-    Message.error('获取考试计划列表失败')
-    examList.value = []
-    total.value = 0
-  } finally {
-    loading.value = false
+const openExamInfo = (record: any) => {
+  console.log("考生信息", record);
+};
+
+
+// 获取项目详情
+const ProjectDetailDrawerRef = ref<InstanceType<typeof ProjectDetailDrawer>>();
+const openProjectInfo = (record: any) => {
+  ProjectDetailDrawerRef.value?.onOpen(record.projectId);
+};
+
+
+// 获取证书详情
+const CertificateDetailDrawerRef = ref<InstanceType<typeof CertificateDetailDrawer>>();
+const openCertificateInfo = (record: any) => {
+  CertificateDetailDrawerRef.value?.onOpen(record.examPlanId);
+};
+
+const columns = ref<TableInstanceColumns[]>([
+  { title: "计划名称", dataIndex: "examPlanName", slotName: "examPlanName" },
+  { title: "考试项目", dataIndex: "projectName", slotName: "projectName" },
+  {
+    title: "考试项目代号",
+    dataIndex: "projectCode",
+    slotName: "projectCode",
+  },
+  {
+    title: "所属八大类",
+    dataIndex: "categoryName",
+    slotName: "categoryName",
+    show: true,
+  },
+  {
+    title: "剩余报名名额",
+    dataIndex: "remainingSlots",
+    slotName: "remainingSlots",
+    align: "center",
+  },
+  {
+    title: "报名时间",
+    dataIndex: "enrollStartTime",
+    slotName: "enrollStartTime",
+    width: 170,
+  },
+  {
+    title: "考试时间",
+    dataIndex: "startTime",
+    slotName: "startTime",
+    width: 170,
+  },
+  {
+    title: "考试时长(分钟)",
+    dataIndex: "examDuration",
+    slotName: "examDuration",
+    align: "center",
+  },
+  { title: "计划状态", dataIndex: "status", slotName: "status", width: 100 },
+  {
+    title: "考试费用/人",
+    dataIndex: "examFee",
+    slotName: "examFee",
+    align: "center",
+  },
+  {
+    title: "操作",
+    dataIndex: "action",
+    slotName: "action",
+    align: "center",
+    fixed: !isMobile() ? "right" : undefined,
+    show: has.hasPermOr([
+      "exam:examPlan:detail",
+      "exam:examPlan:update",
+      "exam:examPlan:delete",
+    ]),
+  },
+]);
+
+
+const getStatusColor = (status: number) => {
+  switch (status) {
+    case 3:
+      return "green"; // 已生效
+    case 5:
+      return "purple"; // 已开考
+    case 6:
+      return "gray"; // 已结束
+    default:
+      return "default";
+  }
+};
+
+const getStatusText = (status: number) => {
+  switch (status) {
+    case 3:
+      return "发布中";
+    case 5:
+      return "已开考";
+    case 6:
+      return "已结束";
+  }
+};
+
+const reset = () => {
+  queryForm.examPlanName = undefined;
+  queryForm.projectName = undefined;
+  queryForm.status = undefined;
+  search();
+};
+
+const search = async () => {
+  const query = new URLSearchParams({
+    examPlanName: queryForm.examPlanName || '',
+    projectName: queryForm.projectName || '',
+    status: queryForm.status || 3,
+    page: String(currentPage.value),
+    size: String(pageSize.value),
+  }).toString()
+
+  const response = await orgGetPlanList(query)
+  if (response?.data) {
+    dataList.value = response.data.list || []
+    total.value = response.data.total || 0
+    pagination.total = total.value
   }
 }
 
-const handlePageChange = async (page: number) => {
-  currentPage.value = page
-  await fetchExamList()
-}
+const getExamTypeColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue"; // 理论考试
+    case 1:
+      return "orange"; // 实操考试
+    default:
+      return "default";
+  }
+};
 
-const handleExamClick = (exam: any) => {
-  emit('select', exam)
-}
+const getExamTypeText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "理论考试";
+    case 1:
+      return "实操考试";
+    default:
+      return "未知状态";
+  }
+};
 
 onMounted(() => {
-  fetchExamList()
+  search()
 })
 </script>
 
 <style scoped lang="scss">
-.list-container {
-  height: 100%;
+.search-container {
   display: flex;
-  flex-direction: column;
-  padding: 0 16px;
-}
-
-.list-wrapper {
-  flex: 1;
-  overflow: auto;
-}
-
-.cert-list {
-  padding: 8px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.exam-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.exam-item {
+  align-items: center;
   width: 100%;
-}
 
-.exam-card {
-  transition: all 0.3s;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid var(--color-border-2);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.09);
-    border-color: var(--color-border-3);
+  .search-input {
+    width: 180px !important;
+  }
+
+  :deep(.arco-picker) {
+    width: 180px !important;
+  }
+
+  :deep(.arco-select) {
+    width: 180px !important;
   }
 }
 
-.exam-content {
+.ml-2 {
+  margin-left: 8px;
+}
+
+:deep(.arco-space) {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background-color: var(--color-bg-1);
 }
 
-.exam-left {
-  flex-shrink: 0;
-}
-
-.exam-image-wrapper {
+.gi_table_page {
   position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-
-  .status-tag {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 2px;
-    
-    :deep(.arco-tag) {
-      margin: 0;
-      border: none;
-      font-size: 12px;
-      line-height: 1.2;
-      padding: 2px 6px;
-      border-radius: 0 4px 0 4px;
-    }
-  }
 }
-
-.exam-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.exam-status {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 65%;
-  padding: 4px 0;
-  font-size: 13px;
-  text-align: center;
-  white-space: nowrap;
-  color: #fff;
-  border-radius: 0 4px 0 4px;
-  
-  &.upcoming {
-    background-color: rgba(var(--warning-6), 0.95);
-  }
-  
-  &.registered {
-    background-color: rgba(var(--success-6), 0.95);
-  }
-  
-  &.completed {
-    background-color: rgba(var(--primary-6), 0.95);
-  }
-  
-  &.expired {
-    background-color: rgba(var(--danger-6), 0.95);
-  }
-}
-
-.exam-main {
-  flex: 1;
-  min-width: 0;
-
-  .exam-name {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--color-text-1);
-    margin: 0 0 8px 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .exam-info {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 8px;
-    color: var(--color-text-2);
-    font-size: 14px;
-  }
-
-  .exam-dates {
-    display: flex;
-    gap: 24px;
-    color: var(--color-text-3);
-    font-size: 13px;
-  }
-}
-
-.exam-arrow {
-  color: var(--color-text-3);
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-}
-
-.pagination-wrapper {
-  padding: 20px 0 50px 0;
-  //margin-top: 16px;
-  display: flex;
-  justify-content: center;
-}
-
-.empty-state {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 64px 0;
-}
-
-.notice-bar {
-  margin-bottom: 16px;
-  padding: 8px 16px;
-  background: var(--color-bg-2);
-  border-radius: 4px;
-}
-
-.notice-carousel {
-  height: 32px;
-}
-
-.notice-item {
-  display: flex;
-  align-items: center;
-  height: 32px;
-  
-  .notice-icon {
-    color: rgb(var(--primary-6));
-    margin-right: 8px;
-    font-size: 16px;
-  }
-
-  .notice-text {
-    color: var(--color-text-2);
-    font-size: 14px;
-  }
-}
-
-.loading-state {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px 0;
-}
-</style> 
+</style>
