@@ -100,15 +100,15 @@
                 :alt="selectedItem?.projectName"
               />
             </div>
-            <a-descriptions
-              :data="getDescriptionData()"
-              layout="inline-vertical"
-            />
-            <a-divider />
-            <div class="detail-description">
-              <h4>{{ getDetailTitle() }}</h4>
-              <p>{{ selectedItem.redeme }}</p>
-            </div>
+            <a-descriptions layout="inline-vertical">
+              <a-descriptions-item
+                v-for="(item, index) in getDescriptionData()"
+                :key="index"
+                :label="item.label"
+              >
+                <span v-html="item.value"></span>
+              </a-descriptions-item>
+            </a-descriptions>
 
             <!-- 添加分割线 -->
             <a-divider style="margin: 16px 0" />
@@ -250,9 +250,7 @@
                 <!-- 添加取消报名按钮 -->
                 <a-button
                   type="primary"
-                  v-if="
-                    selectedItem?.enrollStatus !== '0' 
-                  "
+                  v-if="selectedItem?.enrollStatus !== '0'"
                   @click="handleCancelRegistration"
                 >
                   取消报名
@@ -538,6 +536,24 @@ const showExamDetail = (exam: any) => {
 };
 
 const getExamDesc = (exam) => {
+  // 文件在线预览处理
+  const getPreviewUrl = (url) => {
+    if (!url) return "#";
+    const lower = url.toLowerCase();
+    if (lower.endsWith(".pdf")) return url;
+    if (
+      lower.endsWith(".doc") ||
+      lower.endsWith(".docx") ||
+      lower.endsWith(".xls") ||
+      lower.endsWith(".xlsx") ||
+      lower.endsWith(".ppt") ||
+      lower.endsWith(".pptx")
+    ) {
+      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
+    }
+    return url;
+  };
+
   return [
     { label: "考试时间", value: exam.examStartTime },
     { label: "报名截止", value: exam.enrollEndTime },
@@ -551,6 +567,16 @@ const getExamDesc = (exam) => {
       color: getExamStatusColor(exam.enrollStatus),
     },
     { label: "审核通知", value: qualificationInfo.value?.remark || "无" },
+
+    // ✅ 新增：申请表链接
+    qualificationInfo.value?.imageUrl
+      ? {
+          label: "申请表",
+          value: `<a href="${getPreviewUrl(
+            qualificationInfo.value.imageUrl
+          )}" target="_blank" rel="noopener noreferrer">查看申请表</a>`,
+        }
+      : { label: "申请表", value: "未上传" },
   ];
 };
 
