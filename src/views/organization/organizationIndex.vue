@@ -18,12 +18,6 @@
             <a-menu-item key="3">
               学员名单
             </a-menu-item>
-            <!--            <a-menu-item key="4"> -->
-            <!--              课件管理 -->
-            <!--            </a-menu-item> -->
-            <a-menu-item key="5">
-              专家管理
-            </a-menu-item>
             <a-menu-item key="6">
               <a-space :size="40">
                 <a-badge :count="studentAddCount" dot :offset="[7, -2]">
@@ -31,6 +25,10 @@
                 </a-badge>
               </a-space>
             </a-menu-item>
+            <a-menu-item key="5">
+              专家管理
+            </a-menu-item>
+
             <a-menu-item key="7">
               培训管理
             </a-menu-item>

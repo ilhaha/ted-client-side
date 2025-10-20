@@ -1,13 +1,6 @@
 <template>
-  <a-form
-    ref="formRef"
-    :model="form"
-    :rules="rules"
-    :label-col-style="{ display: 'none' }"
-    :wrapper-col-style="{ flex: 1 }"
-    size="large"
-    @submit="handleLogin"
-  >
+  <a-form ref="formRef" :model="form" :rules="rules" :label-col-style="{ display: 'none' }"
+    :wrapper-col-style="{ flex: 1 }" size="large" @submit="handleLogin">
     <!-- 角色选择（下拉选择框） -->
     <a-form-item field="role">
       <a-select v-model="form.role" placeholder="请选择角色">
@@ -51,19 +44,21 @@
       </a-space>
     </a-form-item>
   </a-form>
+  <RealNameInfo ref="RealNameInfoRef" />
 </template>
 
 <script setup lang="ts">
 import { inject } from 'vue'
-import { type FormInstance, Message } from '@arco-design/web-vue'
+import { type FormInstance, Message,Modal} from '@arco-design/web-vue'
 import { useStorage } from '@vueuse/core'
 import { getImageCaptcha } from '@/apis/common'
 import { useTabsStore, useUserStore } from '@/stores'
 import { encryptByRsa } from '@/utils/encrypt'
 import { getRoleFlag } from '@/utils/auth'
 import { forgotFormKey, loginFormKey } from '@/utils/inject-keys'
-import {findIsAccount} from "@/apis";
-
+import { findIsAccount } from "@/apis";
+import { verifyRealName } from "@/apis/exam/examIdcard";
+import RealNameInfo from './RealNameInfo.vue'
 const loginConfig = useStorage('login-config', {
   rememberMe: true,
   username: '350525197306124505', // 演示默认值
@@ -85,8 +80,21 @@ const form = reactive({
   uuid: '',
   expired: false,
 })
+const idCardReg =
+  /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9X]$/i
+
 const rules: FormInstance['rules'] = {
-  username: [{ required: true, message: '请输入用户名' }],
+  username: [{ required: true, message: '请输入用户名' }, {
+    validator: (value: string, callback) => {
+      if (!value) return callback()
+      // 仅当角色需要身份证时才验证
+      if (form.role === '1' && !idCardReg.test(value)) {
+        return callback('考生请使用身份证进行登录')
+      }
+      callback()
+    },
+    trigger: ['blur', 'change'],
+  },],
   password: [{ required: true, message: '请输入密码' }],
   captcha: [{ required: isCaptchaEnabled.value, message: '请输入验证码' }],
 }
@@ -129,6 +137,8 @@ const userStore = useUserStore()
 const tabsStore = useTabsStore()
 const router = useRouter()
 const loading = ref(false)
+const RealNameInfoRef = ref<InstanceType<typeof RealNameInfo>>();
+
 // 登录
 const handleLogin = async () => {
   try {
@@ -141,47 +151,62 @@ const handleLogin = async () => {
       Message.error('账号未注册')
       return
     }
-    await userStore.accountLogin({
-      username: encryptByRsa(form.username) || '',
-      password: encryptByRsa(form.password) || '',
-      captcha: form.captcha,
-      uuid: form.uuid,
-      role: form.role,
-    })
-    tabsStore.reset()
-    const { redirect, ...othersQuery } = router.currentRoute.value.query
-    const { rememberMe } = loginConfig.value
-    loginConfig.value.username = rememberMe ? form.username : ''
-    const roleFlag = getRoleFlag()
-    await router.push({
-      path: roleFlag === '1' ? ((redirect as string) || '/') : roleFlag === '2' ? ((redirect as string) || '/invigilate') : ((redirect as string) || '/organization/index'),
-      query: {
-        ...othersQuery,
-      },
-    })
-    Message.success('欢迎使用')
-  } catch (error) {
-    console.error(error)
-    getCaptcha()
-    form.captcha = ''
-  } finally {
-    loading.value = false
+    if (form.role === '1') {
+      const verifyRealNameRes = await verifyRealName(encryptByRsa(form.username) || '')
+      if (!verifyRealNameRes.data) {
+        Modal.confirm({
+          title: '实名认证提醒',
+          content: '当前账号未实名认证，是否立即进行实名认证？',
+          okText: '认证',
+          cancelText: '取消',
+          onOk: () => {
+            RealNameInfoRef.value?.onOpen(form.username)
+          }
+        })
+        return
+      }
+    }
+      await userStore.accountLogin({
+        username: encryptByRsa(form.username) || '',
+        password: encryptByRsa(form.password) || '',
+        captcha: form.captcha,
+        uuid: form.uuid,
+        role: form.role,
+      })
+      tabsStore.reset()
+      const { redirect, ...othersQuery } = router.currentRoute.value.query
+      const { rememberMe } = loginConfig.value
+      loginConfig.value.username = rememberMe ? form.username : ''
+      const roleFlag = getRoleFlag()
+      await router.push({
+        path: roleFlag === '1' ? ((redirect as string) || '/') : roleFlag === '2' ? ((redirect as string) || '/invigilate') : ((redirect as string) || '/organization/index'),
+        query: {
+          ...othersQuery,
+        },
+      })
+      Message.success('欢迎使用')
+    } catch (error) {
+      console.error(error)
+      getCaptcha()
+      form.captcha = ''
+    } finally {
+      loading.value = false
+    }
   }
-}
 
 const loginWindow = inject(loginFormKey)
-const forgotWindow = inject(forgotFormKey)
+  const forgotWindow = inject(forgotFormKey)
 
-const handleLoginWindow = () => {
-  loginWindow.value = true
-}
+  const handleLoginWindow = () => {
+    loginWindow.value = true
+  }
 
-const handleForgotWindow = () => {
-  forgotWindow.value = true
-}
-onMounted(() => {
-  getCaptcha()
-})
+  const handleForgotWindow = () => {
+    forgotWindow.value = true
+  }
+  onMounted(() => {
+    getCaptcha()
+  })
 </script>
 
 <style scoped lang="scss">

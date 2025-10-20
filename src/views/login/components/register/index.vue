@@ -21,8 +21,8 @@
         <a-form-item field="username" label="用户名" validate-trigger="blur">
           <a-input v-model="loginForm.username" :max-length="18" placeholder="请输入身份证号" />
         </a-form-item>
-        <a-form-item field="nickname" label="姓名" validate-trigger="blur">
-          <a-input v-model="loginForm.nickname" :max-length="10" placeholder="请输入姓名" />
+        <a-form-item field="nickname" label="真实姓名" validate-trigger="blur">
+          <a-input v-model="loginForm.nickname" :max-length="10" placeholder="请输入真实姓名" />
         </a-form-item>
         <a-form-item field="phone" label="手机号" validate-trigger="blur">
           <a-input v-model="loginForm.phone" :max-length="11" placeholder="请输入手机号" allow-clear />
@@ -67,7 +67,7 @@
 <script setup lang="ts">
 import { inject, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { type BehaviorCaptchaReq, getSmsCaptcha, getSmsCaptchaStatus, loginIdentity } from '@/apis'
+import { type BehaviorCaptchaReq, getSmsCaptcha, getSmsCaptchaStatus, loginIdentity,isPhoneExists } from '@/apis'
 import { encryptByRsa } from '@/utils/encrypt'
 import * as Regexp from '@/utils/regexp'
 import { loginFormKey } from '@/utils/inject-keys'
@@ -164,6 +164,12 @@ const resetCaptcha = () => {
 
 // 弹出行为验证码
 const onCaptcha = async () => {
+  // 判断手机号是否已注册
+  const res = await isPhoneExists(loginForm.phone);
+  if (res.data) {
+    Message.error('该手机号已被注册')
+    return
+  }
   if (captchaLoading.value) return
   const isInvalid = await loginFormRef.value?.validateField('phone')
   if (isInvalid) return
