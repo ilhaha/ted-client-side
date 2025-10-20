@@ -1,8 +1,8 @@
 <template>
-  <div class="special-certification-applicant" >
+  <div class="special-certification-applicant">
     <a-modal
       :visible="visible"
-      title="未上传特种设备作业人员资格申请表"
+      title="上传特种设备作业人员资格申请表"
       @cancel="handleCancel"
       :mask-closable="false"
       :footer="false"
@@ -11,22 +11,26 @@
     >
       <div class="form-actions-container">
         <div class="action-buttons">
-          <a-button type="primary" class="download-btn" @click="handleDownloadTemplate">
+          <a-button
+            type="primary"
+            class="download-btn"
+            @click="handleDownloadTemplate"
+          >
             <template #icon><icon-download /></template>
             下载申请表模板
           </a-button>
         </div>
-        
-        <div class="upload-section" >
+
+        <div class="upload-section">
           <a-upload
             :action="uploadUrl"
             :headers="{
-              Authorization: `Bearer ${getToken()}`
+              Authorization: `Bearer ${getToken()}`,
             }"
-            :data="{ type: 'pic' }"
+            :data="{ type: 'file' }"
             :limit="1"
             v-model:file-list="fileList"
-            :accept="'image/jpeg,image/png,image/jpg'"
+            :accept="'.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip'"
             @success="handleSuccess"
             @before-upload="beforeUpload"
             @error="handleError"
@@ -35,14 +39,16 @@
               <div class="upload-button">
                 <icon-upload />
                 <div class="upload-text">点击或拖拽文件到此处上传</div>
-                <div class="upload-hint">支持图片格式，大小不超过 20MB</div>
+                <div class="upload-hint">
+                  支持常见文档（PDF、Word），大小不超过20MB
+                </div>
               </div>
             </template>
           </a-upload>
-          
-          <a-button 
-            type="primary" 
-            class="confirm-upload-btn" 
+
+          <a-button
+            type="primary"
+            class="confirm-upload-btn"
             :disabled="!fileList.length"
             @click="confirmUpload"
           >
@@ -55,20 +61,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Message } from '@arco-design/web-vue'
-import { getToken } from '@/utils/auth'
+import { ref } from "vue";
+import { Message } from "@arco-design/web-vue";
+import { getToken } from "@/utils/auth";
 
 // 获取环境变量中的API基础URL
-const uploadUrl = `${import.meta.env.VITE_API_PREFIX}/upload/file`
+const uploadUrl = `${import.meta.env.VITE_API_PREFIX}/upload/file`;
 // 上传之后的图片url
-const imageUrl = ref('')
+const imageUrl = ref("");
 
 // 定义上传文件项的类型
 interface UploadItem {
   uid: string;
   name: string;
-  status?: 'init' | 'uploading' | 'done' | 'error';
+  status?: "init" | "uploading" | "done" | "error";
   file?: File;
   url?: string;
 }
@@ -76,71 +82,79 @@ interface UploadItem {
 const props = defineProps({
   visible: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
-const emit = defineEmits(['close', 'upload-application-success'])
+const emit = defineEmits(["close", "upload-application-success"]);
 
 // 文件列表
-const fileList = ref<UploadItem[]>([])
+const fileList = ref<UploadItem[]>([]);
 
 const handleCancel = () => {
-  emit('close')
-}
+  emit("close");
+};
 
 // 处理上传成功
 const handleSuccess = (file: any) => {
-  imageUrl.value = file.response.data.url
- 
-}
+  imageUrl.value = file.response.data.url;
+};
 
 // 上传前校验
 const beforeUpload = (file: File) => {
-  const isImage = file.type.startsWith('image/')
-  if (!isImage) {
-    Message.error('只能上传图片文件！')
-    return false
+  const allowedTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    Message.error('只能上传 PDF 或 Word 文件');
+    return false;
   }
-  return true
-}
+
+  const maxSize = 20 * 1024 * 1024; // 20MB
+  if (file.size > maxSize) {
+    Message.error('文件不能超过 20MB');
+    return false;
+  }
+
+  return true;
+};
 
 const handleError = (error: any) => {
-  const maxSize = 2 * 1024 * 1024 * 1024; 
+  const maxSize = 2 * 1024 * 1024 * 1024;
   if (error.file.size > maxSize) {
-    Message.error('上传失败，图片文件不能超过2GB！')
+    Message.error("上传失败，图片文件不能超过2GB！");
   } else {
-    Message.error('系统错误')
+    Message.error("系统错误");
   }
-}
-
+};
 
 const handleDownloadTemplate = () => {
   // 下载本地文件
-  const filePath = '/static/file/特种设备作业人员资格申请表.docx'
-  
-  // 创建一个a标签来触发下载
-  const link = document.createElement('a')
-  link.href = filePath
-  link.download = '特种设备作业人员资格申请表.docx'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  
-  Message.success('下载申请表模板成功')
-}
+  const filePath = "/static/file/特种设备作业人员资格申请表.docx";
 
+  // 创建一个a标签来触发下载
+  const link = document.createElement("a");
+  link.href = filePath;
+  link.download = "特种设备作业人员资格申请表.docx";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  Message.success("下载申请表模板成功");
+};
 
 // 确认上传
 const confirmUpload = () => {
   if (fileList.value.length === 0) {
-    Message.warning('请先选择要上传的文件')
-    return
+    Message.warning("请先选择要上传的文件");
+    return;
   }
-    emit('upload-application-success', imageUrl.value)
-    emit('close')
-}
-
+  emit("upload-application-success", imageUrl.value);
+  emit("close");
+};
 </script>
 
 <style scoped>
@@ -212,13 +226,17 @@ const confirmUpload = () => {
 }
 
 .upload-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(22, 93, 255, 0.05) 0%, rgba(22, 93, 255, 0) 70%);
+  background: radial-gradient(
+    circle at center,
+    rgba(22, 93, 255, 0.05) 0%,
+    rgba(22, 93, 255, 0) 70%
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }

@@ -56,11 +56,6 @@ interface PageQuery {
   size: number;
 }
 
-/** @desc 机构获取符合自身八大类的考试计划 */
-export function orgGetPlanList(params: string) {
-  return http.get<PageRes<OrgExamPlanVO[]>>(`/exam/examPlan/org/page?${params}`)
-}
-
 /** @desc 获取所有考试计划 */
 export function getExamPlanList(params: string) {
   return http.get<PageRes<EnrollResp[]>>(`exam/enroll/getEnrollList?${params}`)
@@ -70,12 +65,29 @@ export function getExamPlanDetail(examPlanId: string) {
   return http.get(`exam/enroll/getAllDetail/byProject/${examPlanId}`)
 }
 
-export function getExamPlanStatusList(enrollStatus: string, params: string) {
-  if (enrollStatus === 'all') {
-    return http.get<PageRes<EnrollResp[]>>(`exam/enroll/getEnrollStatusList?${params}`)
+export function getExamPlanStatusList(enrollStatus: string, params: Record<string, any>) {
+  // 使用 URLSearchParams 构造器自动拼接参数
+  const query = new URLSearchParams()
+
+  // 把 params 对象里的参数安全地加进去
+  for (const key in params) {
+    if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+      query.append(key, String(params[key]))
+    }
   }
-  return http.get<PageRes<EnrollResp[]>>(`exam/enroll/getEnrollStatusList/${enrollStatus}?${params}`)
+
+  // 如果状态不是 'all'，追加 enrollStatus 参数
+  if (enrollStatus && enrollStatus !== 'all') {
+    query.append('enrollStatus', enrollStatus)
+  }
+
+  // 拼接最终 URL
+  const url = `/exam/enroll/getEnrollStatusList?${query.toString()}`
+  return http.get<PageRes<EnrollResp[]>>(url)
 }
+
+
+
 
 export function viewIdentityCard(examPlanId: string) {
   return http.get(`exam/enroll/viewIdentityCard/${examPlanId}`)

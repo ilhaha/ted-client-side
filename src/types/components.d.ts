@@ -9,13 +9,11 @@ declare module 'vue' {
   export interface GlobalComponents {
     AgencyList: typeof import('./../components/AgencyList.vue')['default']
     Avatar: typeof import('./../components/Avatar/index.vue')['default']
-    back: typeof import('./../components/organizationExamPlanList back.vue')['default']
     Breadcrumb: typeof import('./../components/Breadcrumb/index.vue')['default']
     Carousel: typeof import('./../components/Carousel/index.vue')['default']
     CellCopy: typeof import('./../components/CellCopy/index.vue')['default']
     CertificateList: typeof import('./../components/CertificateList.vue')['default']
     Chart: typeof import('./../components/Chart/index.vue')['default']
-    copy: typeof import('./../components/orgProjectList copy.vue')['default']
     CourseList: typeof import('./../components/CourseList.vue')['default']
     CronForm: typeof import('./../components/GenCron/CronForm/index.vue')['default']
     CronModal: typeof import('./../components/GenCron/CronModal/index.vue')['default']

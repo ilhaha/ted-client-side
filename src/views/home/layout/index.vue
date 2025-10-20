@@ -11,7 +11,10 @@
           indicator-position="never"
           :interval="3000"
         >
-          <a-carousel-item v-for="(notice, index) in announcements" :key="index">
+          <a-carousel-item
+            v-for="(notice, index) in announcements"
+            :key="index"
+          >
             <div class="notice-item" @click="goAnnouncements(notice.uri)">
               <IconNotification class="notice-icon" />
               <span class="notice-text">{{ notice.title }}</span>
@@ -77,8 +80,11 @@
           <template #title>
             <div class="drawer-title">
               <span class="title-text">{{ selectedItem?.projectName }}</span>
-              <a-tag v-if="selectedType === 'project'" :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'">
-                {{ selectedItem?.projectStatus === '1' ? '已上架' : '进行中' }}
+              <a-tag
+                v-if="selectedType === 'project'"
+                :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'"
+              >
+                {{ selectedItem?.projectStatus === "1" ? "已上架" : "进行中" }}
               </a-tag>
             </div>
           </template>
@@ -86,7 +92,11 @@
           <div v-if="selectedItem" class="detail-content">
             <div class="detail-image">
               <img
-                :src="selectedItem.businessLicense||selectedItem?.imageUrl || '/static/images/test.jpg'"
+                :src="
+                  selectedItem.businessLicense ||
+                  selectedItem?.imageUrl ||
+                  '/static/images/test.jpg'
+                "
                 :alt="selectedItem?.projectName"
               />
             </div>
@@ -104,17 +114,25 @@
             <a-divider style="margin: 16px 0" />
 
             <!-- 证书信息卡片 -->
-            <div v-if="selectedKeys[0] === 'exam-plan'" class="certificate-card">
+            <div
+              v-if="selectedKeys[0] === 'exam-plan'"
+              class="certificate-card"
+            >
               <h4>证书信息</h4>
               <a-card :bordered="true" class="info-card">
-                <div v-if="selectedItem?.certificates?.length" class="certificate-list">
+                <div
+                  v-if="selectedItem?.certificates?.length"
+                  class="certificate-list"
+                >
                   <div
                     v-for="(cert, index) in selectedItem.certificates"
                     :key="index"
                     class="cert-item"
                   >
                     <div class="cert-name">{{ cert.certificateName }}</div>
-                    <div class="cert-number">证书编号：{{ cert.certificateNumber || '暂无' }}</div>
+                    <div class="cert-number">
+                      证书编号：{{ cert.certificateNumber || "暂无" }}
+                    </div>
                   </div>
                 </div>
                 <div v-else class="empty-certs">
@@ -127,7 +145,10 @@
             <div v-if="selectedKeys[0] === 'projects'" class="document-card">
               <h4>所需资料</h4>
               <a-card :bordered="true" class="info-card">
-                <div v-if="selectedItem?.documentList?.length" class="document-tags">
+                <div
+                  v-if="selectedItem?.documentList?.length"
+                  class="document-tags"
+                >
                   <a-tag
                     v-for="(doc, index) in selectedItem.documentList"
                     :key="index"
@@ -148,7 +169,10 @@
             <div v-if="selectedKeys[0] === 'exam-plan'" class="document-card">
               <h4>所需资料</h4>
               <a-card :bordered="true" class="info-card">
-                <div v-if="selectedItem?.documentNames?.length" class="document-tags">
+                <div
+                  v-if="selectedItem?.documentNames?.length"
+                  class="document-tags"
+                >
                   <a-tag
                     v-for="(doc, index) in selectedItem.documentNames"
                     :key="index"
@@ -171,7 +195,10 @@
             <div v-if="selectedKeys[0] === 'projects'" class="location-card">
               <h4>考试地点</h4>
               <a-card :bordered="true" class="info-card">
-                <div v-if="selectedItem?.locationList?.length" class="location-tags">
+                <div
+                  v-if="selectedItem?.locationList?.length"
+                  class="location-tags"
+                >
                   <a-tag
                     v-for="(location, index) in selectedItem.locationList"
                     :key="index"
@@ -194,11 +221,17 @@
             <template v-if="selectedType === 'exam'">
               <a-divider />
               <div class="exam-actions">
-                <a-button v-show="isIdentityCard" type="primary" @click="handleViewIdentityCard">查看准考证</a-button>
-                <a-modal v-model:visible="isWindowIdentityCard" :hide-cancel="false">
-                  <template #title>
-                    准考证信息
-                  </template>
+                <a-button
+                  v-show="isIdentityCard"
+                  type="primary"
+                  @click="handleViewIdentityCard"
+                  >查看准考证</a-button
+                >
+                <a-modal
+                  v-model:visible="isWindowIdentityCard"
+                  :hide-cancel="false"
+                >
+                  <template #title> 准考证信息 </template>
                   <div>
                     <div>考试名称：{{ identityCard.examPlanName }}</div>
                     <div>准考证号：{{ identityCard.examNumber }}</div>
@@ -206,16 +239,23 @@
                     <div>考试结束时间：{{ identityCard.endTime }}</div>
                   </div>
                 </a-modal>
-                <a-button type="primary" :disabled="!canRegister" @click="handleExamRegister" v-if="!isQualifications">
+                <a-button
+                  type="primary"
+                  :disabled="!canRegister"
+                  @click="handleExamRegister"
+                  v-if="!isQualifications"
+                >
                   {{ getExamActionText() }}
                 </a-button>
-                  <a-button class="waiting-approval" type="primary" :disabled="true" v-else >
-                  报名等待审核
-                </a-button>
-<!-- 添加取消报名按钮 -->
+                <!-- 添加取消报名按钮 -->
                 <a-button
-                type="primary" v-if="isQualifications" @click="handleCancelRegistration">
-                取消报名
+                  type="primary"
+                  v-if="
+                    selectedItem?.enrollStatus !== '0' 
+                  "
+                  @click="handleCancelRegistration"
+                >
+                  取消报名
                 </a-button>
                 <a-button
                   type="primary"
@@ -227,12 +267,24 @@
               </div>
             </template>
             <template v-if="selectedType === 'agency'">
-              <a-popconfirm content="确定要给当前机构发送申请吗" @ok="handleAddAgency">
-                <a-button v-show="agencyStatus === 0" type="primary">发送申请</a-button>
+              <a-popconfirm
+                content="确定要给当前机构发送申请吗"
+                @ok="handleAddAgency"
+              >
+                <a-button v-show="agencyStatus === 0" type="primary"
+                  >发送申请</a-button
+                >
               </a-popconfirm>
-              <a-button v-show="agencyStatus === 1" type="primary" :disabled="true">已发送申请</a-button>
+              <a-button
+                v-show="agencyStatus === 1"
+                type="primary"
+                :disabled="true"
+                >已发送申请</a-button
+              >
               <a-popconfirm content="确定退出当前机构吗" @ok="handleDelAgency">
-                <a-button v-show="agencyStatus === 2" type="primary">退出机构</a-button>
+                <a-button v-show="agencyStatus === 2" type="primary"
+                  >退出机构</a-button
+                >
               </a-popconfirm>
             </template>
           </div>
@@ -281,122 +333,136 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { IconAlipayCircle, IconApps, IconBook, IconCalendar, IconCode, IconLocation, IconNotification, IconWechatpay } from '@arco-design/web-vue/es/icon'
-import { Message } from '@arco-design/web-vue'
-import ExamPlanList from '@/components/ExamPlanList.vue'
-import ProjectList from '@/components/ProjectList.vue'
-import CourseList from '@/components/CourseList.vue'
-import AgencyList from '@/components/AgencyList.vue'
-import SpecialCertificationApplicant from '@/components/SpecialCertificationApplicant/index.vue'
-import { listTraining } from '@/apis/training/training'
+import { computed, ref, watch } from "vue";
+import {
+  IconAlipayCircle,
+  IconApps,
+  IconBook,
+  IconCalendar,
+  IconCode,
+  IconLocation,
+  IconNotification,
+  IconWechatpay,
+} from "@arco-design/web-vue/es/icon";
+import { Message } from "@arco-design/web-vue";
+import ExamPlanList from "@/components/ExamPlanList.vue";
+import ProjectList from "@/components/ProjectList.vue";
+import CourseList from "@/components/CourseList.vue";
+import AgencyList from "@/components/AgencyList.vue";
+import SpecialCertificationApplicant from "@/components/SpecialCertificationApplicant/index.vue";
+import { listTraining } from "@/apis/training/training";
 import {
   type EnrollResp,
   getExamPlanDetail,
   viewIdentityCard,
-} from '@/apis/plan/examPlan'
-import { getProjectDetail, getProjectList } from '@/apis/project/project'
-import { listAnnouncementHome } from '@/apis/common/announcement'
-import { getStudentInfo } from '@/apis/studentInfo/student'
-import { getCandidatesId } from '@/apis/specialCertificationApplicant/index.ts'
-import { checkEnrolledTime, singUp, cancelEnroll } from '@/apis/plan/enroll'
-import { candidatesUpload } from '@/apis/specialCertificationApplicant/index'
-import { getAgencyDetail, getAgencyStatus, studentAddAgency, studentDelAgency } from '@/apis/org/org'
+} from "@/apis/plan/examPlan";
+import { getProjectDetail, getProjectList } from "@/apis/project/project";
+import { listAnnouncementHome } from "@/apis/common/announcement";
+import { getStudentInfo } from "@/apis/studentInfo/student";
+import { getCandidatesId } from "@/apis/specialCertificationApplicant/index.ts";
+import { checkEnrolledTime, singUp, cancelEnroll } from "@/apis/plan/enroll";
+import { candidatesUpload } from "@/apis/specialCertificationApplicant/index";
+import {
+  getAgencyDetail,
+  getAgencyStatus,
+  studentAddAgency,
+  studentDelAgency,
+} from "@/apis/org/org";
 
-const selectedKeys = ref(['exam-plan'])
-const visible = ref(false)
-const selectedItem = ref(null)
-const selectedType = ref('certificate')
-const isNotFillIn = ref(false)
-const planId = ref(null)
-const isQualifications = ref(false)
+const selectedKeys = ref(["exam-plan"]);
+const visible = ref(false);
+const selectedItem = ref(null);
+const selectedType = ref("certificate");
+const isNotFillIn = ref(false);
+const planId = ref(null);
+const isQualifications = ref(false);
 
 // 添加支付相关状态
-const paymentModalVisible = ref(false)
+const paymentModalVisible = ref(false);
 
 const getCertificateDesc = (cert) => {
   return [
-    { label: '证书编号', value: cert.id },
-    { label: '发证机构', value: cert.issuer },
-    { label: '获得时间', value: cert.date },
-    { label: '有效期至', value: cert.validUntil },
-    { label: '技能标签', value: cert.skills.join('、') },
-  ]
-}
+    { label: "证书编号", value: cert.id },
+    { label: "发证机构", value: cert.issuer },
+    { label: "获得时间", value: cert.date },
+    { label: "有效期至", value: cert.validUntil },
+    { label: "技能标签", value: cert.skills.join("、") },
+  ];
+};
 
 const getStatusColor = (status) => {
   const statusMap = {
-    0: 'blue',
-    1: 'green',
-    2: 'grey',
-    3: 'red',
-  }
-  return statusMap[status] || 'blue'
-}
+    0: "blue",
+    1: "green",
+    2: "grey",
+    3: "red",
+  };
+  return statusMap[status] || "blue";
+};
 
 const getStatusText = (status) => {
   const statusMap = {
-    0: '未报名',
-    1: '已报名',
-    2: '已完成',
-    3: '已过期',
-  }
-  return statusMap[status] || '未知'
-}
+    0: "未报名",
+    1: "已报名",
+    2: "已完成",
+    3: "已过期",
+  };
+  return statusMap[status] || "未知";
+};
 
 const showCertDetail = (cert) => {
-  selectedItem.value = cert
-  visible.value = true
-}
+  selectedItem.value = cert;
+  visible.value = true;
+};
 
 const handleModalClose = () => {
-  isNotFillIn.value = false
-}
+  isNotFillIn.value = false;
+};
 
 // 确认上传申请表
 const handleUploadSuccess = async (imageUrl: string) => {
   const form = {
     planId: planId.value,
     imageUrl,
-  }
-  const res = await candidatesUpload(form)
+  };
+  const res = await candidatesUpload(form);
   if (res.data) {
-    Message.success('申请表上传成功')
-    fetchQualification(Number(planId.value))
+    Message.success("申请表上传成功");
+    fetchQualification(Number(planId.value));
   } else {
-    Message.error('申请表上传成功')
+    Message.error("申请表上传成功");
   }
-}
+};
 
 const onClose = () => {
-  visible.value = false
-  selectedItem.value = null
-}
+  visible.value = false;
+  selectedItem.value = null;
+};
 // 新增取消报名方法
 const handleCancelRegistration = async () => {
   // 获取当前时间
   const currentTime = new Date();
   // 假设 selectedItem 中有报名截止时间字段 registrationEndTime
   const registrationEndTime = new Date(selectedItem.value?.enrollEndTime);
-  console.log(currentTime,registrationEndTime)
+  console.log(currentTime, registrationEndTime);
   if (currentTime > registrationEndTime) {
-    Message.error('当前已过报名截止时间，无法取消报名');
+    Message.error("当前已过报名截止时间，无法取消报名");
     return;
   }
   try {
-    const examPlanId = Number(planId.value)
+    const examPlanId = Number(planId.value);
     await cancelEnroll(examPlanId);
     // 取消报名成功后刷新数据
     await fetchExamDetail(String(examPlanId));
-    await fetchQualification(String(examPlanId))
+    await fetchQualification(String(examPlanId));
     // 可以在这里添加成功提示或者其他逻辑
-    Message.success('取消报名成功');
+    Message.success("取消报名成功");
   } catch (error) {
     // 可以在这里添加失败提示或者其他逻辑
-    console.error('取消报名失败', error);
+    console.error("取消报名失败", error);
   }
 };
-const examPlanList = ref<EnrollResp[]>([])
+const examPlanList = ref<EnrollResp[]>([]);
 // 添加一个获取数据的方法
 // const fetchExamPlanList = async () => {
 //   try {
@@ -412,355 +478,390 @@ const examPlanList = ref<EnrollResp[]>([])
 //   fetchExamPlanList()
 // })
 // 项目数据
-const projectList = ref([])
+const projectList = ref([]);
 const fetchProjectList = async () => {
   try {
-    const response = await getProjectList()
-    // 通常后端返回的数据会包含在 response.data 中
-    projectList.value = response.data
+    const response = await getProjectList();
+    projectList.value = response.data;
+    console.log("projectList:", projectList.value); // 打印项目列表数据
   } catch (error) {
-    console.error('获取考试证书数据失败：', error)
+    console.error("获取考试证书数据失败：", error);
   }
-}
+};
 
 const getProjectDesc = (project) => {
   return [
     // { label: '项目角色', value: project.createUserName },
     // { label: '项目周期', value: project.examDuration },
-    { label: '项目编号', value: project.projectCode },
-    { label: '所属部门', value: project.deptName },
-  ]
-}
+    { label: "项目编号", value: project.projectCode },
+    { label: "所属部门", value: project.deptName },
+  ];
+};
 
 const showProjectDetail = async (project) => {
-  visible.value = true
-  selectedType.value = 'project'
-  selectedItem.value = null // 清空之前的数据
+  visible.value = true;
+  selectedType.value = "project";
+  selectedItem.value = null; // 清空之前的数据
   // 获取详细信息
-  await fetchProjectDetail(project.id)
-}
+  await fetchProjectDetail(project.id);
+};
 
 const getExamStatusText = (status) => {
   const statusMap = {
-    0: '未报名',
-    1: '已报名',
-    2: '已完成',
-    3: '已过期',
-  }
-  return statusMap[status] || '未知'
-}
+    0: "未报名",
+    1: "已报名",
+    2: "已完成",
+    3: "已过期",
+  };
+  return statusMap[status] || "未知";
+};
 
 const getExamStatusColor = (status) => {
   const colorMap = {
-    0: 'blue',
-    1: 'green',
-    2: 'purple',
-    3: 'red',
-  }
-  return colorMap[status] || 'gray'
-}
+    0: "blue",
+    1: "green",
+    2: "purple",
+    3: "red",
+  };
+  return colorMap[status] || "gray";
+};
 
 const showExamDetail = (exam: any) => {
-  planId.value = exam.examPlanId
-  visible.value = true
-  console.log(visible.value)
-  selectedType.value = 'exam'
-  selectedItem.value = null // 清空之前的数据
+  planId.value = exam.examPlanId;
+  visible.value = true;
+  console.log(visible.value);
+  selectedType.value = "exam";
+  selectedItem.value = null; // 清空之前的数据
   // 获取详细信息
-  fetchExamDetail(exam.examPlanId)
-  fetchQualification(exam.examPlanId)
-}
+  fetchExamDetail(exam.examPlanId);
+  fetchQualification(exam.examPlanId);
+};
 
 const getExamDesc = (exam) => {
   return [
-
-    { label: '考试时间', value: exam.examStartTime },
-    { label: '报名截止', value: exam.enrollEndTime },
-    { label: '考试地点', value: exam.examPlace },
-    { label: '考试时长', value: exam.examDuration+"小时" },
-    { label: '考试费用', value: exam.examFee+"元" },
-    { label: '考试项目', value: exam.projectName },
-
-  ]
-}
+    { label: "考试时间", value: exam.examStartTime },
+    { label: "报名截止", value: exam.enrollEndTime },
+    { label: "考试地点", value: exam.examPlace },
+    { label: "考试时长", value: exam.examDuration + "小时" },
+    { label: "考试费用", value: exam.examFee + "元" },
+    { label: "考试项目", value: exam.projectName },
+    {
+      label: "考试状态",
+      value: getExamStatusText(exam.enrollStatus),
+      color: getExamStatusColor(exam.enrollStatus),
+    },
+    { label: "审核通知", value: qualificationInfo.value?.remark || "无" },
+  ];
+};
 
 const getAgencyDesc = (agency) => {
   return [
-    { label: '机构代号', value: agency.code },
-    { label: '机构名称', value: agency.name },
-    { label: '社会统一代码', value: agency.socialCode },
-    { label: '机构地点', value: agency.location },
-    { label: '机构法人', value: agency.legalPerson },
-    { label: '公司规模大小', value: agency.scale },
-  ]
-}
+    { label: "机构代号", value: agency.code },
+    { label: "机构名称", value: agency.name },
+    { label: "社会统一代码", value: agency.socialCode },
+    { label: "机构地点", value: agency.location },
+    { label: "机构法人", value: agency.legalPerson },
+    { label: "公司规模大小", value: agency.scale },
+  ];
+};
 
 const getDescriptionData = () => {
   switch (selectedType.value) {
-    case 'certificate':
-      return getCertificateDesc(selectedItem.value)
-    case 'exam':
-      return getExamDesc(selectedItem.value)
-    case 'agency':
-      return getAgencyDesc(selectedItem.value)
+    case "certificate":
+      return getCertificateDesc(selectedItem.value);
+    case "exam":
+      return getExamDesc(selectedItem.value);
+    case "agency":
+      return getAgencyDesc(selectedItem.value);
     default:
-      return getProjectDesc(selectedItem.value)
+      return getProjectDesc(selectedItem.value);
   }
-}
+};
 
 const getDetailTitle = () => {
   const titleMap = {
-    certificate: '证书说明',
-    exam: '考试说明',
-    // project: '项目描述',
-  }
-  return titleMap[selectedType.value] || ''
-}
+    certificate: "证书说明",
+    exam: "考试说明",
+    //project: '项目描述',
+  };
+  return titleMap[selectedType.value] || "";
+};
 
 const examActionText = computed(() => {
-  if (!selectedItem.value) return ''
+  if (!selectedItem.value) return "";
 
   switch (selectedItem.value.enrollStatus) {
-    case '0':
-      return '报名考试'
-    case '1':
-      return '已报名'
-    case '2':
-      return '已结束'
-    case '3':
-      return '已过期'
+    case "0":
+      return "报名考试";
+    case "1":
+      return "已报名";
+    case "2":
+      return "已结束";
+    case "3":
+      return "已过期";
     default:
-      return `报名考试(${selectedItem.value.enrollStatus})` // 添加状态值便于调试
+      return `报名考试(${selectedItem.value.enrollStatus})`; // 添加状态值便于调试
   }
-})
+});
 
 const canRegister = computed(() => {
-  if (!selectedItem.value) return false
-  return selectedItem.value.enrollStatus === '0'
-})
+  const qualStatus = qualificationInfo.value?.status;
 
-const isIdentityCard = ref(false)
+  // 如果没有资格信息，可以报名
+  if (qualStatus === null || qualStatus === undefined) return true;
+
+  // 等待审核 或 资料需补正 可以报名
+  if (qualStatus === 0 || qualStatus === 2) return true;
+
+  // 其他状态都不能报名
+  return false;
+});
+
+const isIdentityCard = ref(false);
 
 const getExamActionText = () => {
-  if (!selectedItem.value) return ''
-  const textMap = {
-    0: '立即报名',
-    1: '已报名',
-    2: '已完成',
-    3: '已过期',
+  const qualStatus = qualificationInfo.value?.status;
+
+  if (qualStatus === null || qualStatus === undefined) {
+    return "立即报名";
   }
-  return textMap[selectedItem.value.enrollStatus] || ''
-}
+  if (qualStatus === 0) {
+    return "等待审核";
+  }
+  if (qualStatus === 1) {
+    return "报名成功";
+  }
+  if (qualStatus === 2) {
+    return "资料需补正";
+  }
+  if (qualStatus === 3) {
+    return "禁止报名";
+  }
+
+  return "";
+};
 
 const handleExamRegister = async () => {
   // 处理考试报名逻辑
   // 校验考试时间
-  const examPlanId = Number(planId.value)
-  const checkRes = await checkEnrolledTime(examPlanId)
-  if (checkRes.data) return
-  const res = await getStudentInfo()
+  const examPlanId = Number(planId.value);
+  const checkRes = await checkEnrolledTime(examPlanId);
+  if (checkRes.data) return;
+  const res = await getStudentInfo();
   if (res?.data) {
-    const userDocumentList = res.data.documentList || []
-    const examPlanDocument = selectedItem.value.documentNames
+    const userDocumentList = res.data.documentList || [];
+    const examPlanDocument = selectedItem.value.documentNames;
 
     // 找出差集 - 考试需要的文档中用户还没有的文档
-    const missingDocuments = examPlanDocument.filter((doc) => !userDocumentList.includes(doc))
+    const missingDocuments = examPlanDocument.filter(
+      (doc) => !userDocumentList.includes(doc)
+    );
 
     if (missingDocuments.length > 0) {
-      Message.warning(`您还缺少以下资料：${missingDocuments.join('、')}`)
-      return
+      Message.warning(`您还缺少以下资料：${missingDocuments.join("、")}`);
+      return;
     }
     if (!isQualifications.value) {
-       isNotFillIn.value = true
+      isNotFillIn.value = true;
     }
   }
-}
+};
+
+const qualificationInfo = ref(null);
 
 const fetchQualification = async (examPlanId: string) => {
+  const response = await getCandidatesId(Number(examPlanId));
+  qualificationInfo.value = response.data; // 保存完整数据
+  console.log("qualificationInfo:", qualificationInfo.value); // 打印资格信息
 
-   const response = await getCandidatesId(Number(examPlanId))
-    // 已填写
-    if (response.data == null) {
-       isQualifications.value = false
-    }else if(response.data.status == 0) {
-      isQualifications.value = true
-    }
-}
+  // 审核状态处理
+  if (response.data == null) {
+    isQualifications.value = false; // 未填写
+  } else if (response.data.status === 1) {
+    isQualifications.value = true; // 审核通过
+  } else {
+    isQualifications.value = false; // 其它状态都不能报名
+  }
+  // 打印审核状态
+  console.log("资格审核状态:", response.data?.status);
+};
 
 // 子组件ref
-const agencyRef = ref<InstanceType<typeof agencyRef>>()
+const agencyRef = ref<InstanceType<typeof agencyRef>>();
 
 // 申请加入机构
 const handleAddAgency = async () => {
-  const res = await studentAddAgency(selectedItem.value.id)
+  const res = await studentAddAgency(selectedItem.value.id);
   if (res.data > 0) {
-    Message.success('申请成功，已通知相关机构')
+    Message.success("申请成功，已通知相关机构");
   } else if (res.data === -1) {
-    Message.error('请勿重复申请')
+    Message.error("请勿重复申请");
   } else {
-    Message.error('申请失败')
+    Message.error("申请失败");
   }
   // 关闭抽屉
-  visible.value = false
+  visible.value = false;
   // 刷新列表
-  await agencyRef.value.fetchAgencyList()
-}
+  await agencyRef.value.fetchAgencyList();
+};
 
 const handleDelAgency = async () => {
-  const res = await studentDelAgency(selectedItem.value.id)
+  const res = await studentDelAgency(selectedItem.value.id);
   if (res.data > 0) {
-    Message.success('退出机构成功')
+    Message.success("退出机构成功");
   } else {
-    Message.error('退出机构失败')
+    Message.error("退出机构失败");
   }
   // 关闭抽屉
-  visible.value = false
+  visible.value = false;
   // 刷新列表
-  await agencyRef.value.fetchAgencyList()
-}
+  await agencyRef.value.fetchAgencyList();
+};
 
 // 添加课程数据
-const courseList = ref([])
+const courseList = ref([]);
 const fetchCourseList = async () => {
   try {
     const response = await listTraining({
       status: -1,
       page: 1, // 当前页
       size: 10, // 每页大小
-    })
+    });
     // 通常后端返回的数据会包含在 response.data 中
-    courseList.value = response.data.list
+    courseList.value = response.data.list;
   } catch (error) {
-    console.error('获取考试证书数据失败：', error)
+    console.error("获取考试证书数据失败：", error);
   }
-}
+};
 
 onMounted(() => {
-  fetchProjectList()
-  fetchProjectList()
-  fetchCourseList()
-  fetchAnnouncement()
-})
+  fetchProjectList();
+  fetchProjectList();
+  fetchCourseList();
+  fetchAnnouncement();
+});
 
 const showCourseDetail = (course) => {
-  selectedType.value = 'course'
-  selectedItem.value = course
-  visible.value = true
-}
+  selectedType.value = "course";
+  selectedItem.value = course;
+  visible.value = true;
+};
 
 // 公告数据
-const announcements = ref([])
+const announcements = ref([]);
 
 // 获取最新的五条公告标题
 async function fetchAnnouncement() {
   try {
-    const announcementResp = await listAnnouncementHome()
-    const { data } = announcementResp
+    const announcementResp = await listAnnouncementHome();
+    const { data } = announcementResp;
     // 用获取到的数据更新 poems
-    announcements.value = data
+    announcements.value = data;
   } catch (error) {
-    console.error('获取公告失败：', error)
+    console.error("获取公告失败：", error);
   }
 }
 
 // 获取路由实例
-const router = useRouter()
+const router = useRouter();
 
 const goAnnouncements = (uri) => {
-  router.push(`/carousel/${uri}`)
-}
+  router.push(`/carousel/${uri}`);
+};
 
 // 获取考试计划详情
 const fetchExamDetail = async (examPlanId: string) => {
   try {
-    const response = await getExamPlanDetail(examPlanId)
+    const response = await getExamPlanDetail(examPlanId);
     selectedItem.value = {
       ...response.data,
       certificates: response.data.certificates || [], // 确保 certificates 是数组
       documents: response.data.documents || [], // 确保 documents 是数组
-    }
-    isIdentityCard.value = selectedItem.value.enrollStatus === '1' || selectedItem.value.enrollStatus === '2'
+    };
+    isIdentityCard.value =
+      selectedItem.value.enrollStatus === "1" ||
+      selectedItem.value.enrollStatus === "2";
   } catch (error) {
-    console.error('获取考试计划详情失败：', error)
-    Message.error('获取考试计划详情失败')
-    onClose()
+    console.error("获取考试计划详情失败：", error);
+    Message.error("获取考试计划详情失败");
+    onClose();
   }
-}
+};
 
 // 添加获取项目详情的方法
 const fetchProjectDetail = async (projectId: string) => {
   try {
-    const response = await getProjectDetail(projectId)
+    const response = await getProjectDetail(projectId);
     selectedItem.value = {
       ...response.data,
       documentNames: response.data.documentsList || [], // 修改为 documentsList
       locations: response.data.locationsList || [], // 修改为 locationsList
-    }
+    };
   } catch (error) {
-    console.error('获取项目详情失败：', error)
-    Message.error('获取项目详情失败')
-    onClose()
+    console.error("获取项目详情失败：", error);
+    Message.error("获取项目详情失败");
+    onClose();
   }
-}
+};
 
 // 发送申请、已发送申请、退出机构(0、1、2)
-const agencyStatus = ref(0)
+const agencyStatus = ref(0);
 
 const fetchAgencyDetail = async (agencyId: string) => {
   try {
-    const response = await getAgencyDetail(agencyId)// 获取机构详情
+    const response = await getAgencyDetail(agencyId); // 获取机构详情
     selectedItem.value = {
       ...response.data,
       documentNames: response.data.candidateName || [], // 修改为 documentsList
-    }
+    };
   } catch (error) {
-    console.error('获取项目详情失败：', error)
-    Message.error('获取项目详情失败')
-    onClose()
+    console.error("获取项目详情失败：", error);
+    Message.error("获取项目详情失败");
+    onClose();
   }
-}
+};
 
 const fetchAgencyStatus = async (orgId: any) => {
-  const ref = await getAgencyStatus(orgId)
-  agencyStatus.value = ref.data
-}
+  const ref = await getAgencyStatus(orgId);
+  agencyStatus.value = ref.data;
+};
 
 // 查看机构详情
 const showAgencyDetail = async (agency) => {
-  visible.value = true
-  selectedType.value = 'agency'
-  selectedItem.value = null // 清空之前的数据
+  visible.value = true;
+  selectedType.value = "agency";
+  selectedItem.value = null; // 清空之前的数据
   // 获取详细信息
-  await fetchAgencyDetail(agency.id)
-  await fetchAgencyStatus(agency.id)
-}
+  await fetchAgencyDetail(agency.id);
+  await fetchAgencyStatus(agency.id);
+};
 
 // 处理支付按钮点击
 const handlePayment = () => {
-  if (selectedItem.value?.enrollStatus !== '1') {
-    Message.warning('请先报名考试')
-    return
+  if (selectedItem.value?.enrollStatus !== "1") {
+    Message.warning("请先报名考试");
+    return;
   }
-  paymentModalVisible.value = true
-}
+  paymentModalVisible.value = true;
+};
 
-const isWindowIdentityCard = ref(false)
+const isWindowIdentityCard = ref(false);
 const identityCard = ref({
-  examPlanName: '',
-  examNumber: '',
-  startTime: '',
-  endTime: '',
-})
+  examPlanName: "",
+  examNumber: "",
+  startTime: "",
+  endTime: "",
+});
 
 const handleViewIdentityCard = async () => {
   if (!planId.value) {
-    Message.error('请选择考试计划')
-    return
+    Message.error("请选择考试计划");
+    return;
   }
-  isWindowIdentityCard.value = true
-  const res = await viewIdentityCard(planId.value)
-  identityCard.value = res.data
-}
+  isWindowIdentityCard.value = true;
+  const res = await viewIdentityCard(planId.value);
+  identityCard.value = res.data;
+};
 </script>
 
 <style scoped lang="scss">
@@ -963,17 +1064,17 @@ const handleViewIdentityCard = async () => {
 
 .detail-image {
   width: 100%;
-  height: 240px;  // 设置固定高度
+  height: 240px; // 设置固定高度
   overflow: hidden;
   border-radius: 4px;
   background-color: var(--color-fill-2);
-  margin-bottom: 16px;  // 添加底部间距
+  margin-bottom: 16px; // 添加底部间距
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: contain;  // 保持图片比例
-    background-color: var(--color-fill-2);  // 背景色
+    object-fit: contain; // 保持图片比例
+    background-color: var(--color-fill-2); // 背景色
   }
 }
 

@@ -1,9 +1,6 @@
 <template>
   <div class="list-container">
-    <StatusTabs
-      :status-list="examStatus"
-      @change="handleStatusChange"
-    />
+    <StatusTabs :status-list="examStatus" @change="handleStatusChange" />
     <div class="list-wrapper">
       <div class="cert-list">
         <div v-if="loading" class="loading-state">
@@ -11,10 +8,11 @@
         </div>
         <template v-else-if="examList && examList.length > 0">
           <div class="exam-list">
-            <div v-for="exam in examList"
-                 :key="exam.examPlanId || exam.id"
-                 class="exam-item"
-                 @click="handleExamClick(exam)"
+            <div
+              v-for="exam in examList"
+              :key="exam.examPlanId || exam.id"
+              class="exam-item"
+              @click="handleExamClick(exam)"
             >
               <a-card class="exam-card" :bordered="false">
                 <div class="exam-content">
@@ -35,10 +33,16 @@
                   <div class="exam-main">
                     <h3 class="exam-name">{{ exam.examPlanName }}</h3>
                     <div class="exam-info">
-                      <span class="exam-id">计划编号：{{ exam.examPlanId || exam.id }}</span>
+                      <span class="exam-id"
+                        >计划编号：{{ exam.examPlanId || exam.id }}</span
+                      >
                     </div>
                     <div class="exam-dates">
-                      <span>考试时间：{{ exam.examStartTime || exam.startTime }}</span>
+                      <span
+                        >考试时间：{{
+                          exam.examStartTime || exam.startTime
+                        }}</span
+                      >
                       <span>报名截止：{{ exam.enrollEndTime }}</span>
                     </div>
                   </div>
@@ -64,10 +68,16 @@
         <div v-else class="empty-state">
           <a-empty>
             <template #image>
-              <icon-calendar style="font-size: 48px; color: var(--color-text-3);" />
+              <icon-calendar
+                style="font-size: 48px; color: var(--color-text-3)"
+              />
             </template>
             <template #description>
-              {{ currentStatus === 'all' ? '暂无考试计划' : '暂无相关状态的考试计划' }}
+              {{
+                currentStatus === "all"
+                  ? "暂无考试计划"
+                  : "暂无相关状态的考试计划"
+              }}
             </template>
           </a-empty>
         </div>
@@ -77,112 +87,122 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { IconRight, IconCalendar, IconNotification } from '@arco-design/web-vue/es/icon'
-import StatusTabs from './StatusTabs.vue'
-import type {EnrollResp, ExamPlanResp} from '@/apis/plan/examPlan'
-import { getExamPlanList, getExamPlanStatusList } from '@/apis/plan/examPlan'
-import { Message } from '@arco-design/web-vue'
+import { ref, onMounted } from "vue";
+import {
+  IconRight,
+  IconCalendar,
+  IconNotification,
+} from "@arco-design/web-vue/es/icon";
+import StatusTabs from "./StatusTabs.vue";
+import type { EnrollResp, ExamPlanResp } from "@/apis/plan/examPlan";
+import { getExamPlanList, getExamPlanStatusList } from "@/apis/plan/examPlan";
+import { Message } from "@arco-design/web-vue";
 
 const examStatus = [
-  { label: '已报名', value: '1', icon: 'icon-check-circle' },
-  { label: '未报名', value: '0', icon: 'icon-clock-circle' },
-  { label: '已完成', value: '2', icon: 'icon-check-circle' },
-]
+  { label: "未报名", value: "0", icon: "icon-clock-circle" },
+  { label: "审核中", value: "4", icon: "icon-time-circle" },
+  { label: "已报名", value: "1", icon: "icon-check-circle" },
+  { label: "已完成", value: "2", icon: "icon-check-circle" },
+  { label: "已过期", value: "6", icon: "icon-close-circle" },
+];
 
-const currentStatus = ref('all')
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(0)
-const examList = ref([])
-const loading = ref(false)
+const currentStatus = ref("all");
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const examList = ref([]);
+const loading = ref(false);
 
 const props = defineProps<{
-  exams: EnrollResp[]
-}>()
+  exams: EnrollResp[];
+}>();
 
 const emit = defineEmits<{
-  (e: 'select', exam: any): void
-}>()
+  (e: "select", exam: any): void;
+}>();
 
 const queryParams = ref({
   Page: 1,
   Size: 10,
-
-})
+});
 
 // 状态切换
 const handleStatusChange = async (status: string) => {
-  currentStatus.value = status
-  currentPage.value = 1
-  await fetchExamList()
-}
+  currentStatus.value = status;
+  currentPage.value = 1;
+  await fetchExamList();
+};
 
 const fetchExamList = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    let response
-    const params = `page=${currentPage.value}&size=${pageSize.value}`
-    response = await getExamPlanStatusList(currentStatus.value, params)
+    const response = await getExamPlanStatusList(currentStatus.value, {
+      page: currentPage.value,
+      size: pageSize.value,
+    });
 
     if (response?.data) {
-      examList.value = response.data.list || []
-      total.value = response.data.total || 0
+      examList.value = response.data.list || [];
+      total.value = response.data.total || 0;
     }
   } catch (error) {
-    console.error('获取考试计划列表失败：', error)
-    Message.error('获取考试计划列表失败')
-    examList.value = []
-    total.value = 0
+    console.error("获取考试计划列表失败：", error);
+    Message.error("获取考试计划列表失败");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handlePageChange = async (page: number) => {
-  currentPage.value = page
-  await fetchExamList()
-}
+  currentPage.value = page;
+  await fetchExamList();
+};
 
 const handleExamClick = (exam: any) => {
-  emit('select', exam)
-}
+  emit("select", exam);
+};
 
 const getExamStatusText = (status: string) => {
   const statusMap = {
-    '0': '未报名',
-    '1': '已报名',
-    '2': '已完成',
-    '3': '已过期',
-  }
-  return statusMap[status] || '未知'
-}
+    "0": "未报名",
+    "1": "已报名",
+    "2": "已完成",
+    "3": "已过期",
+    "4": "审核中",
+    "5": "待补正",
+  };
+  return statusMap[status] || "未知";
+};
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case '0':
-      return 'blue'    // 未报名
-    case '1':
-      return 'green'   // 已报名
-    case '2':
-      return 'gray'    // 已完成
-    case '3':
-      return 'red'     // 已过期
+    case "0":
+      return "blue"; // 未报名
+    case "1":
+      return "green"; // 已报名
+    case "2":
+      return "gray"; // 已完成
+    case "3":
+      return "red"; // 已过期
+    case "4":
+      return "orange"; // 审核中
+    case "5":
+      return "orange"; // 待补正
     default:
-      return ''
+      return "";
   }
-}
+};
 
 // 添加考试相关的公告
 const notices = [
-  '2024年上半年考试计划已发布',
-  '重要提醒：PMP认证考试报名截止日期临近',
-  '新增在线模拟考试功能，欢迎体验'
-]
+  "2024年上半年考试计划已发布",
+  "重要提醒：PMP认证考试报名截止日期临近",
+  "新增在线模拟考试功能，欢迎体验",
+];
 
 onMounted(() => {
-  fetchExamList()
-})
+  fetchExamList();
+});
 </script>
 
 <style scoped lang="scss">
@@ -221,7 +241,7 @@ onMounted(() => {
   overflow: hidden;
   border: 1px solid var(--color-border-2);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.09);
@@ -254,7 +274,7 @@ onMounted(() => {
     top: 0;
     right: 0;
     padding: 2px;
-    
+
     :deep(.arco-tag) {
       margin: 0;
       border: none;
@@ -283,19 +303,19 @@ onMounted(() => {
   white-space: nowrap;
   color: #fff;
   border-radius: 0 4px 0 4px;
-  
+
   &.upcoming {
     background-color: rgba(var(--warning-6), 0.95);
   }
-  
+
   &.registered {
     background-color: rgba(var(--success-6), 0.95);
   }
-  
+
   &.completed {
     background-color: rgba(var(--primary-6), 0.95);
   }
-  
+
   &.expired {
     background-color: rgba(var(--danger-6), 0.95);
   }
@@ -368,7 +388,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   height: 32px;
-  
+
   .notice-icon {
     color: rgb(var(--primary-6));
     margin-right: 8px;
