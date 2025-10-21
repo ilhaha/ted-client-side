@@ -250,14 +250,14 @@
                 <!-- 添加取消报名按钮 -->
                 <a-button
                   type="primary"
-                  v-if="selectedItem?.enrollStatus !== '0'"
+                  v-if="selectedItem?.enrollStatus != '0' && selectedItem?.enrollStatus != '6' "
                   @click="handleCancelRegistration"
                 >
                   取消报名
                 </a-button>
                 <a-button
                   type="primary"
-                  :disabled="selectedItem?.enrollStatus !== '1'"
+                  :disabled="selectedItem?.enrollStatus != '1'"
                   @click="handlePayment"
                 >
                   立即缴费
@@ -637,7 +637,7 @@ const canRegister = computed(() => {
   if (qualStatus === null || qualStatus === undefined) return true;
 
   // 等待审核 或 资料需补正 可以报名
-  if (qualStatus === 0 || qualStatus === 2) return true;
+  if (qualStatus === 0 || qualStatus === 2 || qualStatus === 4) return true;
 
   // 其他状态都不能报名
   return false;
@@ -662,6 +662,9 @@ const getExamActionText = () => {
   }
   if (qualStatus === 3) {
     return "禁止报名";
+  }
+   if (qualStatus === 4) {
+    return "等待补正审核";
   }
 
   return "";
@@ -805,8 +808,8 @@ const fetchExamDetail = async (examPlanId: string) => {
       documents: response.data.documents || [], // 确保 documents 是数组
     };
     isIdentityCard.value =
-      selectedItem.value.enrollStatus === "1" ||
-      selectedItem.value.enrollStatus === "2";
+      selectedItem.value.enrollStatus == "1" ||
+      selectedItem.value.enrollStatus == "2";
   } catch (error) {
     console.error("获取考试计划详情失败：", error);
     Message.error("获取考试计划详情失败");
@@ -864,7 +867,7 @@ const showAgencyDetail = async (agency) => {
 
 // 处理支付按钮点击
 const handlePayment = () => {
-  if (selectedItem.value?.enrollStatus !== "1") {
+  if (selectedItem.value?.enrollStatus != "1") {
     Message.warning("请先报名考试");
     return;
   }

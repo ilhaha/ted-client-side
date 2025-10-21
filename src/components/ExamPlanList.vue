@@ -101,6 +101,7 @@ import { Message } from "@arco-design/web-vue";
 const examStatus = [
   { label: "未报名", value: "0", icon: "icon-clock-circle" },
   { label: "审核中", value: "4", icon: "icon-time-circle" },
+  { label: "待补正", value: "5", icon: "icon-time-circle" },
   { label: "已报名", value: "1", icon: "icon-check-circle" },
   { label: "已完成", value: "2", icon: "icon-check-circle" },
   { label: "已过期", value: "6", icon: "icon-close-circle" },
@@ -170,6 +171,7 @@ const getExamStatusText = (status: string) => {
     "3": "已过期",
     "4": "审核中",
     "5": "待补正",
+    "6": "虚假信息",
   };
   return statusMap[status] || "未知";
 };
@@ -188,6 +190,8 @@ const getStatusColor = (status: string) => {
       return "orange"; // 审核中
     case "5":
       return "orange"; // 待补正
+    case "6":
+      return "red"; // 虚假信息
     default:
       return "";
   }

@@ -82,7 +82,7 @@ export function getExamPlanStatusList(enrollStatus: string, params: Record<strin
   }
 
   // 如果状态不是 'all'，追加 enrollStatus 参数
-  if (enrollStatus && enrollStatus !== 'all') {
+  if (enrollStatus && enrollStatus != 'all') {
     query.append('enrollStatus', enrollStatus)
   }
 
