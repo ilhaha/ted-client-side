@@ -23,3 +23,18 @@ export function checkEnrolledTime(examPlanId: number) {
 export function cancelEnroll(examPlanId: number) {
     return http.get(`${BASE_URL}/cancelEnroll/${examPlanId}`)
 }
+/** @desc 下载准考证 PDF */
+export async function downloadExamTicket(userId, examNumber) {
+  const res = await http.post(
+    '/api/exam/ticket/download',
+    { userId, examNumber },
+    {
+      responseType: 'blob',
+      timeout: 30000
+    }
+  )
+
+  // 若 http 封装返回 res.data，则直接返回
+  return res?.data || res
+}
+

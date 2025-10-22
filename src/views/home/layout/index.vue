@@ -238,6 +238,14 @@
                     <div>考试开始时间：{{ identityCard.startTime }}</div>
                     <div>考试结束时间：{{ identityCard.endTime }}</div>
                   </div>
+          <template #footer>
+              <a-button
+                  type="primary"
+                   @click="handleDownload(identityCard.userId, identityCard.examNumber)"
+                    >
+                    下载准考证 PDF
+              </a-button>
+          </template>
                 </a-modal>
                 <a-button
                   type="primary"
@@ -250,7 +258,10 @@
                 <!-- 添加取消报名按钮 -->
                 <a-button
                   type="primary"
-                  v-if="selectedItem?.enrollStatus != '0' && selectedItem?.enrollStatus != '6' "
+                  v-if="
+                    selectedItem?.enrollStatus != '0' &&
+                    selectedItem?.enrollStatus != '6'
+                  "
                   @click="handleCancelRegistration"
                 >
                   取消报名
@@ -349,6 +360,7 @@ import CourseList from "@/components/CourseList.vue";
 import AgencyList from "@/components/AgencyList.vue";
 import SpecialCertificationApplicant from "@/components/SpecialCertificationApplicant/index.vue";
 import { listTraining } from "@/apis/training/training";
+
 import {
   type EnrollResp,
   getExamPlanDetail,
@@ -358,7 +370,7 @@ import { getProjectDetail, getProjectList } from "@/apis/project/project";
 import { listAnnouncementHome } from "@/apis/common/announcement";
 import { getStudentInfo } from "@/apis/studentInfo/student";
 import { getCandidatesId } from "@/apis/specialCertificationApplicant/index.ts";
-import { checkEnrolledTime, singUp, cancelEnroll } from "@/apis/plan/enroll";
+import { downloadExamTicket } from "@/apis/plan/enroll";
 import { candidatesUpload } from "@/apis/specialCertificationApplicant/index";
 import {
   getAgencyDetail,
@@ -366,6 +378,7 @@ import {
   studentAddAgency,
   studentDelAgency,
 } from "@/apis/org/org";
+import LoginSetting from "@/views/system/config/components/LoginSetting.vue";
 
 const selectedKeys = ref(["exam-plan"]);
 const visible = ref(false);
@@ -549,7 +562,9 @@ const getExamDesc = (exam) => {
       lower.endsWith(".ppt") ||
       lower.endsWith(".pptx")
     ) {
-      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
+      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(
+        url
+      )}`;
     }
     return url;
   };
@@ -663,7 +678,7 @@ const getExamActionText = () => {
   if (qualStatus === 3) {
     return "禁止报名";
   }
-   if (qualStatus === 4) {
+  if (qualStatus === 4) {
     return "等待补正审核";
   }
 
@@ -880,6 +895,7 @@ const identityCard = ref({
   examNumber: "",
   startTime: "",
   endTime: "",
+  userId: "",
 });
 
 const handleViewIdentityCard = async () => {
@@ -891,6 +907,24 @@ const handleViewIdentityCard = async () => {
   const res = await viewIdentityCard(planId.value);
   identityCard.value = res.data;
 };
+async function handleDownload(userId, examNumber) {
+  try {
+    const res = await downloadExamTicket(userId, examNumber)
+    const blob = new Blob([res], { type: 'application/pdf' })
+    const url = window.URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.style.display = 'none'
+    a.href = url
+    a.download = `ExamTicket-${examNumber}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('❌ 下载准考证失败:', err)
+  }
+}
 </script>
 
 <style scoped lang="scss">
