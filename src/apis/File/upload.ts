@@ -28,6 +28,11 @@ export interface DocumentQuery {
 export interface DocumentPageQuery extends DocumentQuery, PageQuery {}
 
 /** @desc 上传文件 */
+export function applyUpload(data: FormData) {
+  return http.post(`/upload/apply/file`, data)
+}
+
+/** @desc 上传文件 */
 export function upload(data: FormData) {
   return http.post(`/upload/file`, data)
 }

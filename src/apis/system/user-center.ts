@@ -3,6 +3,11 @@ import http from '@/utils/http'
 
 const BASE_URL = '/system/user'
 
+/** @desc 修改用户基本信息 */
+export function uploadWhenInfo(candidateId: string,planId: string) {
+  return http.get(`${BASE_URL}/upload/when/info`, {candidateId,planId})
+}
+
 /** @desc 上传头像 */
 export function uploadAvatar(data: FormData) {
   return http.post(`${BASE_URL}/avatar`, data)

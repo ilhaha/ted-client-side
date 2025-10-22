@@ -1,29 +1,16 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
+    <GiTable row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
-        <a-cascader
-          v-model="queryForm.projectId"
-          :options="categoryOptions"
-          placeholder="请选择考试项目"
-          allow-clear
-          @change="search"
-        />
-	    <a-input-search v-model="queryForm.className" placeholder="请输入班级名称" allow-clear @search="search" />
-      <a-button type="primary" @click="search">
-              <template #icon><icon-search /></template>
-              搜索
-            </a-button>
+        <a-cascader v-model="queryForm.projectId" :options="categoryOptions" placeholder="请选择考试项目" allow-clear
+          @change="search" />
+        <a-input-search v-model="queryForm.className" placeholder="请输入班级名称" allow-clear @search="search" />
+        <a-button type="primary" @click="search">
+          <template #icon><icon-search /></template>
+          搜索
+        </a-button>
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -43,13 +30,8 @@
         <a-space>
           <a-link v-permission="['training:orgClass:detail']" title="详情" @click="onDetail(record)">详情</a-link>
           <a-link v-permission="['training:orgClass:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-          <a-link
-            v-permission="['training:orgClass:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
+          <a-link v-permission="['training:orgClass:delete']" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除
           </a-link>
         </a-space>
@@ -66,7 +48,7 @@ import OrgClassAddModal from './OrgClassAddModal.vue'
 import OrgClassDetailDrawer from './OrgClassDetailDrawer.vue'
 import { type OrgClassResp, type OrgClassQuery, deleteOrgClass, exportOrgClass, listOrgClass } from '@/apis/training/orgClass'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
-import { type ProjectCategoryVO ,getSelectCategoryProject } from '@/apis/training/org'
+import { type ProjectCategoryVO, getSelectCategoryProject } from '@/apis/training/org'
 
 import { useDownload, useTable } from '@/hooks'
 import { useDict } from '@/hooks/app'
@@ -130,4 +112,3 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss"></style>
-

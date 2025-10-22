@@ -14,7 +14,7 @@
                     <a-form-item label="身份证正面（人像面）" required extra="需清晰展示头像、姓名、身份证号">
                         <a-upload :action="`${uploadUrl}1`" list-type="picture-card" :file-list="frontFileList"
                             :show-upload-list="false" accept="image/jpeg,image/png,image/jpg"
-                            @success="handleFrontSuccess" @preview="handlePreview('front')">
+                            @success="handleFrontSuccess" image-preview>
                             <img v-if="form.idCardPhotoFront" :src="form.idCardPhotoFront" alt="front"
                                 style="width: 100%; height: auto;" />
                             <div v-else>
@@ -29,7 +29,7 @@
                     <a-form-item label="身份证反面（国徽面）" required extra="需清晰展示国徽和签发机关">
                         <a-upload :action="`${uploadUrl}0`" list-type="picture-card" :file-list="backFileList"
                             :show-upload-list="false" accept="image/jpeg,image/png,image/jpg"
-                            @success="handleBackSuccess" @preview="handlePreview('back')">
+                            @success="handleBackSuccess" image-preview>
                             <img v-if="form.idCardPhotoBack" :src="form.idCardPhotoBack" alt="back"
                                 style="width: 100%; height: auto;" />
                             <div v-else>
@@ -55,10 +55,6 @@
         </a-form>
     </a-modal>
 
-    <!-- 图片预览 Modal -->
-    <a-modal v-model:visible="previewVisible" :footer="null" :mask-closable="true">
-        <img :src="previewImage" style="width: 100%;" />
-    </a-modal>
 </template>
 
 <script setup lang="ts">
@@ -87,14 +83,6 @@ const form = ref({
 const frontFileList = ref<any[]>([])
 const backFileList = ref<any[]>([])
 
-// 预览相关
-const previewVisible = ref(false)
-const previewImage = ref('')
-
-const handlePreview = (type: 'front' | 'back') => {
-    previewImage.value = type === 'front' ? form.value.idCardPhotoFront : form.value.idCardPhotoBack
-    previewVisible.value = true
-}
 
 // 上传成功处理
 const handleFrontSuccess = (file: any) => {

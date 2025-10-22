@@ -54,9 +54,29 @@ export interface ProjectCategoryVO {
 
 export interface OrgPageQuery extends OrgQuery, PageQuery {}
 
+/** @desc 机构预报名 */
+export function applyPre(data: any) {
+  return http.post(`${BASE_URL}/apply/pre`, data)
+}
+
+/** @desc 获取机构对应的项目-班级-考生级联选择 */
+export function getSelectProjectClassCandidate(projectId:string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/project/class/candidate`,{projectId})
+}
+
+/** @desc 获取机构对应的项目-班级级联选择 */
+export function getSelectProjectClass(orgId:string,projectId:string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/project/class`,{orgId,projectId})
+}
+
+/** @desc 获取机构对应的分类-项目-班级级联选择 */
+export function getSelectCategoryProjectClass(orgId:string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project/class`,{orgId})
+}
+
 /** @desc 获取机构八大类-项目级联选择器 */
-export function getSelectCategoryProject() {
-  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project`)
+export function getSelectCategoryProject(orgId:string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project`,{orgId})
 }
 
 /** @desc 查询机构信息列表 */

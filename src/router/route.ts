@@ -12,6 +12,12 @@ export const systemRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/login/index.vue'),
     meta: { hidden: true },
   },
+  {
+    path: '/org/apply/upload',
+    name: 'ApplyUpload',
+    component: () => import('@/views/training/apply/index.vue'),
+    meta: { hidden: true },
+  },
   /* 公告 轮播图页 */
   {
     path: '/carousel/:id',

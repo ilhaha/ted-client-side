@@ -57,8 +57,8 @@ export function getAgencyStatus(orgId: any) {
   return http.get(`${BASE_URL}/getAgencyStatus/${orgId}`)
 }
 
-export function studentAddAgency(orgId: any) {
-  return http.get(`${BASE_URL}/studentAddAgency/${orgId}`)
+export function studentAddAgency(orgId: any, projectId: any) {
+  return http.get(`${BASE_URL}/studentAddAgency/${orgId}/${projectId}`)
 }
 
 export function studentDelAgency(orgId: any) {

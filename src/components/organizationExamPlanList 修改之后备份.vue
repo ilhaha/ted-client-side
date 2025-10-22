@@ -1,7 +1,7 @@
 <template>
   <div class="gi_table_page">
     <GiTable row-key="id" :data="dataList" :columns="columns" :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 800 }" :pagination="pagination" :disabled-tools="['size']"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #examType="{ record }">
         <a-tag :color="getExamTypeColor(record.examType)" bordered>{{
@@ -49,27 +49,24 @@
         </a-tag>
       </template>
       <template #action="{ record }">
-        <a-space :size="2">
-          <a-link v-if="record.status == 3 && record.remainingSlots > 0" title="报考"
-            @click="openClassSignUp(record)">报考</a-link>
-          <a-link v-if="record.status == 3" title="报考名单" @click="openApplyList(record)">报考名单</a-link>
-          <!-- <a-link v-if="record.status == 5 || record.status == 6" title="考生信息"
-            @click="openExamInfo(record)">考生信息</a-link> -->
+        <a-space>
+          <a-link v-if="record.status == 3 && record.remainingSlots > 0" title="报考名单" @click="openClassSignUp(record)">报考名单</a-link>
         </a-space>
-
+        <a-space>
+          <a-link v-if="record.status == 5 || record.status == 6" title="考生信息"
+            @click="openExamInfo(record)">考生信息</a-link>
+        </a-space>
       </template>
     </GiTable>
 
     <ProjectDetailDrawer ref="ProjectDetailDrawerRef" />
     <CertificateDetailDrawer ref="CertificateDetailDrawerRef" />
-    <OrgEnroll ref="OrgEnrollRef" />
   </div>
 </template>
 
 <script setup lang="ts">
 import ProjectDetailDrawer from "@/views/organization/project/ProjectDetailDrawer.vue";
 import CertificateDetailDrawer from "@/views/organization/certificate/CertificateDetailDrawer.vue";
-import OrgEnroll from '@/views/training/orgEnroll/index.vue'
 import { onMounted, ref, computed } from 'vue'
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { isMobile } from "@/utils";
@@ -111,13 +108,13 @@ const pagination = computed(() => ({
   },
 }))
 
-const OrgEnrollRef = ref<InstanceType<typeof OrgEnroll>>();
 
 const openClassSignUp = (record: any) => {
-  OrgEnrollRef.value?.onOpen(record);
+  console.log("报名", record);
+
 };
 
-const openApplyList = (record: any) => {
+const openExamInfo = (record: any) => {
   console.log("考生信息", record);
 };
 

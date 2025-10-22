@@ -10,6 +10,15 @@ export interface DocumentTypeNameVO {
     disabled: boolean;
 }
 
+
+/**
+ * 考生通过二维码进行资料上传
+ * @returns 
+ */
+export function qrcodeUpload(data:any) {
+    return http.post<any>(`${BASE_URL}//qrcode/upload`,data)
+}
+
 /**
  * 获取资料类型列表
  * @returns 

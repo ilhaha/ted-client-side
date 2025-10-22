@@ -3,18 +3,9 @@
     <div class="menu-demo">
       <!-- 添加公告栏 -->
       <div class="notice-bar">
-        <a-carousel
-          class="notice-carousel"
-          animation-name="fade"
-          :auto-play="true"
-          :show-arrow="false"
-          indicator-position="never"
-          :interval="3000"
-        >
-          <a-carousel-item
-            v-for="(notice, index) in announcements"
-            :key="index"
-          >
+        <a-carousel class="notice-carousel" animation-name="fade" :auto-play="true" :show-arrow="false"
+          indicator-position="never" :interval="3000">
+          <a-carousel-item v-for="(notice, index) in announcements" :key="index">
             <div class="notice-item" @click="goAnnouncements(notice.uri)">
               <IconNotification class="notice-icon" />
               <span class="notice-text">{{ notice.title }}</span>
@@ -26,15 +17,21 @@
       <a-layout-header class="header">
         <a-menu v-model:selected-keys="selectedKeys" mode="horizontal">
           <a-menu-item key="exam-plan">
-            <template #icon><IconCalendar /></template>
+            <template #icon>
+              <IconCalendar />
+            </template>
             考试计划
           </a-menu-item>
           <a-menu-item key="courses">
-            <template #icon><IconBook /></template>
+            <template #icon>
+              <IconBook />
+            </template>
             培训课程
           </a-menu-item>
           <a-menu-item key="projects">
-            <template #icon><IconCode /></template>
+            <template #icon>
+              <IconCode />
+            </template>
             项目展示
           </a-menu-item>
           <a-menu-item key="agency">
@@ -46,44 +43,20 @@
 
       <div class="content-layout">
         <div class="tab-content">
-          <ExamPlanList
-            v-if="selectedKeys[0] === 'exam-plan'"
-            :exams="examPlanList"
-            @select="showExamDetail"
-          />
+          <ExamPlanList v-if="selectedKeys[0] === 'exam-plan'" :exams="examPlanList" @select="showExamDetail" />
 
-          <CourseList
-            v-if="selectedKeys[0] === 'courses'"
-            :courses="courseList"
-            @select="showCourseDetail"
-          />
+          <CourseList v-if="selectedKeys[0] === 'courses'" :courses="courseList" @select="showCourseDetail" />
 
-          <ProjectList
-            v-if="selectedKeys[0] === 'projects'"
-            :projects="projectList"
-            @select="showProjectDetail"
-          />
+          <ProjectList v-if="selectedKeys[0] === 'projects'" :projects="projectList" @select="showProjectDetail" />
 
-          <AgencyList
-            v-if="selectedKeys[0] === 'agency'"
-            ref="agencyRef"
-            @select="showAgencyDetail"
-          />
+          <AgencyList v-if="selectedKeys[0] === 'agency'" ref="agencyRef" @select="showAgencyDetail" />
         </div>
         <!-- 详情抽屉 -->
-        <a-drawer
-          :visible="visible"
-          :width="640"
-          @cancel="onClose"
-          :footer="null"
-        >
+        <a-drawer :visible="visible" :width="640" @cancel="onClose" :footer="null">
           <template #title>
             <div class="drawer-title">
               <span class="title-text">{{ selectedItem?.projectName }}</span>
-              <a-tag
-                v-if="selectedType === 'project'"
-                :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'"
-              >
+              <a-tag v-if="selectedType === 'project'" :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'">
                 {{ selectedItem?.projectStatus === "1" ? "已上架" : "进行中" }}
               </a-tag>
             </div>
@@ -91,21 +64,13 @@
 
           <div v-if="selectedItem" class="detail-content">
             <div class="detail-image">
-              <img
-                :src="
-                  selectedItem.businessLicense ||
-                  selectedItem?.imageUrl ||
-                  '/static/images/test.jpg'
-                "
-                :alt="selectedItem?.projectName"
-              />
+              <img :src="selectedItem.businessLicense ||
+                selectedItem?.imageUrl ||
+                '/static/images/test.jpg'
+                " :alt="selectedItem?.projectName" />
             </div>
             <a-descriptions layout="inline-vertical">
-              <a-descriptions-item
-                v-for="(item, index) in getDescriptionData()"
-                :key="index"
-                :label="item.label"
-              >
+              <a-descriptions-item v-for="(item, index) in getDescriptionData()" :key="index" :label="item.label">
                 <span v-html="item.value"></span>
               </a-descriptions-item>
             </a-descriptions>
@@ -114,21 +79,11 @@
             <a-divider style="margin: 16px 0" />
 
             <!-- 证书信息卡片 -->
-            <div
-              v-if="selectedKeys[0] === 'exam-plan'"
-              class="certificate-card"
-            >
+            <div v-if="selectedKeys[0] === 'exam-plan'" class="certificate-card">
               <h4>证书信息</h4>
               <a-card :bordered="true" class="info-card">
-                <div
-                  v-if="selectedItem?.certificates?.length"
-                  class="certificate-list"
-                >
-                  <div
-                    v-for="(cert, index) in selectedItem.certificates"
-                    :key="index"
-                    class="cert-item"
-                  >
+                <div v-if="selectedItem?.certificates?.length" class="certificate-list">
+                  <div v-for="(cert, index) in selectedItem.certificates" :key="index" class="cert-item">
                     <div class="cert-name">{{ cert.certificateName }}</div>
                     <div class="cert-number">
                       证书编号：{{ cert.certificateNumber || "暂无" }}
@@ -145,16 +100,8 @@
             <div v-if="selectedKeys[0] === 'projects'" class="document-card">
               <h4>所需资料</h4>
               <a-card :bordered="true" class="info-card">
-                <div
-                  v-if="selectedItem?.documentList?.length"
-                  class="document-tags"
-                >
-                  <a-tag
-                    v-for="(doc, index) in selectedItem.documentList"
-                    :key="index"
-                    size="medium"
-                    class="doc-tag"
-                  >
+                <div v-if="selectedItem?.documentList?.length" class="document-tags">
+                  <a-tag v-for="(doc, index) in selectedItem.documentList" :key="index" size="medium" class="doc-tag">
                     <template #icon>
                       <icon-file />
                     </template>
@@ -169,16 +116,8 @@
             <div v-if="selectedKeys[0] === 'exam-plan'" class="document-card">
               <h4>所需资料</h4>
               <a-card :bordered="true" class="info-card">
-                <div
-                  v-if="selectedItem?.documentNames?.length"
-                  class="document-tags"
-                >
-                  <a-tag
-                    v-for="(doc, index) in selectedItem.documentNames"
-                    :key="index"
-                    size="medium"
-                    class="doc-tag"
-                  >
+                <div v-if="selectedItem?.documentNames?.length" class="document-tags">
+                  <a-tag v-for="(doc, index) in selectedItem.documentNames" :key="index" size="medium" class="doc-tag">
                     <template #icon>
                       <icon-file />
                     </template>
@@ -195,16 +134,9 @@
             <div v-if="selectedKeys[0] === 'projects'" class="location-card">
               <h4>考试地点</h4>
               <a-card :bordered="true" class="info-card">
-                <div
-                  v-if="selectedItem?.locationList?.length"
-                  class="location-tags"
-                >
-                  <a-tag
-                    v-for="(location, index) in selectedItem.locationList"
-                    :key="index"
-                    size="medium"
-                    class="location-tag"
-                  >
+                <div v-if="selectedItem?.locationList?.length" class="location-tags">
+                  <a-tag v-for="(location, index) in selectedItem.locationList" :key="index" size="medium"
+                    class="location-tag">
                     <template #icon>
                       <IconLocation />
                     </template>
@@ -221,16 +153,8 @@
             <template v-if="selectedType === 'exam'">
               <a-divider />
               <div class="exam-actions">
-                <a-button
-                  v-show="isIdentityCard"
-                  type="primary"
-                  @click="handleViewIdentityCard"
-                  >查看准考证</a-button
-                >
-                <a-modal
-                  v-model:visible="isWindowIdentityCard"
-                  :hide-cancel="false"
-                >
+                <a-button v-show="isIdentityCard" type="primary" @click="handleViewIdentityCard">查看准考证</a-button>
+                <a-modal v-model:visible="isWindowIdentityCard" :hide-cancel="false">
                   <template #title> 准考证信息 </template>
                   <div>
                     <div>考试名称：{{ identityCard.examPlanName }}</div>
@@ -238,62 +162,32 @@
                     <div>考试开始时间：{{ identityCard.startTime }}</div>
                     <div>考试结束时间：{{ identityCard.endTime }}</div>
                   </div>
-          <template #footer>
-              <a-button
-                  type="primary"
-                   @click="handleDownload(identityCard.userId, identityCard.examNumber)"
-                    >
-                    下载准考证 PDF
-              </a-button>
-          </template>
+                  <template #footer>
+                    <a-button type="primary" @click="handleDownload(identityCard.userId, identityCard.examNumber)">
+                      下载准考证 PDF
+                    </a-button>
+                  </template>
                 </a-modal>
-                <a-button
-                  type="primary"
-                  :disabled="!canRegister"
-                  @click="handleExamRegister"
-                  v-if="!isQualifications"
-                >
+                <a-button type="primary" :disabled="!canRegister" @click="handleExamRegister" v-if="!isQualifications">
                   {{ getExamActionText() }}
                 </a-button>
                 <!-- 添加取消报名按钮 -->
-                <a-button
-                  type="primary"
-                  v-if="
-                    selectedItem?.enrollStatus != '0' &&
-                    selectedItem?.enrollStatus != '6'
-                  "
-                  @click="handleCancelRegistration"
-                >
+                <a-button type="primary" v-if="selectedItem?.enrollStatus != '0' && selectedItem?.enrollStatus != '6'"
+                  @click="handleCancelRegistration">
                   取消报名
                 </a-button>
-                <a-button
-                  type="primary"
-                  :disabled="selectedItem?.enrollStatus != '1'"
-                  @click="handlePayment"
-                >
+                <a-button type="primary" :disabled="selectedItem?.enrollStatus != '1'" @click="handlePayment">
                   立即缴费
                 </a-button>
               </div>
             </template>
             <template v-if="selectedType === 'agency'">
-              <a-popconfirm
-                content="确定要给当前机构发送申请吗"
-                @ok="handleAddAgency"
-              >
-                <a-button v-show="agencyStatus === 0" type="primary"
-                  >发送申请</a-button
-                >
+              <a-popconfirm content="确定要给当前机构发送申请吗" @ok="openAddAgency">
+                <a-button v-show="agencyStatus === 0" type="primary">发送申请</a-button>
               </a-popconfirm>
-              <a-button
-                v-show="agencyStatus === 1"
-                type="primary"
-                :disabled="true"
-                >已发送申请</a-button
-              >
+              <a-button v-show="agencyStatus === 1" type="primary" :disabled="true">已发送申请</a-button>
               <a-popconfirm content="确定退出当前机构吗" @ok="handleDelAgency">
-                <a-button v-show="agencyStatus === 2" type="primary"
-                  >退出机构</a-button
-                >
+                <a-button v-show="agencyStatus === 2" type="primary">退出机构</a-button>
               </a-popconfirm>
             </template>
           </div>
@@ -304,39 +198,49 @@
           </div>
         </a-drawer>
       </div>
-      <SpecialCertificationApplicant
-        :visible="isNotFillIn"
-        @close="handleModalClose"
-        @upload-application-success="handleUploadSuccess"
-      ></SpecialCertificationApplicant>
+      <SpecialCertificationApplicant :visible="isNotFillIn" @close="handleModalClose"
+        @upload-application-success="handleUploadSuccess"></SpecialCertificationApplicant>
 
       <!-- 添加支付模态框 -->
-      <a-modal
-        v-model:visible="paymentModalVisible"
-        title="考试缴费"
-        :footer="false"
-        :mask-closable="false"
-      >
+      <a-modal v-model:visible="paymentModalVisible" title="考试缴费" :footer="false" :mask-closable="false">
         <div class="payment-content">
           <div class="qr-code">
             <img src="/static/images/test.jpg" alt="支付二维码" />
           </div>
           <div class="payment-methods">
             <a-button type="primary" class="payment-btn">
-              <template #icon><IconWechatpay /></template>
+              <template #icon>
+                <IconWechatpay />
+              </template>
               微信支付
             </a-button>
             <a-button type="primary" class="payment-btn">
-              <template #icon><IconAlipayCircle /></template>
+              <template #icon>
+                <IconAlipayCircle />
+              </template>
               支付宝支付
             </a-button>
             <a-button type="primary" class="payment-btn">
-              <template #icon><IconApps /></template>
+              <template #icon>
+                <IconApps />
+              </template>
               银行转账
             </a-button>
           </div>
         </div>
       </a-modal>
+      <!-- 选择机构项目弹窗 -->
+      <a-modal v-model:visible="selectProjectModalVisible" title="选择机构培训项目" :mask-closable="false">
+        <a-cascader :options="categoryOptions" placeholder="请选择考试项目" allow-clear @change="selectOrgProject" />
+
+        <template #footer>
+          <a-space>
+            <a-button @click="handleAddAgencyCancel">取消</a-button>
+            <a-button type="primary" @click="handleAddAgency">确定</a-button>
+          </a-space>
+        </template>
+      </a-modal>
+
     </div>
   </a-layout>
 </template>
@@ -360,6 +264,7 @@ import CourseList from "@/components/CourseList.vue";
 import AgencyList from "@/components/AgencyList.vue";
 import SpecialCertificationApplicant from "@/components/SpecialCertificationApplicant/index.vue";
 import { listTraining } from "@/apis/training/training";
+import { downloadExamTicket } from "@/apis/plan/enroll";
 
 import {
   type EnrollResp,
@@ -370,7 +275,7 @@ import { getProjectDetail, getProjectList } from "@/apis/project/project";
 import { listAnnouncementHome } from "@/apis/common/announcement";
 import { getStudentInfo } from "@/apis/studentInfo/student";
 import { getCandidatesId } from "@/apis/specialCertificationApplicant/index.ts";
-import { downloadExamTicket } from "@/apis/plan/enroll";
+import { checkEnrolledTime, singUp, cancelEnroll } from "@/apis/plan/enroll";
 import { candidatesUpload } from "@/apis/specialCertificationApplicant/index";
 import {
   getAgencyDetail,
@@ -378,7 +283,7 @@ import {
   studentAddAgency,
   studentDelAgency,
 } from "@/apis/org/org";
-import LoginSetting from "@/views/system/config/components/LoginSetting.vue";
+import { type ProjectCategoryVO, getSelectCategoryProject } from '@/apis/training/org'
 
 const selectedKeys = ref(["exam-plan"]);
 const visible = ref(false);
@@ -390,7 +295,7 @@ const isQualifications = ref(false);
 
 // 添加支付相关状态
 const paymentModalVisible = ref(false);
-
+const selectProjectModalVisible = ref(false);
 const getCertificateDesc = (cert) => {
   return [
     { label: "证书编号", value: cert.id },
@@ -562,9 +467,7 @@ const getExamDesc = (exam) => {
       lower.endsWith(".ppt") ||
       lower.endsWith(".pptx")
     ) {
-      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(
-        url
-      )}`;
+      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
     }
     return url;
   };
@@ -586,11 +489,11 @@ const getExamDesc = (exam) => {
     // ✅ 新增：申请表链接
     qualificationInfo.value?.imageUrl
       ? {
-          label: "申请表",
-          value: `<a href="${getPreviewUrl(
-            qualificationInfo.value.imageUrl
-          )}" target="_blank" rel="noopener noreferrer">查看申请表</a>`,
-        }
+        label: "申请表",
+        value: `<a href="${getPreviewUrl(
+          qualificationInfo.value.imageUrl
+        )}" target="_blank" rel="noopener noreferrer">查看申请表</a>`,
+      }
       : { label: "申请表", value: "未上传" },
   ];
 };
@@ -732,21 +635,44 @@ const fetchQualification = async (examPlanId: string) => {
 
 // 子组件ref
 const agencyRef = ref<InstanceType<typeof agencyRef>>();
+// 选择机构培训项目
+const selectOrgProject = (value: string) => {
+  selectedItem.value.selectedProjectId = value;
+};
 
-// 申请加入机构
+// 真正申请加入
 const handleAddAgency = async () => {
-  const res = await studentAddAgency(selectedItem.value.id);
+  if (!selectedItem.value.selectedProjectId) {
+    Message.warning("请选择培训项目");
+    return;
+  }
+  const res = await studentAddAgency(selectedItem.value.id, selectedItem.value.selectedProjectId);
   if (res.data > 0) {
+    selectedItem.value.selectedProjectId = null;
+    selectProjectModalVisible.value = false;
     Message.success("申请成功，已通知相关机构");
   } else if (res.data === -1) {
     Message.error("请勿重复申请");
   } else {
     Message.error("申请失败");
   }
-  // 关闭抽屉
+  //关闭抽屉
   visible.value = false;
-  // 刷新列表
+  //刷新列表
   await agencyRef.value.fetchAgencyList();
+};
+
+const handleAddAgencyCancel = () => {
+  selectedItem.value.selectedProjectId = null;
+  selectProjectModalVisible.value = false;
+};
+
+const categoryOptions = ref<ProjectCategoryVO[]>([])
+// 弹出申请加入机构
+const openAddAgency = async () => {
+  const selectRes = await getSelectCategoryProject(selectedItem.value.id)
+  categoryOptions.value = selectRes.data
+  selectProjectModalVisible.value = true;
 };
 
 const handleDelAgency = async () => {
@@ -1072,6 +998,7 @@ async function handleDownload(userId, examNumber) {
     justify-content: center;
   }
 }
+
 .document-card,
 .location-card {
   margin-bottom: 16px;

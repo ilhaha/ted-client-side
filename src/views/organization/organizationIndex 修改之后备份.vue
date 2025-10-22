@@ -12,25 +12,23 @@
             <a-menu-item key="1">
               考试计划
             </a-menu-item>
-            <!-- <a-menu-item key="2">
-              考试项目
-            </a-menu-item> -->
+            <a-menu-item key="2">
+              班级管理
+            </a-menu-item>
             <a-menu-item key="3">
               学员名单
             </a-menu-item>
-            <!--            <a-menu-item key="4"> -->
-            <!--              课件管理 -->
-            <!--            </a-menu-item> -->
-            <a-menu-item key="5">
-              专家管理
-            </a-menu-item>
             <a-menu-item key="6">
               <a-space :size="40">
-                <a-badge :count="studentAddCount" dot :offset="[7, -2]">
+                <a-badge :count="studentAddCount"  :offset="[10, -2]">
                   学员申请
                 </a-badge>
               </a-space>
             </a-menu-item>
+            <a-menu-item key="5">
+              专家管理
+            </a-menu-item>
+
             <a-menu-item key="7">
               培训管理
             </a-menu-item>
@@ -43,7 +41,7 @@
             <organizationExamPlanList :exams="examPlanList" @select="showExamDetail" />
           </div>
           <div v-if="activeTab === '2'" class="project-list">
-            <orgProjectList :projects="projectList" @select="handleProjectSelect" />
+            <orgClassList />
           </div>
           <div v-if="activeTab === '3'" class="tab-content">
             <div class="action-buttons">
@@ -126,21 +124,7 @@
             <ExpertList />
           </div>
           <div v-if="activeTab === '6'" class="tab-content">
-            <a-table :data="studentApplyFortList" :columns="studentApplyFortColumns" :loading="studentApplyFortLoading"
-              :pagination="{
-                total: studentTotal,
-                current: studentCurrentPage,
-                pageSize: studentPageSize,
-                showTotal: true,
-                onChange: handleStudentAddPage,
-              }">
-              <template #operations="{ record }">
-                <div class="table-button">
-                  <a-button @click="handleRefuseStudent(record.orgId, record.candidateId)">拒绝</a-button>
-                  <a-button type="primary" @click="handleApproveStudent(record.orgId, record.candidateId)">通过</a-button>
-                </div>
-              </template>
-            </a-table>
+            <orgCandidateList />
           </div>
           <!-- 新增培训管理内容 -->
           <div v-if="activeTab === '7'" class="tab-content">
@@ -421,8 +405,9 @@ import {
   refuseStudent,
 } from '@/apis/org/org'
 import organizationExamPlanList from '@/components/organizationExamPlanList.vue'
+import orgClassList from "@/views/training/orgClass/index.vue";
+import orgCandidateList from "@/views/training/orgCandidate/index.vue";
 import { type ProjectResp, getProjectDetail } from '@/apis/project/project'
-import orgProjectList from '@/components/orgProjectList.vue'
 import TrainingLesson from '@/components/TrainingLesson.vue'
 import ExpertList from '@/components/ExpertList.vue'
 import { getCertificateByCandidateId } from '@/apis/certificates/certificates'
@@ -670,7 +655,6 @@ const studentApplyFortColumns = [
   },
 ]
 
-const projectList = ref([])
 
 // 获取证件状态颜色
 const getCertStatusColor = (status: number) => {
@@ -724,71 +708,13 @@ const handleCloseCertificate = () => {
 // 待添加的考生列表
 const studentAddCount = ref(0)
 
-// 获取待添加的考生列表
-const fetchStudentAddList = async () => {
-  studentApplyFortLoading.value = true
-  try {
-    const res = await getStudentAddList()
-    if (res?.data) {
-      studentApplyFortList.value = res.data.list || []
-      studentTotal.value = res.data.total || 0
-      studentAddCount.value = res.data.list.length
-    }
-  } catch (error) {
-    console.error('获取考生列表失败：', error)
-    Message.error('获取考生列表失败')
-    studentApplyFortList.value = []
-    studentTotal.value = 0
-  } finally {
-    studentApplyFortLoading.value = false
-  }
-}
-
-// 在 onMounted 中调用获取数据
-// onMounted(() => {
-//   // fetchOrgInfo()
-//   if (activeTab.value === '3') {
-//     // fetchStudentList()
-//   }
-//   // fetchStudentAddList()
-// })
 
 // 修改 handleTabChange 方法，在切换到学员名单时获取数据
 const handleTabChange = (key: string) => {
   activeTab.value = key
   if (key === '3') {
     fetchStudentList()
-  } else if (key === '6') {
-    fetchStudentAddList()
-  }
-}
-
-// 处理学生申请页面
-const handleStudentAddPage = async (page: number) => {
-  studentCurrentPage.value = page
-  await fetchStudentAddList()
-}
-
-// 通过考生
-const handleApproveStudent = async (orgId: string, userId: string) => {
-  const res = await approveStudent(orgId, userId)
-  if (res?.data) {
-    Message.success('已通过')
-    await fetchStudentAddList()
-  } else {
-    Message.error('通过失败')
-  }
-}
-
-// 拒绝考生
-const handleRefuseStudent = async (orgId: string, userId: string) => {
-  const res = await refuseStudent(orgId, userId)
-  if (res?.data) {
-    Message.success('已拒绝')
-    await fetchStudentAddList()
-  } else {
-    Message.error('拒绝失败')
-  }
+  } 
 }
 
 const visible = ref(false)
@@ -1139,15 +1065,6 @@ const handleStudentUploadOk = async () => {
   } finally {
     studentUploadLoading.value = false
   }
-}
-
-const handleProjectSelect = async (project: ProjectResp) => {
-  // 在这里处理项目选择后的逻辑
-  visible.value = true
-  selectedType.value = 'project'
-  selectedItem.value = null // 清空之前的数据
-  // 获取详细信息
-  await fetchProjectDetail(project.id)
 }
 
 // 获取资料状态颜色
