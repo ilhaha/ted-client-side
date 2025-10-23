@@ -163,7 +163,7 @@
                     <div>考试结束时间：{{ identityCard.endTime }}</div>
                   </div>
                   <template #footer>
-                    <a-button type="primary" @click="handleDownload(identityCard.userId, identityCard.examNumber)">
+                    <a-button type="primary" @click="handleDownload(identityCard.userId,identityCard.name,identityCard.examPlanName, identityCard.examNumber)">
                       下载准考证 PDF
                     </a-button>
                   </template>
@@ -822,6 +822,7 @@ const identityCard = ref({
   startTime: "",
   endTime: "",
   userId: "",
+  name: "",
 });
 
 const handleViewIdentityCard = async () => {
@@ -833,7 +834,7 @@ const handleViewIdentityCard = async () => {
   const res = await viewIdentityCard(planId.value);
   identityCard.value = res.data;
 };
-async function handleDownload(userId, examNumber) {
+async function handleDownload(userId,name,examPlanName,examNumber) {
   try {
     const res = await downloadExamTicket(userId, examNumber)
     const blob = new Blob([res], { type: 'application/pdf' })
@@ -842,7 +843,7 @@ async function handleDownload(userId, examNumber) {
     const a = document.createElement('a')
     a.style.display = 'none'
     a.href = url
-    a.download = `ExamTicket-${examNumber}.pdf`
+    a.download = `${examPlanName}-${name}-${examNumber}.pdf`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
