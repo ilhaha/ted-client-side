@@ -106,7 +106,7 @@ import { Modal, Message, Input } from '@arco-design/web-vue'
 
 import { uploadWhenInfo } from '@/apis/system/user-center'
 import { applyUpload } from '@/apis/File/upload'
-import { qrcodeUpload } from '@/apis/document'
+import { qrcodeUpload } from '@/apis/document/enrollPreUpload'
 const route = useRoute()
 const unuploadedDocumentTypes = ref<any[]>([])
 const planInfoVO = ref<any>({})
@@ -273,7 +273,6 @@ const handleConfirm = async () => {
         Message.success('上传成功')
         return true
       } catch (err) {
-        Message.error('上传失败，请重试')
         return false
       }
     }
@@ -282,9 +281,6 @@ const handleConfirm = async () => {
 }
 
 const submitAllFiles = async (idLastSix: string) => {
-  console.log('提交的身份证后六位:', idLastSix)
-  console.log('图片类文件列表:', fileListMap)
-  console.log('申请表文件列表:', formFileList.value[0])
   await qrcodeUpload({
     candidateId: form.candidateId,
     planId: form.planId,
