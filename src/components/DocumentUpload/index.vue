@@ -1,56 +1,58 @@
 <template>
-  <div class="special-certification-applicant" >
+  <div class="special-certification-applicant">
     <a-modal
-        :visible="visible"
-        :title="title"
-        @cancel="handleCancel"
-        :mask-closable="false"
-        :footer="false"
-        :width="500"
-        class="custom-modal"
+      :visible="visible"
+      :title="title"
+      @cancel="handleCancel"
+      :mask-closable="false"
+      :footer="false"
+      :width="500"
+      class="custom-modal"
     >
       <div class="form-actions-container">
-        <div class="upload-section" >
+        <div class="upload-section">
           <a-select
-              v-model="selectedType"
-              placeholder="请选择资料类型"
-              class="type-select"
-              :options="typeNameList"
-              :field-names="{ label: 'label', value: 'value' }"
-              allow-clear
-              @change="handleTypeChange"
+            v-model="selectedType"
+            placeholder="请选择资料类型"
+            class="type-select"
+            :options="typeNameList"
+            :field-names="{ label: 'label', value: 'value' }"
+            allow-clear
+            @change="handleTypeChange"
           />
           <!-- 上传组件 -->
           <a-upload
-              :action="uploadUrl"
-              :headers="{
-              Authorization: `Bearer ${getToken()}`
+            :action="uploadUrl"
+            :headers="{
+              Authorization: `Bearer ${getToken()}`,
             }"
-              :data="uploadData"
-              :multiple="true"
-              :limit="5"
-              v-model:file-list="fileList"
-              :accept="'image/jpeg,image/png,image/jpg'"
-              @success="handleSuccess"
-              @before-upload="beforeUpload"
-              @error="handleError"
-              :disabled="!selectedType"
-              @click="handleUploadClick"
+            :data="uploadData"
+            :multiple="true"
+            :limit="5"
+            v-model:file-list="fileList"
+            :accept="'image/jpeg,image/png,image/jpg'"
+            @success="handleSuccess"
+            @before-upload="beforeUpload"
+            @error="handleError"
+            :disabled="!selectedType"
+            @click="handleUploadClick"
           >
             <template #upload-button>
               <div class="upload-button">
                 <icon-upload />
                 <div class="upload-text">点击或拖拽文件到此处上传</div>
-                <div class="upload-hint">支持多个图片文件，单个大小不超过 20MB</div>
+                <div class="upload-hint">
+                  支持多个图片文件，单个大小不超过 20MB
+                </div>
               </div>
             </template>
           </a-upload>
 
           <a-button
-              type="primary"
-              class="confirm-upload-btn"
-              :disabled="!fileList.length"
-              @click="confirmUpload"
+            type="primary"
+            class="confirm-upload-btn"
+            :disabled="!fileList.length"
+            @click="confirmUpload"
           >
             确认上传
           </a-button>
@@ -61,26 +63,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { Message } from '@arco-design/web-vue'
-import { getToken } from '@/utils/auth'
-import { type DocumentTypeNameVO, getTypeNameList } from '@/apis/document/index'
+import { ref, onMounted } from "vue";
+import { Message } from "@arco-design/web-vue";
+import { getToken } from "@/utils/auth";
+import {
+  type DocumentTypeNameVO,
+  getTypeNameList,
+} from "@/apis/document/index";
 
-console.log(222,import.meta.env.VITE_API_PREFIX);
+console.log(222, import.meta.env.VITE_API_PREFIX);
 
 // 获取环境变量中的API基础URL
-const uploadUrl = `${import.meta.env.VITE_API_PREFIX}/upload/file`
+const uploadUrl = `${import.meta.env.VITE_API_PREFIX}/upload/file`;
 // 上传之后的图片url
-const imageUrl = ref('')
+const imageUrl = ref("");
 const uploadData = ref({
-  type: 'pic'
-})
+  type: "pic",
+});
 
 // 定义上传文件项的类型
 interface UploadItem {
   uid: string;
   name: string;
-  status?: 'init' | 'uploading' | 'done' | 'error';
+  status?: "init" | "uploading" | "done" | "error";
   file?: File;
   url?: string;
 }
@@ -88,107 +93,110 @@ interface UploadItem {
 const props = defineProps({
   visible: {
     type: Boolean,
-    default: false
+    default: false,
   },
   title: {
     type: String,
-    default: ''
-  }
-})
+    default: "",
+  },
+});
 
-const emit = defineEmits(['close', 'upload-success'])
+const emit = defineEmits(["close", "upload-success"]);
 
 // 文件列表
-const fileList = ref<UploadItem[]>([])
+const fileList = ref<UploadItem[]>([]);
 
 // 选中的资料类型
-const selectedType = ref<number>()
+const selectedType = ref<number>();
 
 // 资料类型列表
-const typeNameList = ref<DocumentTypeNameVO[]>([])
+const typeNameList = ref<DocumentTypeNameVO[]>([]);
 
 // 获取资料类型列表
 const getDocumentTypeList = async () => {
   try {
-    const res = await getTypeNameList()
-    typeNameList.value = res.data.map(item => ({
+    const res = await getTypeNameList();
+    typeNameList.value = res.data.map((item) => ({
       ...item,
-      disabled: item.disabled || false
-    }))
+      disabled: item.disabled || false,
+    }));
   } catch (error) {
-    Message.error('获取资料类型列表失败')
+    Message.error("获取资料类型列表失败");
   }
-}
+};
 
 // 处理资料类型选择变化
 const handleTypeChange = (value: string) => {
-  const selectedOption = typeNameList.value.find(item => item.value === value)
-  if (selectedOption?.label === '视频') {
-    uploadData.value.type = 'video'
+  const selectedOption = typeNameList.value.find(
+    (item) => item.value === value
+  );
+  if (selectedOption?.label === "视频") {
+    uploadData.value.type = "video";
   } else {
-    uploadData.value.type = 'pic'
+    uploadData.value.type = "pic";
   }
-  fileList.value = []
-}
+  fileList.value = [];
+};
 
 // 确认上传
 // 在 script 部分添加 handleSuccess 处理函数
 const handleSuccess = (file: any) => {
-  if(file.response.code != 0) {
-    Message.error(file.response.msg)
-    return
+  if (file.response.code != 0) {
+    Message.error(file.response.msg || "上传失败");
+    return;
   }
-}
+  Message.success("文件上传成功");
+};
 
 const closeModal = () => {
-  emit('close')
-}
+  emit("close");
+};
 
 // 修改确认上传的逻辑
 const confirmUpload = () => {
   if (!selectedType.value) {
-    Message.warning('请选择资料类型')
-    return
+    Message.warning("请选择资料类型");
+    return;
   }
 
   if (fileList.value.length === 0) {
-    Message.warning('请先选择要上传的文件')
-    return
+    Message.warning("请先选择要上传的文件");
+    return;
   }
 
-  const urls = fileList.value.map(item => item.response.data.url)
+  const urls = fileList.value.map((item) => item.response.data.url);
   // 发送所有文件的URL
-  emit('upload-success', {
-    docPath: urls.join(','),
-    typeId: selectedType.value
-  })
-  handleCancel()
+  emit("upload-success", {
+    docPath: urls.join(","),
+    typeId: selectedType.value,
+  });
+  handleCancel();
   // emit('close')
-}
+};
 
 // 修改关闭时重置的逻辑
 // 删除重复的closeModal函数
 const handleCancel = () => {
   // 重置所有表单内容
-  selectedType.value = undefined
-  fileList.value = []
+  selectedType.value = undefined;
+  fileList.value = [];
   uploadData.value = {
-    type: 'pic',
-  }
-  emit('close')// 添加这行触发关闭事件
-}
+    type: "pic",
+  };
+  emit("close"); // 添加这行触发关闭事件
+};
 
 onMounted(() => {
-  getDocumentTypeList()
-})
+  getDocumentTypeList();
+});
 
 // 处理上传点击事件
 const handleUploadClick = (e: Event) => {
   if (!selectedType.value) {
-    Message.warning('请先选择资料类型')
-    e.preventDefault()
+    Message.warning("请先选择资料类型");
+    e.preventDefault();
   }
-}
+};
 </script>
 
 <style scoped>
@@ -260,13 +268,17 @@ const handleUploadClick = (e: Event) => {
 }
 
 .upload-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(22, 93, 255, 0.05) 0%, rgba(22, 93, 255, 0) 70%);
+  background: radial-gradient(
+    circle at center,
+    rgba(22, 93, 255, 0.05) 0%,
+    rgba(22, 93, 255, 0) 70%
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }

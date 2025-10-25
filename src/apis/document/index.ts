@@ -29,3 +29,13 @@ export function getTypeNameList() {
 export function studentUploadDocuments(data) {
     return http.post(`/document/examineeDocument/studentUploadDocuments`,data)
 }
+
+/**
+ * 补正上传或重新上传接口
+ * @param data 
+ * @returns Promise
+ */
+export function studentReUploadDocument(data: { id: number; docPath: string; status:number}) {
+  return http.post(`/document/examineeDocument/studentReUploadDocument`, data);
+}
+
