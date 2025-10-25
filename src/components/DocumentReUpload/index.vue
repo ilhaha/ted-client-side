@@ -160,9 +160,32 @@ watch(() => props.visible, (val) => {
 .upload-button {
   border: 1px dashed #c0c4cc;
   border-radius: 6px;
-  padding: 20px;
+  padding: 50px;
+  padding-Left: 90px;
+  padding-Right: 90px;
   text-align: center;
   cursor: pointer;
+}
+.upload-button:hover {
+  border-color: #165dff;
+  background-color: #f0f7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.upload-button:hover::before {
+  opacity: 1;
+}
+
+.upload-button :deep(.arco-icon) {
+  color: #165dff;
+  font-size: 32px;
+  margin-bottom: 12px;
+  transition: transform 0.3s ease;
+}
+
+.upload-button:hover :deep(.arco-icon) {
+  transform: scale(1.1);
 }
 .upload-text {
   margin-top: 8px;
