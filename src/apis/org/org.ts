@@ -65,6 +65,10 @@ export function studentDelAgency(orgId: any) {
   return http.get(`${BASE_URL}/studentDelAgency/${orgId}`)
 }
 
+export function studentQuitAgency(orgId: any) {
+  return http.get(`${BASE_URL}/studentQuitAgency/${orgId}`)
+}
+
 export function getStudentAddList() {
   return http.get<OrgResp[]>(`${BASE_URL}/getCandidates`, { type: 'add' })
 }

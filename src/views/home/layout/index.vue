@@ -3,9 +3,18 @@
     <div class="menu-demo">
       <!-- 添加公告栏 -->
       <div class="notice-bar">
-        <a-carousel class="notice-carousel" animation-name="fade" :auto-play="true" :show-arrow="false"
-          indicator-position="never" :interval="3000">
-          <a-carousel-item v-for="(notice, index) in announcements" :key="index">
+        <a-carousel
+          class="notice-carousel"
+          animation-name="fade"
+          :auto-play="true"
+          :show-arrow="false"
+          indicator-position="never"
+          :interval="3000"
+        >
+          <a-carousel-item
+            v-for="(notice, index) in announcements"
+            :key="index"
+          >
             <div class="notice-item" @click="goAnnouncements(notice.uri)">
               <IconNotification class="notice-icon" />
               <span class="notice-text">{{ notice.title }}</span>
@@ -43,20 +52,44 @@
 
       <div class="content-layout">
         <div class="tab-content">
-          <ExamPlanList v-if="selectedKeys[0] === 'exam-plan'" :exams="examPlanList" @select="showExamDetail" />
+          <ExamPlanList
+            v-if="selectedKeys[0] === 'exam-plan'"
+            :exams="examPlanList"
+            @select="showExamDetail"
+          />
 
-          <CourseList v-if="selectedKeys[0] === 'courses'" :courses="courseList" @select="showCourseDetail" />
+          <CourseList
+            v-if="selectedKeys[0] === 'courses'"
+            :courses="courseList"
+            @select="showCourseDetail"
+          />
 
-          <ProjectList v-if="selectedKeys[0] === 'projects'" :projects="projectList" @select="showProjectDetail" />
+          <ProjectList
+            v-if="selectedKeys[0] === 'projects'"
+            :projects="projectList"
+            @select="showProjectDetail"
+          />
 
-          <AgencyList v-if="selectedKeys[0] === 'agency'" ref="agencyRef" @select="showAgencyDetail" />
+          <AgencyList
+            v-if="selectedKeys[0] === 'agency'"
+            ref="agencyRef"
+            @select="showAgencyDetail"
+          />
         </div>
         <!-- 详情抽屉 -->
-        <a-drawer :visible="visible" :width="640" @cancel="onClose" :footer="null">
+        <a-drawer
+          :visible="visible"
+          :width="640"
+          @cancel="onClose"
+          :footer="null"
+        >
           <template #title>
             <div class="drawer-title">
               <span class="title-text">{{ selectedItem?.projectName }}</span>
-              <a-tag v-if="selectedType === 'project'" :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'">
+              <a-tag
+                v-if="selectedType === 'project'"
+                :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'"
+              >
                 {{ selectedItem?.projectStatus === "1" ? "已上架" : "进行中" }}
               </a-tag>
             </div>
@@ -64,13 +97,21 @@
 
           <div v-if="selectedItem" class="detail-content">
             <div class="detail-image">
-              <img :src="selectedItem.businessLicense ||
-                selectedItem?.imageUrl ||
-                '/static/images/test.jpg'
-                " :alt="selectedItem?.projectName" />
+              <img
+                :src="
+                  selectedItem.businessLicense ||
+                  selectedItem?.imageUrl ||
+                  '/static/images/test.jpg'
+                "
+                :alt="selectedItem?.projectName"
+              />
             </div>
             <a-descriptions layout="inline-vertical">
-              <a-descriptions-item v-for="(item, index) in getDescriptionData()" :key="index" :label="item.label">
+              <a-descriptions-item
+                v-for="(item, index) in getDescriptionData()"
+                :key="index"
+                :label="item.label"
+              >
                 <span v-html="item.value"></span>
               </a-descriptions-item>
             </a-descriptions>
@@ -79,11 +120,21 @@
             <a-divider style="margin: 16px 0" />
 
             <!-- 证书信息卡片 -->
-            <div v-if="selectedKeys[0] === 'exam-plan'" class="certificate-card">
+            <div
+              v-if="selectedKeys[0] === 'exam-plan'"
+              class="certificate-card"
+            >
               <h4>证书信息</h4>
               <a-card :bordered="true" class="info-card">
-                <div v-if="selectedItem?.certificates?.length" class="certificate-list">
-                  <div v-for="(cert, index) in selectedItem.certificates" :key="index" class="cert-item">
+                <div
+                  v-if="selectedItem?.certificates?.length"
+                  class="certificate-list"
+                >
+                  <div
+                    v-for="(cert, index) in selectedItem.certificates"
+                    :key="index"
+                    class="cert-item"
+                  >
                     <div class="cert-name">{{ cert.certificateName }}</div>
                     <div class="cert-number">
                       证书编号：{{ cert.certificateNumber || "暂无" }}
@@ -100,8 +151,16 @@
             <div v-if="selectedKeys[0] === 'projects'" class="document-card">
               <h4>所需资料</h4>
               <a-card :bordered="true" class="info-card">
-                <div v-if="selectedItem?.documentList?.length" class="document-tags">
-                  <a-tag v-for="(doc, index) in selectedItem.documentList" :key="index" size="medium" class="doc-tag">
+                <div
+                  v-if="selectedItem?.documentList?.length"
+                  class="document-tags"
+                >
+                  <a-tag
+                    v-for="(doc, index) in selectedItem.documentList"
+                    :key="index"
+                    size="medium"
+                    class="doc-tag"
+                  >
                     <template #icon>
                       <icon-file />
                     </template>
@@ -116,8 +175,16 @@
             <div v-if="selectedKeys[0] === 'exam-plan'" class="document-card">
               <h4>所需资料</h4>
               <a-card :bordered="true" class="info-card">
-                <div v-if="selectedItem?.documentNames?.length" class="document-tags">
-                  <a-tag v-for="(doc, index) in selectedItem.documentNames" :key="index" size="medium" class="doc-tag">
+                <div
+                  v-if="selectedItem?.documentNames?.length"
+                  class="document-tags"
+                >
+                  <a-tag
+                    v-for="(doc, index) in selectedItem.documentNames"
+                    :key="index"
+                    size="medium"
+                    class="doc-tag"
+                  >
                     <template #icon>
                       <icon-file />
                     </template>
@@ -134,9 +201,16 @@
             <div v-if="selectedKeys[0] === 'projects'" class="location-card">
               <h4>考试地点</h4>
               <a-card :bordered="true" class="info-card">
-                <div v-if="selectedItem?.locationList?.length" class="location-tags">
-                  <a-tag v-for="(location, index) in selectedItem.locationList" :key="index" size="medium"
-                    class="location-tag">
+                <div
+                  v-if="selectedItem?.locationList?.length"
+                  class="location-tags"
+                >
+                  <a-tag
+                    v-for="(location, index) in selectedItem.locationList"
+                    :key="index"
+                    size="medium"
+                    class="location-tag"
+                  >
                     <template #icon>
                       <IconLocation />
                     </template>
@@ -153,8 +227,16 @@
             <template v-if="selectedType === 'exam'">
               <a-divider />
               <div class="exam-actions">
-                <a-button v-show="isIdentityCard" type="primary" @click="handleViewIdentityCard">查看准考证</a-button>
-                <a-modal v-model:visible="isWindowIdentityCard" :hide-cancel="false">
+                <a-button
+                  v-show="isIdentityCard"
+                  type="primary"
+                  @click="handleViewIdentityCard"
+                  >查看准考证</a-button
+                >
+                <a-modal
+                  v-model:visible="isWindowIdentityCard"
+                  :hide-cancel="false"
+                >
                   <template #title> 准考证信息 </template>
                   <div>
                     <div>考试名称：{{ identityCard.examPlanName }}</div>
@@ -163,46 +245,112 @@
                     <div>考试结束时间：{{ identityCard.endTime }}</div>
                   </div>
                   <template #footer>
-                    <a-button type="primary" @click="handleDownload(identityCard.userId,identityCard.name,identityCard.examPlanName, identityCard.examNumber)">
+                    <a-button
+                      type="primary"
+                      @click="
+                        handleDownload(
+                          identityCard.userId,
+                          identityCard.name,
+                          identityCard.examPlanName,
+                          identityCard.examNumber
+                        )
+                      "
+                    >
                       下载准考证 PDF
                     </a-button>
                   </template>
                 </a-modal>
-                <a-button type="primary" :disabled="!canRegister" @click="handleExamRegister" v-if="!isQualifications">
+                <a-button
+                  type="primary"
+                  :disabled="!canRegister"
+                  @click="handleExamRegister"
+                  v-if="!isQualifications"
+                >
                   {{ getExamActionText() }}
                 </a-button>
                 <!-- 添加取消报名按钮 -->
-                <a-button type="primary" v-if="selectedItem?.enrollStatus != '0' && selectedItem?.enrollStatus != '6'"
-                  @click="handleCancelRegistration">
+                <a-button
+                  type="primary"
+                  v-if="
+                    selectedItem?.enrollStatus != '0' &&
+                    selectedItem?.enrollStatus != '6'
+                  "
+                  @click="handleCancelRegistration"
+                >
                   取消报名
                 </a-button>
-                <a-button type="primary" :disabled="selectedItem?.enrollStatus != '1'" @click="handlePayment">
+                <a-button
+                  type="primary"
+                  :disabled="selectedItem?.enrollStatus != '1'"
+                  @click="handlePayment"
+                >
                   立即缴费
                 </a-button>
               </div>
             </template>
             <template v-if="selectedType === 'agency'">
-              <a-popconfirm content="确定要给当前机构发送申请吗" @ok="openAddAgency">
-                <a-button v-show="agencyStatus === 0" type="primary">发送申请</a-button>
+              <!-- 状态为0：显示发送申请 -->
+              <a-popconfirm
+                content="确定要给当前机构发送申请吗"
+                @ok="openAddAgency"
+              >
+                <a-button v-show="agencyStatus === 0" type="primary"
+                  >发送申请</a-button
+                >
               </a-popconfirm>
-              <a-button v-show="agencyStatus === 1" type="primary" :disabled="true">已发送申请</a-button>
-              <a-popconfirm content="确定退出当前机构吗" @ok="handleDelAgency">
-                <a-button v-show="agencyStatus === 2" type="primary">退出机构</a-button>
+
+              <!-- 状态为1：显示撤回申请 -->
+              <a-popconfirm content="确定撤回当前申请吗" @ok="handleDelAgency">
+                <a-button v-show="agencyStatus === 1" type="primary"
+                  >撤回申请</a-button
+                >
+              </a-popconfirm>
+
+              <!-- 状态为-1：同时显示撤回申请 + 重新申请 -->
+              <template v-if="agencyStatus === -1">
+                <a-popconfirm
+                  content="确定撤回当前申请吗"
+                  @ok="handleDelAgency"
+                >
+                  <a-button type="primary" style="margin-right: 8px"
+                    >撤回申请</a-button
+                  >
+                </a-popconfirm>
+                <a-popconfirm
+                  content="确定重新向当前机构发送申请吗"
+                  @ok="openAddAgency"
+                >
+                  <a-button type="primary">重新申请</a-button>
+                </a-popconfirm>
+              </template>
+
+              <!-- 状态为2：显示退出机构 -->
+              <a-popconfirm content="确定退出当前机构吗" @ok="handleQuitAgency">
+                <a-button v-show="agencyStatus === 2" type="primary"
+                  >退出机构</a-button
+                >
               </a-popconfirm>
             </template>
           </div>
-
           <!-- 添加加载状态 -->
           <div v-else class="loading-content">
             <a-spin dot />
           </div>
         </a-drawer>
       </div>
-      <SpecialCertificationApplicant :visible="isNotFillIn" @close="handleModalClose"
-        @upload-application-success="handleUploadSuccess"></SpecialCertificationApplicant>
+      <SpecialCertificationApplicant
+        :visible="isNotFillIn"
+        @close="handleModalClose"
+        @upload-application-success="handleUploadSuccess"
+      ></SpecialCertificationApplicant>
 
       <!-- 添加支付模态框 -->
-      <a-modal v-model:visible="paymentModalVisible" title="考试缴费" :footer="false" :mask-closable="false">
+      <a-modal
+        v-model:visible="paymentModalVisible"
+        title="考试缴费"
+        :footer="false"
+        :mask-closable="false"
+      >
         <div class="payment-content">
           <div class="qr-code">
             <img src="/static/images/test.jpg" alt="支付二维码" />
@@ -230,8 +378,17 @@
         </div>
       </a-modal>
       <!-- 选择机构项目弹窗 -->
-      <a-modal v-model:visible="selectProjectModalVisible" title="选择机构培训项目" :mask-closable="false">
-        <a-cascader :options="categoryOptions" placeholder="请选择考试项目" allow-clear @change="selectOrgProject" />
+      <a-modal
+        v-model:visible="selectProjectModalVisible"
+        title="选择机构培训项目"
+        :mask-closable="false"
+      >
+        <a-cascader
+          :options="categoryOptions"
+          placeholder="请选择考试项目"
+          allow-clear
+          @change="selectOrgProject"
+        />
 
         <template #footer>
           <a-space>
@@ -240,7 +397,6 @@
           </a-space>
         </template>
       </a-modal>
-
     </div>
   </a-layout>
 </template>
@@ -282,8 +438,12 @@ import {
   getAgencyStatus,
   studentAddAgency,
   studentDelAgency,
+  studentQuitAgency,
 } from "@/apis/org/org";
-import { type ProjectCategoryVO, getSelectCategoryProject } from '@/apis/training/org'
+import {
+  type ProjectCategoryVO,
+  getSelectCategoryProject,
+} from "@/apis/training/org";
 
 const selectedKeys = ref(["exam-plan"]);
 const visible = ref(false);
@@ -467,7 +627,9 @@ const getExamDesc = (exam) => {
       lower.endsWith(".ppt") ||
       lower.endsWith(".pptx")
     ) {
-      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
+      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(
+        url
+      )}`;
     }
     return url;
   };
@@ -489,11 +651,11 @@ const getExamDesc = (exam) => {
     // ✅ 新增：申请表链接
     qualificationInfo.value?.imageUrl
       ? {
-        label: "申请表",
-        value: `<a href="${getPreviewUrl(
-          qualificationInfo.value.imageUrl
-        )}" target="_blank" rel="noopener noreferrer">查看申请表</a>`,
-      }
+          label: "申请表",
+          value: `<a href="${getPreviewUrl(
+            qualificationInfo.value.imageUrl
+          )}" target="_blank" rel="noopener noreferrer">查看申请表</a>`,
+        }
       : { label: "申请表", value: "未上传" },
   ];
 };
@@ -506,6 +668,7 @@ const getAgencyDesc = (agency) => {
     { label: "机构地点", value: agency.location },
     { label: "机构法人", value: agency.legalPerson },
     { label: "公司规模大小", value: agency.scale },
+    { label: "审核备注", value: remark || "无" },
   ];
 };
 
@@ -646,7 +809,10 @@ const handleAddAgency = async () => {
     Message.warning("请选择培训项目");
     return;
   }
-  const res = await studentAddAgency(selectedItem.value.id, selectedItem.value.selectedProjectId);
+  const res = await studentAddAgency(
+    selectedItem.value.id,
+    selectedItem.value.selectedProjectId
+  );
   if (res.data > 0) {
     selectedItem.value.selectedProjectId = null;
     selectProjectModalVisible.value = false;
@@ -667,24 +833,40 @@ const handleAddAgencyCancel = () => {
   selectProjectModalVisible.value = false;
 };
 
-const categoryOptions = ref<ProjectCategoryVO[]>([])
+const categoryOptions = ref<ProjectCategoryVO[]>([]);
 // 弹出申请加入机构
 const openAddAgency = async () => {
-  const selectRes = await getSelectCategoryProject(selectedItem.value.id)
-  categoryOptions.value = selectRes.data
+  const selectRes = await getSelectCategoryProject(selectedItem.value.id);
+  categoryOptions.value = selectRes.data;
   selectProjectModalVisible.value = true;
 };
-
+//取消当前机构
 const handleDelAgency = async () => {
   const res = await studentDelAgency(selectedItem.value.id);
-  if (res.data > 0) {
-    Message.success("退出机构成功");
+  if (res.data == 0) {
+    Message.success("取消机构申请成功");
   } else {
-    Message.error("退出机构失败");
+    Message.error("取消机构申请失败");
   }
   // 关闭抽屉
   visible.value = false;
   // 刷新列表
+  await agencyRef.value.fetchAgencyList();
+};
+// 退出机构方法
+const handleQuitAgency = async () => {
+  // 调用“退出机构”的接口（用你项目中真实的退出接口，比如 studentQuitAgency）
+  const res = await studentQuitAgency(selectedItem.value.id);
+
+  // 根据接口返回结果提示用户
+  if (res.data > 0 || res.success) {
+    Message.success("退出机构成功"); // 业务文案明确是“退出”
+  } else {
+    Message.error("退出机构失败，请稍后重试");
+  }
+
+  // 后续操作：关闭抽屉 + 刷新列表，保证页面状态同步
+  visible.value = false;
   await agencyRef.value.fetchAgencyList();
 };
 
@@ -776,6 +958,7 @@ const fetchProjectDetail = async (projectId: string) => {
 
 // 发送申请、已发送申请、退出机构(0、1、2)
 const agencyStatus = ref(0);
+let remark = "";
 
 const fetchAgencyDetail = async (agencyId: string) => {
   try {
@@ -793,7 +976,8 @@ const fetchAgencyDetail = async (agencyId: string) => {
 
 const fetchAgencyStatus = async (orgId: any) => {
   const ref = await getAgencyStatus(orgId);
-  agencyStatus.value = ref.data;
+  agencyStatus.value = ref.data.data.status;
+  remark = ref.data.data.remark;
 };
 
 // 查看机构详情
@@ -834,22 +1018,22 @@ const handleViewIdentityCard = async () => {
   const res = await viewIdentityCard(planId.value);
   identityCard.value = res.data;
 };
-async function handleDownload(userId,name,examPlanName,examNumber) {
+async function handleDownload(userId, name, examPlanName, examNumber) {
   try {
-    const res = await downloadExamTicket(userId, examNumber)
-    const blob = new Blob([res], { type: 'application/pdf' })
-    const url = window.URL.createObjectURL(blob)
+    const res = await downloadExamTicket(userId, examNumber);
+    const blob = new Blob([res], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
 
-    const a = document.createElement('a')
-    a.style.display = 'none'
-    a.href = url
-    a.download = `${examPlanName}-${name}-${examNumber}.pdf`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = `${examPlanName}-${name}-${examNumber}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   } catch (err) {
-    console.error('❌ 下载准考证失败:', err)
+    console.error("❌ 下载准考证失败:", err);
   }
 }
 </script>
