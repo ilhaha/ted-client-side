@@ -869,7 +869,6 @@ const handleQuitAgency = async () => {
   visible.value = false;
   await agencyRef.value.fetchAgencyList();
 };
-
 // 添加课程数据
 const courseList = ref([]);
 const fetchCourseList = async () => {

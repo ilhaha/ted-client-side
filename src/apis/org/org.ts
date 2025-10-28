@@ -64,9 +64,13 @@ export function studentAddAgency(orgId: any, projectId: any) {
 export function studentDelAgency(orgId: any) {
   return http.get(`${BASE_URL}/studentDelAgency/${orgId}`)
 }
-
+// 学员退出机构
 export function studentQuitAgency(orgId: any) {
   return http.get(`${BASE_URL}/studentQuitAgency/${orgId}`)
+}
+//机构退出学生
+export function agencyRemoveStudent(orgId, candidateId) {
+  return http.get(`${BASE_URL}/agencyRemoveStudent/${orgId}/${candidateId}`)
 }
 
 export function getStudentAddList() {

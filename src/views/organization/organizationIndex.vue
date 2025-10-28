@@ -3,42 +3,38 @@
     <div class="organization-container">
       <!-- 右侧内容区 -->
       <div class="right-content">
-        <div class="user-id">
-        </div>
+        <div class="user-id"></div>
 
         <!-- 导航菜单 -->
         <div class="nav-menu">
-          <a-menu v-model:selected-keys="activeTab" mode="horizontal" @menu-item-click="handleTabChange">
-            <a-menu-item key="1">
-              考试计划
-            </a-menu-item>
-            <a-menu-item key="2">
-              班级管理
-            </a-menu-item>
-            <a-menu-item key="3">
-              学员名单
-            </a-menu-item>
+          <a-menu
+            v-model:selected-keys="activeTab"
+            mode="horizontal"
+            @menu-item-click="handleTabChange"
+          >
+            <a-menu-item key="1"> 考试计划 </a-menu-item>
+            <a-menu-item key="2"> 班级管理 </a-menu-item>
+            <a-menu-item key="3"> 学员名单 </a-menu-item>
             <a-menu-item key="6">
               <a-space :size="40">
-                <a-badge :count="studentAddCount"  :offset="[10, -2]">
+                <a-badge :count="studentAddCount" :offset="[10, -2]">
                   学员申请
                 </a-badge>
               </a-space>
             </a-menu-item>
-            <a-menu-item key="5">
-              专家管理
-            </a-menu-item>
+            <a-menu-item key="5"> 专家管理 </a-menu-item>
 
-            <a-menu-item key="7">
-              培训管理
-            </a-menu-item>
+            <a-menu-item key="7"> 培训管理 </a-menu-item>
           </a-menu>
         </div>
 
         <!-- 内容区域 -->
         <div class="list-content">
           <div v-if="activeTab === '1'" class="tab-content">
-            <organizationExamPlanList :exams="examPlanList" @select="showExamDetail" />
+            <organizationExamPlanList
+              :exams="examPlanList"
+              @select="showExamDetail"
+            />
           </div>
           <div v-if="activeTab === '2'" class="project-list">
             <orgClassList />
@@ -54,23 +50,33 @@
                 </a-button>
               </a-space>
             </div>
-            <a-table :data="studentApplyFortList" :columns="studentApplyFortColumns" :loading="studentApplyFortLoading"
+            <a-table
+              :data="studentApplyFortList"
+              :columns="studentApplyFortColumns"
+              :loading="studentApplyFortLoading"
               :pagination="{
                 total: studentTotal,
                 current: studentCurrentPage,
                 pageSize: studentPageSize,
                 showTotal: true,
                 onChange: handleStudentPageChange,
-              }">
+              }"
+            >
               <template #operations="{ record }">
-                <a-button type="text" @click="handleViewCertificate(record.candidateId)">
+                <a-button
+                  type="text"
+                  @click="handleViewCertificate(record.candidateId)"
+                >
                   <template #icon>
                     <IconEye />
                   </template>
                   证书查询
                 </a-button>
                 <!-- 新增查看资料按钮 -->
-                <a-button type="text" @click="handleViewDocuments(record.candidateId)">
+                <a-button
+                  type="text"
+                  @click="handleViewDocuments(record.candidateId)"
+                >
                   <template #icon>
                     <IconFile />
                   </template>
@@ -82,24 +88,52 @@
                   </template>
                   上传资料
                 </a-button>
+                <a-button
+                  type="text"
+                  status="danger"
+                  @click="handleRemoveStudent(record.orgId, record.candidateId)"
+                >
+                  <template #icon>
+                    <IconDelete />
+                  </template>
+                  移除学生
+                </a-button>
               </template>
             </a-table>
-            <DocumentUpload :visible="uploadVisible" title="上传资料" @close="uploadVisible = false"
-              @upload-success="handleUploadSuccess">
+            <DocumentUpload
+              :visible="uploadVisible"
+              title="上传资料"
+              @close="uploadVisible = false"
+              @upload-success="handleUploadSuccess"
+            >
             </DocumentUpload>
 
             <!-- 新增资料弹窗 -->
-            <Drawer v-model:visible="showDocumentModal" title="学员资料" :footer="false" width="500px"
-              @close="handleCloseDocument">
+            <Drawer
+              v-model:visible="showDocumentModal"
+              title="学员资料"
+              :footer="false"
+              width="500px"
+              @close="handleCloseDocument"
+            >
               <div class="document-drawer-content">
                 <div v-if="documentLoading" class="loading-container">
                   <a-spin size="large" />
                 </div>
                 <div v-else-if="documentList.length" class="document-list">
-                  <div v-for="(doc, index) in documentList" :key="index" class="document-card">
+                  <div
+                    v-for="(doc, index) in documentList"
+                    :key="index"
+                    class="document-card"
+                  >
                     <div class="document-image">
-                      <a-image :src="doc.documentUrl" :alt="doc.documentName" :preview="true" fit="cover"
-                        @error="handleImageError" />
+                      <a-image
+                        :src="doc.documentUrl"
+                        :alt="doc.documentName"
+                        :preview="true"
+                        fit="cover"
+                        @error="handleImageError"
+                      />
                     </div>
                     <div class="document-info">
                       <div class="document-header">
@@ -135,13 +169,28 @@
     </div>
   </div>
   <!-- 批量注册弹窗 -->
-  <Modal v-model:visible="showBatchSignUpModal" title="批量注册学员" :footer="false" width="400px" @close="handleFileClose">
+  <Modal
+    v-model:visible="showBatchSignUpModal"
+    title="批量注册学员"
+    :footer="false"
+    width="400px"
+    @close="handleFileClose"
+  >
     <div class="batch-modal-content">
       <a-space direction="vertical" size="large" fill>
-        <a-upload v-model:file-list="fileList" :action="`${uploadUrl}/training/org/upload`" :headers="{
-          Authorization: `Bearer ${getToken()}`,
-        }" :limit="1" accept=".xls,.xlsx" list-type="text" @success="handleSuccess" @before-upload="beforeUpload"
-          @error="handleError">
+        <a-upload
+          v-model:file-list="fileList"
+          :action="`${uploadUrl}/training/org/upload`"
+          :headers="{
+            Authorization: `Bearer ${getToken()}`,
+          }"
+          :limit="1"
+          accept=".xls,.xlsx"
+          list-type="text"
+          @success="handleSuccess"
+          @before-upload="beforeUpload"
+          @error="handleError"
+        >
           <template #upload-button>
             <a-button type="primary">
               <template #icon>
@@ -167,23 +216,40 @@
             <li>请严格按照模板格式填写数据</li>
           </ul>
         </div>
-        <a-button type="primary" class="confirm-upload-btn" :disabled="!fileList.length" @click="handleConfirmUpload">
+        <a-button
+          type="primary"
+          class="confirm-upload-btn"
+          :disabled="!fileList.length"
+          @click="handleConfirmUpload"
+        >
           确认上传
         </a-button>
       </a-space>
     </div>
   </Modal>
   <!-- 查看证书抽屉 -->
-  <Drawer v-model:visible="showCertificateModal" title="查看证书" :footer="false" width="500px"
-    @close="handleCloseCertificate">
+  <Drawer
+    v-model:visible="showCertificateModal"
+    title="查看证书"
+    :footer="false"
+    width="500px"
+    @close="handleCloseCertificate"
+  >
     <div class="certificate-drawer-content">
       <div v-if="certificateLoading" class="loading-container">
         <a-spin size="large" />
       </div>
       <div v-else-if="certificateList?.length > 0" class="certificate-list">
-        <div v-for="(cert, index) in certificateList" :key="index" class="certificate-card">
+        <div
+          v-for="(cert, index) in certificateList"
+          :key="index"
+          class="certificate-card"
+        >
           <div class="certificate-image">
-            <img :src="cert.imageUrl || '/static/images/default-cert.jpg'" :alt="cert.certificateTypeName" />
+            <img
+              :src="cert.imageUrl || '/static/images/default-cert.jpg'"
+              :alt="cert.certificateTypeName"
+            />
           </div>
           <div class="certificate-info">
             <div class="certificate-header">
@@ -199,7 +265,7 @@
               </div>
               <div class="detail-item">
                 <IconCalendar />
-                <span>发证日期：{{ cert.holdingDate || '未填写' }}</span>
+                <span>发证日期：{{ cert.holdingDate || "未填写" }}</span>
               </div>
               <div class="detail-item">
                 <IconCalendar />
@@ -219,15 +285,21 @@
     <template #title>
       <div class="drawer-title">
         <span class="title-text">{{ selectedItem?.projectName }}</span>
-        <a-tag v-if="selectedType === 'project'" :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'">
-          {{ selectedItem?.projectStatus === '1' ? '已上架' : '进行中' }}
+        <a-tag
+          v-if="selectedType === 'project'"
+          :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'"
+        >
+          {{ selectedItem?.projectStatus === "1" ? "已上架" : "进行中" }}
         </a-tag>
       </div>
     </template>
 
     <div v-if="selectedItem" class="detail-content">
       <div class="detail-image">
-        <img :src="selectedItem?.imageUrl || '/static/images/test.jpg'" :alt="selectedItem?.projectName" />
+        <img
+          :src="selectedItem?.imageUrl || '/static/images/test.jpg'"
+          :alt="selectedItem?.projectName"
+        />
       </div>
       <a-descriptions :data="getDescriptionData()" layout="inline-vertical" />
       <a-divider />
@@ -243,10 +315,19 @@
       <div v-if="activeTab === '1'" class="certificate-card">
         <h4>证书信息</h4>
         <a-card :bordered="true" class="info-card">
-          <div v-if="selectedItem?.certificates?.length" class="certificate-list">
-            <div v-for="(cert, index) in selectedItem.certificates" :key="index" class="cert-item">
+          <div
+            v-if="selectedItem?.certificates?.length"
+            class="certificate-list"
+          >
+            <div
+              v-for="(cert, index) in selectedItem.certificates"
+              :key="index"
+              class="cert-item"
+            >
               <div class="cert-name">{{ cert.certificateName }}</div>
-              <div class="cert-number">证书编号：{{ cert.certificateNumber || '暂无' }}</div>
+              <div class="cert-number">
+                证书编号：{{ cert.certificateNumber || "暂无" }}
+              </div>
             </div>
           </div>
           <div v-else class="empty-certs">
@@ -260,7 +341,12 @@
         <h4>所需资料</h4>
         <a-card :bordered="true" class="info-card">
           <div v-if="selectedItem?.documentList?.length" class="document-tags">
-            <a-tag v-for="(doc, index) in selectedItem.documentList" :key="index" size="medium" class="doc-tag">
+            <a-tag
+              v-for="(doc, index) in selectedItem.documentList"
+              :key="index"
+              size="medium"
+              class="doc-tag"
+            >
               <template #icon>
                 <IconFile />
               </template>
@@ -276,7 +362,12 @@
         <h4>所需资料</h4>
         <a-card :bordered="true" class="info-card">
           <div v-if="selectedItem?.documentNames?.length" class="document-tags">
-            <a-tag v-for="(doc, index) in selectedItem.documentNames" :key="index" size="medium" class="doc-tag">
+            <a-tag
+              v-for="(doc, index) in selectedItem.documentNames"
+              :key="index"
+              size="medium"
+              class="doc-tag"
+            >
               <template #icon>
                 <IconFile />
               </template>
@@ -294,8 +385,12 @@
         <h4>考试地点</h4>
         <a-card :bordered="true" class="info-card">
           <div v-if="selectedItem?.locationList?.length" class="location-tags">
-            <a-tag v-for="(location, index) in selectedItem.locationList" :key="index" size="medium"
-              class="location-tag">
+            <a-tag
+              v-for="(location, index) in selectedItem.locationList"
+              :key="index"
+              size="medium"
+              class="location-tag"
+            >
               <template #icon>
                 <IconLocation />
               </template>
@@ -313,34 +408,60 @@
       <a-spin dot />
     </div>
     <template #footer>
-      <a-button v-if="activeTab === '1'" type="primary" @click="handleClick">选择考生</a-button>
-      <a-modal :visible="selectStudent" draggable :width="800" :mask-closable="false" ok-text="选择" @ok="handleUpload"
-        @cancel="handleCloseUpload">
-        <template #title>
-          选择需要提交申请表的考生
-        </template>
+      <a-button v-if="activeTab === '1'" type="primary" @click="handleClick"
+        >选择考生</a-button
+      >
+      <a-modal
+        :visible="selectStudent"
+        draggable
+        :width="800"
+        :mask-closable="false"
+        ok-text="选择"
+        @ok="handleUpload"
+        @cancel="handleCloseUpload"
+      >
+        <template #title> 选择需要提交申请表的考生 </template>
         <div class="search">
           <div class="nickname">
             <input v-model="nickname" type="text" placeholder="搜索考生名称" />
             <a-button type="primary" @click="searchByNickName">搜索</a-button>
             <a-button @click="resetName">重置</a-button>
-            <a-modal :visible="studentUploadVisible" :width="900" :mask-closable="false">
-              <template #title>
-                上传资料申请表
-              </template>
+            <a-modal
+              :visible="studentUploadVisible"
+              :width="900"
+              :mask-closable="false"
+            >
+              <template #title> 上传资料申请表 </template>
               <div>
-                <a-table :columns="uploadColumns" :data="uploadList" :virtual-list-props="{ height: 300 }"
-                  :pagination="false" style="width: 800px; min-height: 342px; margin-left: 25px">
+                <a-table
+                  :columns="uploadColumns"
+                  :data="uploadList"
+                  :virtual-list-props="{ height: 300 }"
+                  :pagination="false"
+                  style="width: 800px; min-height: 342px; margin-left: 25px"
+                >
                   <template #upload="{ record }">
-                    <a-upload :file-list="getUploadFileList(record.id)" list-type="picture-card"
-                      :action="studentFileUploadUrl" :limit="1" :data="uploadData"
-                      style="display: flex; justify-content: center;"
-                      :headers="{ Authorization: `Bearer ${getToken()}` }" accept="image/jpeg,image/png,image/jpg"
-                      image-preview @success="(file) => handleStudentSuccess([file, record])"
-                      @error="(error) => handleStudentError(error, record.id)" />
+                    <a-upload
+                      :file-list="getUploadFileList(record.id)"
+                      list-type="picture-card"
+                      :action="studentFileUploadUrl"
+                      :limit="1"
+                      :data="uploadData"
+                      style="display: flex; justify-content: center"
+                      :headers="{ Authorization: `Bearer ${getToken()}` }"
+                      accept="image/jpeg,image/png,image/jpg"
+                      image-preview
+                      @success="(file) => handleStudentSuccess([file, record])"
+                      @error="(error) => handleStudentError(error, record.id)"
+                    />
                   </template>
                   <template #cancel="{ record }">
-                    <a-popconfirm content="确定取消上传吗?" cancel-text="不取消" ok-text="确定取消" @ok="handleStudentCancel(record)">
+                    <a-popconfirm
+                      content="确定取消上传吗?"
+                      cancel-text="不取消"
+                      ok-text="确定取消"
+                      @ok="handleStudentCancel(record)"
+                    >
                       <a-link>取消上传</a-link>
                     </a-popconfirm>
                   </template>
@@ -351,26 +472,41 @@
                   <div />
                   <div>
                     <a-button @click="handleStudentUploadCancel">取消</a-button>
-                    <a-button type="primary" :loading="studentUploadLoading"
-                      @click="handleStudentUploadOk">确定</a-button>
+                    <a-button
+                      type="primary"
+                      :loading="studentUploadLoading"
+                      @click="handleStudentUploadOk"
+                      >确定</a-button
+                    >
                   </div>
                 </div>
               </template>
             </a-modal>
           </div>
-          <a-table v-model:selected-keys="checkboxList" :data="studentList" :columns="studentColumns"
-            :loading="studentLoading" :row-selection="rowSelection" :pagination="{
+          <a-table
+            v-model:selected-keys="checkboxList"
+            :data="studentList"
+            :columns="studentColumns"
+            :loading="studentLoading"
+            :row-selection="rowSelection"
+            :pagination="{
               total,
               current: currentPage,
               pageSize,
               showTotal: true,
               onChange: handlePageChange,
-            }" row-key="id" style="width: 700px; min-height: 300px; margin-left: 25px" @select="handleCheckbox">
+            }"
+            row-key="id"
+            style="width: 700px; min-height: 300px; margin-left: 25px"
+            @select="handleCheckbox"
+          >
             <template #studentStatus="{ record }">
               <a-space direction="vertical">
                 <a-space>
-                  <a-link :status="record.studentStatus ? 'success' : 'warning'">{{ record.studentStatus ? '已提交' : '未提交'
-                    }}</a-link>
+                  <a-link
+                    :status="record.studentStatus ? 'success' : 'warning'"
+                    >{{ record.studentStatus ? "已提交" : "未提交" }}</a-link
+                  >
                 </a-space>
               </a-space>
             </template>
@@ -383,8 +519,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
-import { Drawer, Message, Modal } from '@arco-design/web-vue'
+import { onMounted, reactive, ref } from "vue";
+import { Drawer, Message, Modal } from "@arco-design/web-vue";
 import {
   IconBook,
   IconCalendar,
@@ -393,9 +529,9 @@ import {
   IconFile,
   IconLocation,
   IconUpload,
-} from '@arco-design/web-vue/es/icon'
-import * as XLSX from 'xlsx'
-import { getToken } from '@/utils/auth'
+} from "@arco-design/web-vue/es/icon";
+import * as XLSX from "xlsx";
+import { getToken } from "@/utils/auth";
 import {
   approveStudent,
   getCandidatesList,
@@ -403,163 +539,167 @@ import {
   getStudentAddList,
   parseExcel,
   refuseStudent,
-} from '@/apis/org/org'
-import organizationExamPlanList from '@/components/organizationExamPlanList.vue'
+  agencyRemoveStudent,
+} from "@/apis/org/org";
+import organizationExamPlanList from "@/components/organizationExamPlanList.vue";
 import orgClassList from "@/views/training/orgClass/index.vue";
 import orgCandidateList from "@/views/training/orgCandidate/index.vue";
-import { type ProjectResp, getProjectDetail } from '@/apis/project/project'
-import TrainingLesson from '@/components/TrainingLesson.vue'
-import ExpertList from '@/components/ExpertList.vue'
-import { getCertificateByCandidateId } from '@/apis/certificates/certificates'
-import TrainingManagement from '@/views/organization/train/index.vue'
-import type { EnrollResp } from '@/apis/plan/examPlan'
-import { candidatesUploads, getCandidatesId } from '@/apis/specialCertificationApplicant'
-import { getStudentDocumentTypeStatus, getStudentList } from '@/apis'
-import DocumentUpload from '@/components/DocumentUpload/index.vue'
-import { studentUploadDocuments } from '@/apis/document'
-import { getExamPlanDetail } from '@/apis/plan/examPlan'
-import { getOrgInfo } from '@/apis/training/org'
+import { type ProjectResp, getProjectDetail } from "@/apis/project/project";
+import TrainingLesson from "@/components/TrainingLesson.vue";
+import ExpertList from "@/components/ExpertList.vue";
+import { getCertificateByCandidateId } from "@/apis/certificates/certificates";
+import TrainingManagement from "@/views/organization/train/index.vue";
+import type { EnrollResp } from "@/apis/plan/examPlan";
+import {
+  candidatesUploads,
+  getCandidatesId,
+} from "@/apis/specialCertificationApplicant";
+import { getStudentDocumentTypeStatus, getStudentList } from "@/apis";
+import DocumentUpload from "@/components/DocumentUpload/index.vue";
+import { studentUploadDocuments } from "@/apis/document";
+import { getExamPlanDetail } from "@/apis/plan/examPlan";
+import { getOrgInfo } from "@/apis/training/org";
 
-const uploadUrl = `${import.meta.env.VITE_API_PREFIX}`
-const showBatchSignUpModal = ref(false)
-const fileList = ref([])
-const uploading = ref(false)
-const fileId = ref('')
-const showCertificateModal = ref(false)
-const certificateLoading = ref(false)
-const certificateList = ref<any[]>([])
-const showDocumentModal = ref(false)
-const documentLoading = ref(false)
-const documentList = ref<Document[]>([])
+const uploadUrl = `${import.meta.env.VITE_API_PREFIX}`;
+const showBatchSignUpModal = ref(false);
+const fileList = ref([]);
+const uploading = ref(false);
+const fileId = ref("");
+const showCertificateModal = ref(false);
+const certificateLoading = ref(false);
+const certificateList = ref<any[]>([]);
+const showDocumentModal = ref(false);
+const documentLoading = ref(false);
+const documentList = ref<Document[]>([]);
 
 // 查看资料方法
 const handleViewDocuments = async (candidateId: string) => {
-  showDocumentModal.value = true
-  documentLoading.value = true
+  showDocumentModal.value = true;
+  documentLoading.value = true;
   try {
     // 调用后端接口获取资料
-    const response = await getOneCandidateDocument(candidateId)
+    const response = await getOneCandidateDocument(candidateId);
     if (response.data) {
-      documentList.value = response.data
+      documentList.value = response.data;
     } else {
-      documentList.value = []
+      documentList.value = [];
     }
   } catch (error) {
-    console.error('查询资料失败:', error)
-    documentList.value = []
-    Message.error('获取资料失败')
+    console.error("查询资料失败:", error);
+    documentList.value = [];
+    Message.error("获取资料失败");
   } finally {
-    documentLoading.value = false
+    documentLoading.value = false;
   }
-}
+};
 
 // 关闭资料抽屉
 const handleCloseDocument = () => {
-  showDocumentModal.value = false
-  documentList.value = []
-}
+  showDocumentModal.value = false;
+  documentList.value = [];
+};
 
 // 点击后跳出弹窗
 const handleBatchSignUp = () => {
-  showBatchSignUpModal.value = true
-}
+  showBatchSignUpModal.value = true;
+};
 
 // 处理上传成功
 const handleSuccess = (file: any) => {
-  if (file.response && file.response.code === '0') {
-    fileId.value = file.response.data // 确保这里提取的是文件 ID
-    Message.success('上传成功')
+  if (file.response && file.response.code === "0") {
+    fileId.value = file.response.data; // 确保这里提取的是文件 ID
+    Message.success("上传成功");
   } else {
-    Message.error(file.response?.msg || '上传失败')
+    Message.error(file.response?.msg || "上传失败");
   }
-}
+};
 
 // 上传前校验
 const beforeUpload = (file: File) => {
-  const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-  const isLt2M = file.size / 1024 / 1024 < 2
+  const isExcel = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
+  const isLt2M = file.size / 1024 / 1024 < 2;
 
   if (!isExcel) {
-    Message.error('只能上传 Excel 文件!')
-    return false
+    Message.error("只能上传 Excel 文件!");
+    return false;
   }
   if (!isLt2M) {
-    Message.error('文件大小不能超过 2MB!')
-    return false
+    Message.error("文件大小不能超过 2MB!");
+    return false;
   }
-  return true
-}
+  return true;
+};
 
 // 确认上传
 const handleConfirmUpload = async () => {
   if (!fileId.value) {
-    Message.warning('请先上传文件')
-    return
+    Message.warning("请先上传文件");
+    return;
   }
 
-  uploading.value = true
+  uploading.value = true;
   try {
     // 调用解析方法
-    const parseResponse = await parseExcel(fileId.value.data)
+    const parseResponse = await parseExcel(fileId.value.data);
 
     if (parseResponse.data && parseResponse.data.msg) {
-      Message.success('文件解析成功')
+      Message.success("文件解析成功");
       // 处理解析后的数据
     } else {
-      Message.error(parseResponse.data.message || '文件解析失败')
+      Message.error(parseResponse.data.message || "文件解析失败");
     }
   } catch (error: any) {
-    Message.error(error.message || '解析失败，请重试')
+    Message.error(error.message || "解析失败，请重试");
   } finally {
-    uploading.value = false
-    fileList.value = [] // 清空文件列表
-    fileId.value = '' // 清空文件 ID
+    uploading.value = false;
+    fileList.value = []; // 清空文件列表
+    fileId.value = ""; // 清空文件 ID
   }
-}
+};
 
 // 处理上传错误
 const handleError = (error: any) => {
-  console.error('上传失败:', error)
-  Message.error('上传失败，请重试')
-}
+  console.error("上传失败:", error);
+  Message.error("上传失败，请重试");
+};
 
 // 关闭弹窗时清空文件列表
 const handleFileClose = () => {
-  fileList.value = []
-}
+  fileList.value = [];
+};
 
 // 下载模板
 const handleDownloadTemplate = () => {
   // 创建 Excel 模板内容
   const templateData = [
-    ['id', '身份证号', '姓名'], // 表头
-  ]
+    ["id", "身份证号", "姓名"], // 表头
+  ];
 
   // 创建工作簿
-  const workbook = XLSX.utils.book_new()
-  const worksheet = XLSX.utils.aoa_to_sheet(templateData)
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.aoa_to_sheet(templateData);
 
   // 设置列宽
-  worksheet['!cols'] = [
+  worksheet["!cols"] = [
     { wch: 20 }, // 身份证号列宽
     { wch: 15 }, // 姓名列宽
-  ]
+  ];
 
   // 添加工作表到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, '学员注册名单')
+  XLSX.utils.book_append_sheet(workbook, worksheet, "学员注册名单");
 
   // 生成Excel文件并下载
-  XLSX.writeFile(workbook, '学员注册名单模板.xlsx')
-}
+  XLSX.writeFile(workbook, "学员注册名单模板.xlsx");
+};
 
 // 机构信息模拟数据
 const orgInfo = ref({
-  nickname: '',
-  name: '',
-  phone: '',
-  code: '',
-  address: '',
-})
+  nickname: "",
+  name: "",
+  phone: "",
+  code: "",
+  address: "",
+});
 
 // 获取机构信息
 // const fetchOrgInfo = async () => {
@@ -579,519 +719,560 @@ const orgInfo = ref({
 //     Message.error('获取机构信息失败')
 //   }
 // }
+const handleRemoveStudent = (orgId, candidateId) => {
+  Modal.confirm({
+    title: '确认移除学生',
+    content: '确定要将该学生从机构中移除吗？此操作不可撤销。',
+    okText: '确认',
+    cancelText: '取消',
+    async onOk() {
+      try {
+        const res = await agencyRemoveStudent(orgId, candidateId)
+        if (res.code === '0' && res.success) {
+          Message.success('学生已成功移除')
+          loadStudentList()
+        } else {
+          Message.warning(res.msg || '移除失败')
+        }
+      } catch (error) {
+        // 兼容网络异常或 500 报错
+        // Message.error(error?.message || '移除失败')
+      }
+    },
+  })
+}
 
-const examPlanList = ref<EnrollResp[]>([])
+
+// 刷新学生列表
+const loadStudentList = async () => {
+  await fetchStudentList();
+}
+
+const examPlanList = ref<EnrollResp[]>([]);
 
 // 学员名单模拟数据
-const studentApplyFortList = ref([])
-const studentCurrentPage = ref(1)
-const studentPageSize = ref(10)
-const studentTotal = ref(0)
-const studentApplyFortLoading = ref(false)
+const studentApplyFortList = ref([]);
+const studentCurrentPage = ref(1);
+const studentPageSize = ref(10);
+const studentTotal = ref(0);
+const studentApplyFortLoading = ref(false);
 
 // 需要上传资格申请表的考生
-const uploadList = ref([])
+const uploadList = ref([]);
 
 // 添加获取考生列表的方法
 const fetchStudentList = async () => {
-  studentApplyFortLoading.value = true
+  studentApplyFortLoading.value = true;
   try {
-    const response = await getCandidatesList()
+    const response = await getCandidatesList();
 
     if (response?.data) {
-      studentApplyFortList.value = response.data.list || []
-      studentTotal.value = response.data.total || 0
+      studentApplyFortList.value = response.data.list || [];
+      studentTotal.value = response.data.total || 0;
     }
   } catch (error) {
-    console.error('获取考生列表失败：', error)
-    Message.error('获取考生列表失败')
-    studentApplyFortList.value = []
-    studentTotal.value = 0
+    console.error("获取考生列表失败：", error);
+    Message.error("获取考生列表失败");
+    studentApplyFortList.value = [];
+    studentTotal.value = 0;
   } finally {
-    studentApplyFortLoading.value = false
+    studentApplyFortLoading.value = false;
   }
-}
+};
 
 // 添加分页变化处理方法
 const handleStudentPageChange = async (page: number) => {
-  studentCurrentPage.value = page
-  await fetchStudentList()
-}
+  studentCurrentPage.value = page;
+  await fetchStudentList();
+};
 
 // 当前选中的菜单项
-const activeTab = ref('1')
+const activeTab = ref("1");
 
 const studentApplyFortColumns = [
   {
-    title: '考生学号',
-    dataIndex: 'candidateId',
+    title: "考生学号",
+    dataIndex: "candidateId",
     width: 80,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '姓名',
-    dataIndex: 'nickName',
+    title: "姓名",
+    dataIndex: "nickName",
     width: 50,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '联系电话',
-    dataIndex: 'phoneNumber',
+    title: "联系电话",
+    dataIndex: "phoneNumber",
     width: 80,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '邮箱',
-    dataIndex: 'email',
+    title: "邮箱",
+    dataIndex: "email",
     width: 80,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '操作',
+    title: "操作",
     width: 100,
-    slotName: 'operations',
-    fixed: 'right',
-    align: 'center',
+    slotName: "operations",
+    fixed: "right",
+    align: "center",
   },
-]
-
+];
 
 // 获取证件状态颜色
 const getCertStatusColor = (status: number) => {
   const statusMap: Record<number, string> = {
-    1: 'green', // 有效
-    2: 'red', // 已过期
-    3: 'red', // 已作废
-    4: 'orange', // 待审核
-  }
-  return statusMap[status] || 'gray'
-}
+    1: "green", // 有效
+    2: "red", // 已过期
+    3: "red", // 已作废
+    4: "orange", // 待审核
+  };
+  return statusMap[status] || "gray";
+};
 
 // 获取证件状态文本
 const getCertStatusText = (status: number) => {
   const statusMap: Record<number, string> = {
-    1: '有效',
-    2: '已过期',
-    3: '已作废',
-    4: '待审核',
-  }
-  return statusMap[status] || '未知状态'
-}
+    1: "有效",
+    2: "已过期",
+    3: "已作废",
+    4: "待审核",
+  };
+  return statusMap[status] || "未知状态";
+};
 
 // 查看证书方法
 const handleViewCertificate = async (candidateId: string) => {
-  showCertificateModal.value = true
-  certificateLoading.value = true
+  showCertificateModal.value = true;
+  certificateLoading.value = true;
   try {
-    const response = await getCertificateByCandidateId(candidateId)
+    const response = await getCertificateByCandidateId(candidateId);
     if (response?.data?.length > 0) {
-      certificateList.value = response.data
+      certificateList.value = response.data;
     } else {
-      certificateList.value = []
+      certificateList.value = [];
       // Message.warning('未找到证书信息')
     }
   } catch (error) {
-    console.error('查询证书失败:', error)
+    console.error("查询证书失败:", error);
     // Message.error('查询证书失败')
-    certificateList.value = []
+    certificateList.value = [];
   } finally {
-    certificateLoading.value = false
+    certificateLoading.value = false;
   }
-}
+};
 
 // 关闭证书抽屉
 const handleCloseCertificate = () => {
-  showCertificateModal.value = false
-  certificateList.value = []
-}
+  showCertificateModal.value = false;
+  certificateList.value = [];
+};
 
 // 待添加的考生列表
-const studentAddCount = ref(0)
-
+const studentAddCount = ref(0);
 
 // 修改 handleTabChange 方法，在切换到学员名单时获取数据
 const handleTabChange = (key: string) => {
-  activeTab.value = key
-  if (key === '3') {
-    fetchStudentList()
-  } 
-}
+  activeTab.value = key;
+  if (key === "3") {
+    fetchStudentList();
+  }
+};
 
-const visible = ref(false)
-const selectedItem = ref(null)
-const selectedType = ref('certificate')
-const planId = ref(null)
-const isQualifications = ref(false)
+const visible = ref(false);
+const selectedItem = ref(null);
+const selectedType = ref("certificate");
+const planId = ref(null);
+const isQualifications = ref(false);
 
 const onClose = () => {
-  visible.value = false
-  selectedItem.value = null
-}
+  visible.value = false;
+  selectedItem.value = null;
+};
 
 const getExamDesc = () => {
   return [
-    { label: '考试时间', value: selectedItem.value.examStartTime },
-    { label: '报名截止', value: selectedItem.value.enrollEndTime },
-    { label: '考试地点', value: selectedItem.value.examPlace },
-    { label: '考试时长', value: selectedItem.value.examDuration },
-    { label: '考试费用', value: selectedItem.value.examFee },
-    { label: '考试项目', value: selectedItem.value.projectName },
-  ]
-}
+    { label: "考试时间", value: selectedItem.value.examStartTime },
+    { label: "报名截止", value: selectedItem.value.enrollEndTime },
+    { label: "考试地点", value: selectedItem.value.examPlace },
+    { label: "考试时长", value: selectedItem.value.examDuration },
+    { label: "考试费用", value: selectedItem.value.examFee },
+    { label: "考试项目", value: selectedItem.value.projectName },
+  ];
+};
 
 const getProjectDesc = (project) => {
   return [
-    { label: '项目编号', value: project.projectCode },
-    { label: '所属部门', value: project.deptName },
-  ]
-}
+    { label: "项目编号", value: project.projectCode },
+    { label: "所属部门", value: project.deptName },
+  ];
+};
 
 const getDescriptionData = () => {
   switch (selectedType.value) {
-    case 'exam':
-      return getExamDesc()
+    case "exam":
+      return getExamDesc();
     default:
-      return getProjectDesc(selectedItem.value)
+      return getProjectDesc(selectedItem.value);
   }
-}
+};
 
 const getDetailTitle = () => {
   const titleMap = {
-    certificate: '证书说明',
-    exam: '考试说明',
-  }
-  return titleMap[selectedType.value] || ''
-}
+    certificate: "证书说明",
+    exam: "考试说明",
+  };
+  return titleMap[selectedType.value] || "";
+};
 
 // 获取考试计划详情
 const fetchExamDetail = async (examPlanId: string) => {
-  const response = await getExamPlanDetail(examPlanId)
+  const response = await getExamPlanDetail(examPlanId);
   selectedItem.value = {
     ...response.data,
     certificates: response.data.certificates || [],
     documents: response.data.documents || [],
-  }
-}
+  };
+};
 
 const fetchQualification = async (examPlanId: string) => {
-  const response = await getCandidatesId(Number(examPlanId))
+  const response = await getCandidatesId(Number(examPlanId));
   // 已填写
   if (response.data == null) {
-    isQualifications.value = false
+    isQualifications.value = false;
   } else if (response.data.status == 0) {
-    isQualifications.value = true
+    isQualifications.value = true;
   }
-}
+};
 
 // 添加获取项目详情的方法
 const fetchProjectDetail = async (projectId: string) => {
-  const response = await getProjectDetail(projectId)
+  const response = await getProjectDetail(projectId);
   selectedItem.value = {
     ...response.data,
-    documentNames: response.data.documentsList || [], 
-    locations: response.data.locationsList || [], 
-  }
-
-}
+    documentNames: response.data.documentsList || [],
+    locations: response.data.locationsList || [],
+  };
+};
 
 const showExamDetail = (exam: any) => {
-  planId.value = exam.id
-  visible.value = true
-  selectedType.value = 'exam'
-  selectedItem.value = null // 清空之前的数据
+  planId.value = exam.id;
+  visible.value = true;
+  selectedType.value = "exam";
+  selectedItem.value = null; // 清空之前的数据
   // 获取详细信息
-  fetchExamDetail(exam.examPlanId)
-  fetchQualification(exam.examPlanId)
-}
+  fetchExamDetail(exam.examPlanId);
+  fetchQualification(exam.examPlanId);
+};
 
-const uploadVisible = ref(false)
-const candidateId = ref('')
+const uploadVisible = ref(false);
+const candidateId = ref("");
 
-const handleUploadSuccess = async (data: { docPath: string, typeId: number }) => {
+const handleUploadSuccess = async (data: {
+  docPath: string;
+  typeId: number;
+}) => {
   try {
     // 传入考生id
     const params = {
       docPath: data.docPath,
       typeId: data.typeId,
       candidateId: candidateId.value,
-    }
-    const res = await studentUploadDocuments(params)
-    if (res.data === '成功') {
-      Message.success('上传成功')
+    };
+    const res = await studentUploadDocuments(params);
+    if (res.data === "成功") {
+      Message.success("上传成功");
     }
   } finally {
-    uploadVisible.value = false
+    uploadVisible.value = false;
   }
-}
+};
 
 // 上传考生资料
 const handleUploadData = async (record) => {
-  candidateId.value = record
-  uploadVisible.value = true
-}
+  candidateId.value = record;
+  uploadVisible.value = true;
+};
 
-const selectStudent = ref(false)
-const nickname = ref('')
-const studentLoading = ref(false)
-const studentList = ref([])
-const checkboxList = ref([])
+const selectStudent = ref(false);
+const nickname = ref("");
+const studentLoading = ref(false);
+const studentList = ref([]);
+const checkboxList = ref([]);
 // 表格分页配置
-const currentPage = ref(1)
-const pageSize = ref(4)
-const total = ref(0)
+const currentPage = ref(1);
+const pageSize = ref(4);
+const total = ref(0);
 
 const rowSelection = reactive({
-  type: 'checkbox',
+  type: "checkbox",
   showCheckedAll: false,
   onlyCurrent: false,
-})
+});
 
 const studentColumns = [
   {
-    title: 'ID',
-    dataIndex: 'id',
+    title: "ID",
+    dataIndex: "id",
     width: 100,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '考生名称',
-    dataIndex: 'nickname',
+    title: "考生名称",
+    dataIndex: "nickname",
     width: 100,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '考生当前计划所需资料状态',
-    dataIndex: 'studentStatus',
-    slotName: 'studentStatus',
+    title: "考生当前计划所需资料状态",
+    dataIndex: "studentStatus",
+    slotName: "studentStatus",
     width: 100,
-    align: 'center',
+    align: "center",
   },
-]
+];
 
 const uploadColumns = [
   {
-    title: 'ID',
-    dataIndex: 'id',
+    title: "ID",
+    dataIndex: "id",
     width: 100,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '考生名称',
-    dataIndex: 'nickname',
+    title: "考生名称",
+    dataIndex: "nickname",
     width: 100,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '资格申请表',
-    dataIndex: 'upload',
-    slotName: 'upload',
+    title: "资格申请表",
+    dataIndex: "upload",
+    slotName: "upload",
     width: 100,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '操作',
-    dataIndex: 'cancel',
-    slotName: 'cancel',
+    title: "操作",
+    dataIndex: "cancel",
+    slotName: "cancel",
     width: 80,
-    align: 'center',
+    align: "center",
   },
-]
-const studentFileMap = ref(new Map())
+];
+const studentFileMap = ref(new Map());
 
 // 修改初始文件列表为 Map 结构
 const initStudentFileList = () => {
-  studentFileMap.value = new Map()
-  uploadList.value = []
-}
+  studentFileMap.value = new Map();
+  uploadList.value = [];
+};
 
 // 获得当前机构所有考生
 const handleClick = async (page) => {
   try {
-    initStudentFileList()
-    selectStudent.value = true
-    studentLoading.value = true
-    currentPage.value = typeof page === 'number' ? page : 1
-    const params = `page=${currentPage.value}&size=${pageSize.value}`
-    const res = await getStudentList(params, nickname.value)
+    initStudentFileList();
+    selectStudent.value = true;
+    studentLoading.value = true;
+    currentPage.value = typeof page === "number" ? page : 1;
+    const params = `page=${currentPage.value}&size=${pageSize.value}`;
+    const res = await getStudentList(params, nickname.value);
     if (!res.data) {
-      Message.error('获取考生列表失败')
+      Message.error("获取考生列表失败");
     }
-    const statusRes = await getStudentDocumentTypeStatus(selectedItem.value.documentNames)
-    studentList.value = res.data.list
+    const statusRes = await getStudentDocumentTypeStatus(
+      selectedItem.value.documentNames
+    );
+    studentList.value = res.data.list;
     studentList.value.forEach((studentListItem) => {
       statusRes.data.forEach((statusResItem) => {
         if (studentListItem.id === statusResItem.studentId) {
-          studentListItem.studentStatus = statusResItem.status
+          studentListItem.studentStatus = statusResItem.status;
         }
-      })
-    })
-    total.value = res.data.total
+      });
+    });
+    total.value = res.data.total;
   } finally {
-    studentLoading.value = false
+    studentLoading.value = false;
   }
-}
+};
 
 // 添加分页变化处理方法
 const handlePageChange = async (page: number) => {
-  currentPage.value = page
-  await handleClick(page)
-}
+  currentPage.value = page;
+  await handleClick(page);
+};
 
 // 按照名称搜索
 const searchByNickName = async () => {
-  await handleClick(1)
-}
+  await handleClick(1);
+};
 
 // 重置名称
 const resetName = async () => {
-  nickname.value = ''
-  await handleClick(1)
-}
+  nickname.value = "";
+  await handleClick(1);
+};
 
 const handleCheckbox = async (record) => {
-  await new Promise((resolve) => setTimeout(resolve, 10))
-  const status = studentList.value.find((item) => item.id === record[record.length - 1])
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  const status = studentList.value.find(
+    (item) => item.id === record[record.length - 1]
+  );
   if (!status) {
-    return
+    return;
   }
   if (!status.studentStatus) {
-    checkboxList.value = checkboxList.value.filter((item) => item !== record[record.length - 1])
-    Message.error('该考生未提交对应资料')
+    checkboxList.value = checkboxList.value.filter(
+      (item) => item !== record[record.length - 1]
+    );
+    Message.error("该考生未提交对应资料");
   }
-}
+};
 
 // 批量上传
-const studentUploadVisible = ref(false)
-const studentUploadLoading = ref(false)
-const studentFileUploadUrl = ref(`${import.meta.env.VITE_API_PREFIX}/upload/file`)
+const studentUploadVisible = ref(false);
+const studentUploadLoading = ref(false);
+const studentFileUploadUrl = ref(
+  `${import.meta.env.VITE_API_PREFIX}/upload/file`
+);
 const uploadData = ref({
-  type: 'pic',
-})
+  type: "pic",
+});
 
 const getUploadFileList = (key: number) => {
-  return studentFileMap.value.get(key) || []
-}
+  return studentFileMap.value.get(key) || [];
+};
 
 // 取消上传
 const handleStudentUploadCancel = () => {
-  selectStudent.value = true
-  studentUploadVisible.value = false
-  initStudentFileList()
-}
+  selectStudent.value = true;
+  studentUploadVisible.value = false;
+  initStudentFileList();
+};
 
-const imgSuccess = ref(new Map())
+const imgSuccess = ref(new Map());
 
 const handleStudentSuccess = (data: any[]) => {
-  const [file, record] = data
-  const key = record.id
-  if (file.response.code === '0') {
-    studentFileMap.value.set(key, [file])
-    imgSuccess.value.set(key, true)
-    Message.success('图片上传成功')
-    return
+  const [file, record] = data;
+  const key = record.id;
+  if (file.response.code === "0") {
+    studentFileMap.value.set(key, [file]);
+    imgSuccess.value.set(key, true);
+    Message.success("图片上传成功");
+    return;
   }
-  Message.error('图片上传失败')
-}
+  Message.error("图片上传失败");
+};
 
 const handleStudentError = (error: any) => {
-  console.error('上传失败:', error)
-}
+  console.error("上传失败:", error);
+};
 
 const handleStudentCancel = (record) => {
-  uploadList.value = uploadList.value.filter((item) => item.id !== record.id)
-  checkboxList.value = checkboxList.value.filter((item) => item !== record.id)
-}
+  uploadList.value = uploadList.value.filter((item) => item.id !== record.id);
+  checkboxList.value = checkboxList.value.filter((item) => item !== record.id);
+};
 
 // 点击上传按钮弹窗
 const handleUpload = () => {
   if (checkboxList.value.length === 0) {
-    Message.error('请选择需要上传资格申请表的考生')
-    return
+    Message.error("请选择需要上传资格申请表的考生");
+    return;
   }
-  initStudentFileList()
+  initStudentFileList();
   checkboxList.value.forEach((checkboxItem) => {
-    uploadList.value.push(studentList.value.find((item) => item.id === checkboxItem))
-  })
-  selectStudent.value = false
-  studentUploadVisible.value = true
-}
+    uploadList.value.push(
+      studentList.value.find((item) => item.id === checkboxItem)
+    );
+  });
+  selectStudent.value = false;
+  studentUploadVisible.value = true;
+};
 
 const handleCloseUpload = () => {
-  uploadList.value = []
-  checkboxList.value = []
-  selectStudent.value = false
-  studentUploadVisible.value = false
-}
+  uploadList.value = [];
+  checkboxList.value = [];
+  selectStudent.value = false;
+  studentUploadVisible.value = false;
+};
 
 // 上传前校验
 const studentBeforeUpload = () => {
   for (const value of imgSuccess.value) {
     if (!value) {
-      Message.error('请等待图片上传成功')
-      studentUploadLoading.value = false
-      return false
+      Message.error("请等待图片上传成功");
+      studentUploadLoading.value = false;
+      return false;
     }
   }
   if (studentFileMap.value.size < uploadList.value.length) {
-    Message.error('请上传对应的考生申请图片')
-    studentUploadLoading.value = false
-    return false
+    Message.error("请上传对应的考生申请图片");
+    studentUploadLoading.value = false;
+    return false;
   }
-  return true
-}
+  return true;
+};
 
 // 确定上传
 const handleStudentUploadOk = async () => {
-  studentUploadLoading.value = true
-  if (!studentBeforeUpload()) return
-  const studentMap = new Map()
+  studentUploadLoading.value = true;
+  if (!studentBeforeUpload()) return;
+  const studentMap = new Map();
   studentFileMap.value.forEach((value, key) => {
-    studentMap.set(key, value[0].response.data.url)
-  })
+    studentMap.set(key, value[0].response.data.url);
+  });
   // map转普通对象
-  const obj = Object.fromEntries(studentMap)
+  const obj = Object.fromEntries(studentMap);
   // json转json字符串
-  const studentMapStr = JSON.stringify(obj)
+  const studentMapStr = JSON.stringify(obj);
   try {
-    const res = await candidatesUploads({ studentMapStr, planId: planId.value })
+    const res = await candidatesUploads({
+      studentMapStr,
+      planId: planId.value,
+    });
     if (!res.data) {
-      Message.error('提交申请失败')
+      Message.error("提交申请失败");
     }
-    Message.success('提交申请成功')
-    initStudentFileList()
-    checkboxList.value = []
-    studentUploadVisible.value = false
+    Message.success("提交申请成功");
+    initStudentFileList();
+    checkboxList.value = [];
+    studentUploadVisible.value = false;
   } catch {
   } finally {
-    studentUploadLoading.value = false
+    studentUploadLoading.value = false;
   }
-}
+};
 
 // 获取资料状态颜色
 const getDocStatusColor = (status: string) => {
   const statusMap: Record<string, string> = {
-    0: 'orange', // 待审核
-    1: 'green', // 已生效
-    2: 'red', // 未通过
-  }
-  return statusMap[status] || 'gray'
-}
+    0: "orange", // 待审核
+    1: "green", // 已生效
+    2: "red", // 未通过
+  };
+  return statusMap[status] || "gray";
+};
 
 // 获取资料状态文本
 const getDocStatusText = (status: string) => {
   const statusMap: Record<string, string> = {
-    0: '待审核',
-    1: '已生效',
-    2: '未通过',
-  }
-  return statusMap[status] || '未知状态'
-}
+    0: "待审核",
+    1: "已生效",
+    2: "未通过",
+  };
+  return statusMap[status] || "未知状态";
+};
 
 // 处理图片加载错误
 const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement
-  img.src = '/static/images/default-doc.jpg'
-}
+  const img = e.target as HTMLImageElement;
+  img.src = "/static/images/default-doc.jpg";
+};
 </script>
 
 <style scoped lang="scss">
@@ -1447,7 +1628,7 @@ const handleImageError = (e: Event) => {
   }
 }
 
-.table-button>button {
+.table-button > button {
   margin-right: 5px;
 }
 
@@ -1456,7 +1637,7 @@ const handleImageError = (e: Event) => {
   text-align: center;
 }
 
-.nickname>input {
+.nickname > input {
   width: 200px;
   height: 30px;
   outline: none;
@@ -1466,7 +1647,7 @@ const handleImageError = (e: Event) => {
   padding-left: 5px;
 }
 
-.nickname>button {
+.nickname > button {
   margin-right: 5px;
 }
 
