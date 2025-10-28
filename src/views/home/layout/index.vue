@@ -843,7 +843,7 @@ const openAddAgency = async () => {
 //取消当前机构
 const handleDelAgency = async () => {
   const res = await studentDelAgency(selectedItem.value.id);
-  if (res.data == 0) {
+  if (res.data == 2) {
     Message.success("取消机构申请成功");
   } else {
     Message.error("取消机构申请失败");
