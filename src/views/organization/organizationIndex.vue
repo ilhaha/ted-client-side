@@ -725,6 +725,7 @@ const handleRemoveStudent = (orgId, candidateId) => {
     content: '确定要将该学生从机构中移除吗？此操作不可撤销。',
     okText: '确认',
     cancelText: '取消',
+    
     async onOk() {
       try {
         const res = await agencyRemoveStudent(orgId, candidateId)

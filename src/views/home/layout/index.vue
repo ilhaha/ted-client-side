@@ -247,6 +247,7 @@
                   <template #footer>
                     <a-button
                       type="primary"
+                      :loading="downloading"
                       @click="
                         handleDownload(
                           identityCard.userId,
@@ -1017,8 +1018,10 @@ const handleViewIdentityCard = async () => {
   const res = await viewIdentityCard(planId.value);
   identityCard.value = res.data;
 };
+const downloading = ref(false);
 async function handleDownload(userId, name, examPlanName, examNumber) {
   try {
+    downloading.value = true; // 🔄 开始加载
     const res = await downloadExamTicket(userId, examNumber);
     const blob = new Blob([res], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
@@ -1031,8 +1034,13 @@ async function handleDownload(userId, name, examPlanName, examNumber) {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+
+    Message.success("下载成功");
   } catch (err) {
     console.error("❌ 下载准考证失败:", err);
+    Message.error("下载准考证失败，请稍后重试");
+  } finally {
+    downloading.value = false; // ✅ 下载结束，关闭加载状态
   }
 }
 </script>

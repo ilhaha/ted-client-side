@@ -41,6 +41,31 @@
                 </a-col>
             </a-row>
 
+            <!-- 上传人脸证件照 -->
+            <a-form-item label="人脸证件照（1寸）" required extra="需为1寸规格(295×413px)、白底彩色、五官清晰正面免冠">
+                <a-upload
+                    :action="`${uploadUrl}2`"
+                    list-type="picture-card"
+                    :file-list="faceFileList"
+                    :show-upload-list="false"
+                    accept="image/jpeg,image/png,image/jpg"
+                    :before-upload="checkFacePhotoSize"
+                    @success="handleFaceSuccess"
+                    image-preview
+                >
+                    <img
+                        v-if="form.facePhoto"
+                        :src="form.facePhoto"
+                        alt="face"
+                        style="width: 100%; height: auto;"
+                    />
+                    <div v-else>
+                        <plus-outlined />
+                        <div style="margin-top: 8px;">上传人脸照</div>
+                    </div>
+                </a-upload>
+            </a-form-item>
+
             <!-- 提交按钮 -->
             <div style="text-align: center; margin-top: 20px;">
                 <a-button @click="handleCancel">取消</a-button>
@@ -49,12 +74,11 @@
 
             <!-- 温馨提示 -->
             <div style="color: #999; font-size: 13px; margin-top: 16px; text-align: center;">
-                请确保上传的身份证照片清晰可辨，不得使用他人证件。<br />
-                上传的身份证照片必须与上述身份证号 <strong>{{ idNumber }}</strong> 一致。实名认证信息仅用于考试报名等验证。
+                请确保上传的身份证照片及人脸证件照清晰可辨，不得使用他人证件或照片。<br />
+                上传的照片必须与身份证号 <strong>{{ idNumber }}</strong> 一致。实名认证信息仅用于考试报名等验证。
             </div>
         </a-form>
     </a-modal>
-
 </template>
 
 <script setup lang="ts">
@@ -78,13 +102,14 @@ const form = ref({
     validEndDate: '',
     idCardPhotoFront: '',
     idCardPhotoBack: '',
+    facePhoto: ''
 })
 
 const frontFileList = ref<any[]>([])
 const backFileList = ref<any[]>([])
+const faceFileList = ref<any[]>([])
 
-
-// 上传成功处理
+// 上传成功 - 正面
 const handleFrontSuccess = (file: any) => {
     const res = file.response
     if (res?.code !== "0") {
@@ -105,6 +130,7 @@ const handleFrontSuccess = (file: any) => {
     Message.success('身份证正面上传成功')
 }
 
+// 上传成功 - 反面
 const handleBackSuccess = (file: any) => {
     const res = file.response
     if (res?.code !== "0") {
@@ -122,7 +148,43 @@ const handleBackSuccess = (file: any) => {
     Message.success('身份证反面上传成功')
 }
 
-// 关闭弹窗重置
+// 上传成功 - 人脸证件照
+const handleFaceSuccess = (file: any) => {
+    const res = file.response
+    if (res?.code !== "0") {
+        Message.error(res?.msg || '上传失败')
+        form.value.facePhoto = ''
+        faceFileList.value = []
+        return
+    }
+    form.value.facePhoto = res.data.url
+    faceFileList.value = [file]
+    Message.success('人脸证件照上传成功')
+}
+
+// 上传前检测尺寸（1寸 295×413 px）
+const checkFacePhotoSize = (file: File) => {
+    return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => {
+            const width = img.width
+            const height = img.height
+            if (Math.abs(width - 295) <= 5 && Math.abs(height - 413) <= 5) {
+                resolve(true)
+            } else {
+                Message.error(`人脸证件照尺寸不符合要求（当前：${width}×${height}，需为约295×413像素）`)
+                reject()
+            }
+        }
+        img.onerror = () => {
+            Message.error('无法读取图片，请重新选择文件')
+            reject()
+        }
+        img.src = URL.createObjectURL(file)
+    })
+}
+
+// 重置
 const resetForm = () => {
     form.value = {
         realName: '',
@@ -136,13 +198,15 @@ const resetForm = () => {
         validEndDate: '',
         idCardPhotoFront: '',
         idCardPhotoBack: '',
+        facePhoto: ''
     }
     frontFileList.value = []
     backFileList.value = []
+    faceFileList.value = []
     idNumber.value = ''
 }
 
-// 取消按钮
+// 取消
 const handleCancel = () => {
     visible.value = false
     resetForm()
@@ -150,8 +214,8 @@ const handleCancel = () => {
 
 // 提交
 const submitForm = async () => {
-    if (!form.value.idCardPhotoFront || !form.value.idCardPhotoBack) {
-        Message.error('请上传身份证正反面照片')
+    if (!form.value.idCardPhotoFront || !form.value.idCardPhotoBack || !form.value.facePhoto) {
+        Message.error('请完整上传身份证正反面及人脸证件照')
         return
     }
     if (form.value.idCardNumber != idNumber.value) {
