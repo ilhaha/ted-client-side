@@ -4,7 +4,6 @@
     <div class="title-bar">
       <h2 class="page-title">报考资料补正</h2>
     </div>
-
     <!-- 可滚动上传区域：优化信息层级与间距 -->
     <div class="scroll-container">
       <!-- 报考个人信息：卡片化展示，提升辨识度 -->
@@ -22,77 +21,150 @@
           </p>
         </div>
       </div>
+      <div v-if="!enrollPreInfoVO || Object.keys(enrollPreInfoVO).length == 0">
+        <!-- 温馨提示2：报名资格申请表指引 -->
+        <div class="tips-card warning-tips">
+          <div class="tips-icon">⚠️</div>
+          <div class="tips-text">
+            请上传报名资格申请表（<span class="format-tag">仅支持PDF、Word格式</span>），且不能提供虚假材料。<br>
+            <span class="warning-tag">提供虚假资料者，资料退回后将不可再次申报！</span>
+          </div>
+        </div>
 
+        <!-- 单独上传：报名资格申请表（PDF/Word专属） -->
+        <div class="doc-card form-card">
+          <div class="doc-info">
+            <span class="doc-name">报名资格申请表</span>
+            <span class="upload-count">
+              {{ (formFileList || []).length }}/1
+            </span>
+          </div>
 
-      <!-- 温馨提示2：报名资格申请表指引 -->
-      <div class="tips-card warning-tips">
-        <div class="tips-icon">⚠️</div>
-        <div class="tips-text">
-          请上传报名资格申请表（<span class="format-tag">仅支持PDF、Word格式</span>），且不能提供虚假材料。<br>
-          <span class="warning-tag">提供虚假资料者，资料退回后将不可再次申报！</span>
+          <div class="upload-wrapper">
+            <a-upload list-type="text" :file-list="formFileList"
+              :custom-request="(options) => handleFormUpload(options)" @before-remove="handleFormRemove"
+              :disabled="formFileList.length >= 1" accept=".pdf,.doc,.docx" draggable>
+            </a-upload>
+          </div>
+        </div>
+
+        <!-- 温馨提示1：缺漏图片资料指引 -->
+        <div class="tips-card">
+          <div class="tips-icon">💡</div>
+          <div class="tips-text">
+            以下为您报考时<span class="highlight">缺少的资料</span>，请按类型补传：
+            每种资料至少1张、最多3张，仅支持图片格式。
+          </div>
+        </div>
+
+        <!-- 资料上传卡片：图片类资料 -->
+        <div class="doc-card" v-for="item in unuploadedDocumentTypes" :key="item.id" @mouseenter="cardHovered = item.id"
+          @mouseleave="cardHovered = ''">
+          <div class="doc-info">
+            <span class="doc-name">{{ item.typeName }}</span>
+            <span class="upload-count">
+              {{ (fileListMap[item.id] || []).length }}/3
+            </span>
+          </div>
+
+          <div class="upload-wrapper">
+            <a-upload list-type="picture-card" :file-list="fileListMap[item.id] || []"
+              :custom-request="(options) => handleUpload(options, item, 'image')"
+              @before-remove="(file) => handleRemove(file, item)" :accept="'image/*'" image-preview
+              :show-remove-icon="true">
+              <template #upload-button>
+                <div class="upload-btn" :class="{
+                  disabled: (fileListMap[item.id] || []).length >= 3,
+                  hover: cardHovered === item.id && (fileListMap[item.id] || []).length < 3
+                }">
+                  <IconPlus class="upload-icon" />
+                  <span class="upload-text">上传</span>
+                </div>
+              </template>
+            </a-upload>
+
+          </div>
         </div>
       </div>
 
-      <!-- 单独上传：报名资格申请表（PDF/Word专属） -->
-      <div class="doc-card form-card">
-        <div class="doc-info">
-          <span class="doc-name">报名资格申请表</span>
-          <span class="upload-count">
-            {{ (formFileList || []).length }}/1
-          </span>
+      <div v-else>
+        <!-- 温馨提示2：报名资格申请表指引 -->
+        <div class="tips-card warning-tips" v-if="enrollPreInfoVO.status == 0">
+          <div class="tips-icon">ℹ️</div>
+          <div class="tips-text">
+            您提交的报考资料已提交，等待审核，请耐心等待。
+          </div>
         </div>
 
-        <div class="upload-wrapper">
-          <a-upload list-type="text" :file-list="formFileList" :custom-request="(options) => handleFormUpload(options)"
-            @before-remove="handleFormRemove" :disabled="formFileList.length >= 1" accept=".pdf,.doc,.docx" draggable>
-          </a-upload>
+        <div class="tips-card warning-tips" v-if="enrollPreInfoVO.status == 1">
+          <div class="tips-icon">✅</div>
+          <div class="tips-text">
+            您提交的报考资料审核已通过，请关注考试内容及安排，按时准备考试。
+          </div>
         </div>
+
+        <div class="tips-card warning-tips" v-if="enrollPreInfoVO.status == 2">
+          <div class="tips-icon">⚠️</div>
+          <div class="tips-text">
+            您提交的报考资料审核未通过，具体原因如下：<br>
+            <span>{{ enrollPreInfoVO.remark }}</span>
+          </div>
+        </div>
+
+        <div class="tips-card warning-tips" v-if="enrollPreInfoVO.status == 4">
+          <div class="tips-icon">❌</div>
+          <div class="tips-text">
+            您提交的报考资料认定为虚假材料，具体原因如下：<br>
+            <span>{{ enrollPreInfoVO.remark }}</span>
+          </div>
+        </div>
+
+        <!-- 单独上传：报名资格申请表（PDF/Word专属） -->
+        <div class="doc-card form-card">
+          <div class="doc-info" style="margin-bottom: 0;">
+            <span class="doc-name" style=" color: #1890ff;"><a :href="formFileList[0].url"
+                target="_blank">报名资格申请表</a></span>
+            <span class="upload-count">
+              {{ (formFileList || []).length }}/1
+            </span>
+          </div>
+
+          <!-- <div class="upload-wrapper">
+            <a-list bordered size="small">
+              <a-list-item>
+                <a :href="formFileList[0].url" target="_blank">{{ formFileList[0].name }}</a>
+              </a-list-item>
+            </a-list>
+          </div> -->
+        </div>
+        <!-- 资料上传卡片：图片类资料 -->
+        <div class="doc-card" v-for="item in uploadedDocumentTypes" :key="item.id" @mouseenter="cardHovered = item.id"
+          @mouseleave="cardHovered = ''">
+
+          <div class="doc-info">
+            <span class="doc-name">{{ item.typeName }}</span>
+            <span class="upload-count">{{ (fileListMap[item.id] || []).length }}/3</span>
+          </div>
+
+          <div class="upload-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a-image v-for="file in fileListMap[item.id] || []" :key="file.uid" :src="file.url" width="80" height="80"
+              style="object-fit: cover;" :preview="{ visible: true }" />
+          </div>
+        </div>
+
       </div>
-
-      <!-- 温馨提示1：缺漏图片资料指引 -->
-      <div class="tips-card">
-        <div class="tips-icon">💡</div>
-        <div class="tips-text">
-          以下为您报考时<span class="highlight">缺少的资料</span>，请按类型补传：
-          每种资料至少1张、最多3张，仅支持图片格式。
-        </div>
-      </div>
-
-      <!-- 资料上传卡片：图片类资料 -->
-      <div class="doc-card" v-for="item in unuploadedDocumentTypes" :key="item.id" @mouseenter="cardHovered = item.id"
-        @mouseleave="cardHovered = ''">
-        <div class="doc-info">
-          <span class="doc-name">{{ item.typeName }}</span>
-          <span class="upload-count">
-            {{ (fileListMap[item.id] || []).length }}/3
-          </span>
-        </div>
-
-        <div class="upload-wrapper">
-          <a-upload list-type="picture-card" :file-list="fileListMap[item.id] || []"
-            :custom-request="(options) => handleUpload(options, item, 'image')"
-            @before-remove="(file) => handleRemove(file, item)" :accept="'image/*'" image-preview
-            :show-remove-icon="true">
-            <template #upload-button>
-              <div class="upload-btn" :class="{
-                disabled: (fileListMap[item.id] || []).length >= 3,
-                hover: cardHovered === item.id && (fileListMap[item.id] || []).length < 3
-              }">
-                <IconPlus class="upload-icon" />
-                <span class="upload-text">上传</span>
-              </div>
-            </template>
-          </a-upload>
-
-        </div>
-      </div>
-
     </div>
 
     <!-- 底部按钮：优化固定效果与点击反馈 -->
-    <div class="footer">
+    <div class="footer"
+      v-if="unuploadedDocumentTypes.length > 0 || !enrollPreInfoVO || Object.keys(enrollPreInfoVO).length == 0">
       <a-button type="primary" size="large" class="confirm-btn" @click="handleConfirm" :disabled="!isAllUploaded">
         确认上传
+      </a-button>
+    </div>
+    <div class="footer" v-else-if="enrollPreInfoVO.status == 2">
+      <a-button type="primary" size="large" class="confirm-btn">
+        重新提交
       </a-button>
     </div>
   </div>
@@ -105,13 +177,16 @@ import { useRoute } from 'vue-router'
 import { Modal, Message, Input } from '@arco-design/web-vue'
 
 import { uploadWhenInfo } from '@/apis/system/user-center'
-import { applyUpload } from '@/apis/File/upload'
+import { applyUpload, upload } from '@/apis/File/upload'
 import { qrcodeUpload } from '@/apis/document/enrollPreUpload'
+
 const route = useRoute()
 const unuploadedDocumentTypes = ref<any[]>([])
+const uploadedDocumentTypes = ref<any[]>([])
 const planInfoVO = ref<any>({})
 const nickname = ref<string>('')
 const fileListMap = reactive<Record<string, any[]>>({})
+const enrollPreInfoVO = ref<any>({})
 const form = reactive({ candidateId: '', planId: '' })
 const cardHovered = ref('')
 // 报名资格申请表专属文件列表（最多1个）
@@ -123,6 +198,30 @@ onMounted(async () => {
   if (form.candidateId && form.planId) {
     const res = await uploadWhenInfo(form.candidateId, form.planId)
     unuploadedDocumentTypes.value = res.data.unuploadedDocumentTypes || []
+    uploadedDocumentTypes.value = res.data.uploadedDocumentTypes || []
+    enrollPreInfoVO.value = res.data.enrollPreInfoVO || {}
+    if (enrollPreInfoVO && Object.keys(enrollPreInfoVO.value).length > 0) {
+      formFileList.value.push({
+        uid: enrollPreInfoVO.value.id,
+        name: enrollPreInfoVO.value.qualificationFileName || '报名资格申请表',
+        url: enrollPreInfoVO.value.qualificationFileUrl
+      })
+      if (uploadedDocumentTypes.value.length > 0) {
+        uploadedDocumentTypes.value.forEach((item) => {
+          // 初始化数组
+          fileListMap[item.id] = [];
+          // 把逗号分隔的字符串拆分成数组
+          const paths = (item.docPath || '').split(',');
+          paths.forEach((url, index) => {
+            fileListMap[item.id].push({
+              uid: `${item.id}-${index}-${Date.now()}`, // 保证唯一
+              url: url,
+              name: item.type_name
+            });
+          });
+        });
+      }
+    }
     planInfoVO.value = res.data.planInfoVO || {}
     nickname.value = res.data.nickname || ''
   } else {
@@ -160,25 +259,18 @@ const handleUpload = async (options: any, item: any, type: string) => {
 
   const formData = new FormData()
   formData.append('file', file)
-
-  try {
-    const res = await applyUpload(formData);
-    if (res.data) {
-      Message.success(`${item.typeName} 上传成功`)
-      options.onSuccess?.()
-      if (!fileListMap[item.id]) fileListMap[item.id] = []
-      fileListMap[item.id].push({
-        uid: options.fileItem.uid,
-        url: res.data.url,
-        name: file.name,
-      })
-    } else {
-      options.onError?.()
-      Message.error('上传失败，请重试')
-    }
-  } catch (error) {
+  const res = await applyUpload(formData);
+  if (res.data) {
+    Message.success(`${item.typeName} 上传成功`)
+    options.onSuccess?.()
+    if (!fileListMap[item.id]) fileListMap[item.id] = []
+    fileListMap[item.id].push({
+      uid: options.fileItem.uid,
+      url: res.data.url,
+      name: file.name,
+    })
+  } else {
     options.onError?.()
-    Message.error('上传出错，请重试')
   }
 }
 
@@ -193,26 +285,19 @@ const handleFormUpload = async (options: any) => {
     options.onError?.()
     return
   }
-
   const formData = new FormData()
   formData.append('file', file)
-  try {
-    const res = await applyUpload(formData);
-    if (res.data) {
-      Message.success('报名资格申请表上传成功')
-      options.onSuccess?.()
-      formFileList.value.push({
-        uid: options.fileItem.uid,
-        name: file.name,
-        url: res.data.url,
-      })
-    } else {
-      options.onError?.()
-      Message.error('上传失败，请重试')
-    }
-  } catch (error) {
+  const res = await applyUpload(formData);
+  if (res.data) {
+    Message.success('报名资格申请表上传成功')
+    options.onSuccess?.()
+    formFileList.value.push({
+      uid: options.fileItem.uid,
+      name: file.name,
+      url: res.data.url,
+    })
+  } else {
     options.onError?.()
-    Message.error('上传出错，请重试')
   }
 }
 
@@ -296,6 +381,12 @@ const submitAllFiles = async (idLastSix: string) => {
 </script>
 
 <style scoped>
+.status-text {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+
 /* 页面基础样式 */
 .upload-page {
   display: flex;
