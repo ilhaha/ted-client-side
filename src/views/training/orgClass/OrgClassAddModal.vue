@@ -27,6 +27,9 @@ const title = computed(() => (isUpdate.value ? '修改培训机构班级' : '新
 const formRef = ref<InstanceType<typeof GiForm>>()
 
 const [form, resetForm] = useResetReactive({
+  projectId: undefined,
+  className: undefined,
+  classType: 0
   // todo 待补充
 })
 
@@ -40,7 +43,7 @@ const columns: ColumnItem[] = reactive([
     span: 24,
     props: {
       allowSearch: true,
-      multiple: false, // 支持多选
+      multiple: false,
       options: categoryOptions,
       fieldNames: { label: 'label', value: 'value' }
     },
@@ -53,6 +56,25 @@ const columns: ColumnItem[] = reactive([
     span: 24,
     rules: [{ required: true, message: '请输入班级名称' }]
   },
+  {
+    label: '班级类型',
+    field: 'classType',
+    type: 'select',
+    span: 24,
+    props: computed(() => ({
+      allowSearch: false,
+      multiple: false,
+      disabled: isUpdate.value,
+      options: [
+        { label: '作业人员', value: 0 },
+        { label: '检验人员', value: 1 }
+      ],
+      fieldNames: { label: 'label', value: 'value' }
+    })),
+    rules: [{ required: true, message: '请选择班级类型' }]
+  }
+
+
 ])
 
 // 重置
