@@ -256,6 +256,9 @@
                           identityCard.examNumber
                         )
                       "
+                      v-if="
+                        identityCard.showStatus == 1
+                      "
                     >
                       下载准考证 PDF
                     </a-button>
