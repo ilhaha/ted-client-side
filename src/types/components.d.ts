@@ -7,8 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    '修改之后备份': typeof import('./../components/organizationExamPlanList 修改之后备份.vue')['default']
-    '修改之前备份': typeof import('./../components/organizationExamPlanList 修改之前备份.vue')['default']
     AgencyList: typeof import('./../components/AgencyList.vue')['default']
     Avatar: typeof import('./../components/Avatar/index.vue')['default']
     Breadcrumb: typeof import('./../components/Breadcrumb/index.vue')['default']
@@ -67,8 +65,6 @@ declare module 'vue' {
     MonthForm: typeof import('./../components/GenCron/CronForm/component/month-form.vue')['default']
     NoticeBar: typeof import('./../components/NoticeBar.vue')['default']
     OrganizationExamPlanList: typeof import('./../components/organizationExamPlanList.vue')['default']
-    'OrganizationExamPlanList 修改之后备份': typeof import('./../components/organizationExamPlanList 修改之后备份.vue')['default']
-    'OrganizationExamPlanList 修改之前备份': typeof import('./../components/organizationExamPlanList 修改之前备份.vue')['default']
     OrgProjectList: typeof import('./../components/orgProjectList.vue')['default']
     ParentView: typeof import('./../components/ParentView/index.vue')['default']
     PlanInvigilateList: typeof import('./../components/PlanInvigilateList.vue')['default']

@@ -4,13 +4,14 @@
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
+        <a-select v-model="queryForm.classType" placeholder="班级类型" allow-clear class="search-input ml-2"
+          @change="search">
+          <a-option value="0">作业人员</a-option>
+          <a-option value="1">检验人员</a-option>
+        </a-select>
         <a-cascader v-model="queryForm.projectId" :options="categoryOptions" placeholder="请选择考试项目" allow-clear
           @change="search" />
         <a-input-search v-model="queryForm.className" placeholder="请输入班级名称" allow-clear @search="search" />
-        <a-button type="primary" @click="search">
-          <template #icon><icon-search /></template>
-          搜索
-        </a-button>
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -21,9 +22,9 @@
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
-        <a-button v-permission="['training:orgClass:export']" @click="onExport">
-          <template #icon><icon-download /></template>
-          <template #default>导出</template>
+        <a-button v-permission="['training:orgClass:improtWorker']" @click="openImport">
+          <template #icon><icon-upload /></template>
+          <template #default>导入作业人员名单</template>
         </a-button>
       </template>
       <template #qrcodeApplyUrl="{ record }">
@@ -35,24 +36,19 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['training:orgClass:detail']" title="详情" @click="onDetail(record)">详情</a-link>
           <a-link v-permission="['training:orgClass:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-          <a-link v-permission="['training:orgClass:delete']" status="danger" :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
-            删除
-          </a-link>
         </a-space>
       </template>
     </GiTable>
 
     <OrgClassAddModal ref="OrgClassAddModalRef" @save-success="search" />
-    <OrgClassDetailDrawer ref="OrgClassDetailDrawerRef" />
+    <WokerImportModel ref="WokerImportModelRef" />
   </div>
 </template>
 
 <script setup lang="ts">
 import OrgClassAddModal from './OrgClassAddModal.vue'
-import OrgClassDetailDrawer from './OrgClassDetailDrawer.vue'
+import WokerImportModel from './WokerImportModel.vue'
 import { type OrgClassResp, type OrgClassQuery, deleteOrgClass, exportOrgClass, listOrgClass } from '@/apis/training/orgClass'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { type ProjectCategoryVO, getSelectCategoryProject } from '@/apis/training/org'
@@ -68,6 +64,7 @@ defineOptions({ name: 'OrgClass' })
 const queryForm = reactive<OrgClassQuery>({
   projectId: undefined,
   className: undefined,
+  classType: "0",
   sort: ['id,desc']
 })
 
@@ -92,11 +89,11 @@ const columns = ref<TableInstanceColumns[]>([
     fixed: !isMobile() ? 'right' : undefined,
     show: has.hasPermOr(['training:orgClass:detail', 'training:orgClass:update', 'training:orgClass:delete'])
   }])
-// 详情
-const OrgClassDetailDrawerRef = ref<InstanceType<typeof OrgClassDetailDrawer>>()
 
-const onDetail = (record: OrgClassResp) => {
-  OrgClassDetailDrawerRef.value?.onOpen(record.id)
+// 打开作业人员导入弹窗
+const WokerImportModelRef = ref<InstanceType<typeof WokerImportModel>>()
+const openImport = () => {
+  WokerImportModelRef.value?.onOpen()
 }
 
 const OrgClassAddModalRef = ref<InstanceType<typeof OrgClassAddModal>>()
@@ -118,6 +115,13 @@ const handleImageError = (e: Event) => {
   img.onerror = null; // 防止默认图片也加载失败时无限循环
 };
 
+// 重置
+const reset = () => {
+  queryForm.projectId = undefined
+  queryForm.className = undefined
+  queryForm.classType = undefined
+  search()
+}
 onMounted(async () => {
   const res = await getSelectCategoryProject()
   categoryOptions.value = res.data

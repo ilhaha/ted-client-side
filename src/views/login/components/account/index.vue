@@ -4,7 +4,7 @@
     <!-- 角色选择（下拉选择框） -->
     <a-form-item field="role">
       <a-select v-model="form.role" placeholder="请选择角色">
-        <a-option value="1">考生</a-option>
+        <a-option value="1">检验人员</a-option>
         <a-option value="2">监考</a-option>
         <a-option value="3">机构</a-option>
       </a-select>
@@ -32,7 +32,7 @@
       <a-row justify="space-between" align="center" class="w-full">
         <a-checkbox v-model="loginConfig.rememberMe">记住我</a-checkbox>
         <div>
-          <button class="logon-btn" type="button" @click="handleLoginWindow">考生注册</button>
+          <button class="logon-btn" type="button" @click="handleLoginWindow">注册</button>
           <button class="logon-btn" type="button" @click="handleForgotWindow">忘记密码</button>
         </div>
       </a-row>

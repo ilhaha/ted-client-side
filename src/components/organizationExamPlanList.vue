@@ -9,26 +9,21 @@
         }}</a-tag>
       </template>
       <template #toolbar-left>
-        <div class="search-container">
-          <a-input v-model="queryForm.examPlanName" placeholder="搜索计划名称" allow-clear class="search-input" />
-          <a-input v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear class="search-input ml-2" />
-          <a-select v-model="queryForm.status" placeholder="计划状态" allow-clear class="search-input ml-2"
-            style="margin-left: 8px;">
-            <a-option value="3">发布中</a-option>
-            <a-option value="5">考试中</a-option>
-            <a-option value="6">已结束</a-option>
-          </a-select>
-          <a-space class="ml-2">
-            <a-button type="primary" @click="search">
-              <template #icon><icon-search /></template>
-              搜索
-            </a-button>
-            <a-button class="ml-2" @click="reset">
-              <template #icon><icon-refresh /></template>
-              重置
-            </a-button>
-          </a-space>
-        </div>
+        <!-- <div class="search-container"> -->
+        <a-input-search v-model="queryForm.examPlanName" placeholder="搜索计划名称" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear @search="search" />
+        <a-select v-model="queryForm.status" placeholder="计划状态" allow-clear class="search-input ml-2" @change="search">
+          <a-option value="3">发布中</a-option>
+          <a-option value="5">考试中</a-option>
+          <a-option value="6">已结束</a-option>
+        </a-select>
+        <a-space class="ml-2">
+          <a-button class="ml-2" @click="reset">
+            <template #icon><icon-refresh /></template>
+            重置
+          </a-button>
+        </a-space>
+        <!-- </div> -->
       </template>
       <template #examPlanName="{ record }">
         <a-link title="查看计划证书" @click="openCertificateInfo(record)">{{ record.examPlanName }}</a-link>

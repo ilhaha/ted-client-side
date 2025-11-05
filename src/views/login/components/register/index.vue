@@ -7,7 +7,7 @@
     :footer="false"
   >
     <template #title>
-      考生注册
+      检验人员注册
     </template>
     <div>
       <a-form

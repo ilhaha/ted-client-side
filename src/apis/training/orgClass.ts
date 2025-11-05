@@ -7,6 +7,7 @@ export interface OrgClassResp {
   orgId: string
   projectId: string
   className: string
+  classType:string | undefined
   createUser: string
   updateUser: string
   createTime: string
@@ -25,6 +26,7 @@ export interface OrgClassDetailResp {
   updateUser: string
   createTime: string
   updateTime: string
+  classType:string | undefined
   isDeleted: string
   createUserString: string
   updateUserString: string
@@ -32,6 +34,7 @@ export interface OrgClassDetailResp {
 export interface OrgClassQuery {
   projectId: string | undefined
   className: string | undefined
+  classType:string | undefined
   sort: Array<string>
 }
 export interface OrgClassPageQuery extends OrgClassQuery, PageQuery {}

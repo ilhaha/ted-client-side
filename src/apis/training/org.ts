@@ -54,6 +54,23 @@ export interface ProjectCategoryVO {
 
 export interface OrgPageQuery extends OrgQuery, PageQuery {}
 
+/** @desc 通过excel导入作业人员信息 */
+export function importWorker(file: any,classId:string) {
+  return http.post(`${BASE_URL}/import/worker/${classId}`, file)
+}
+
+
+/** @desc 下载导入作业人员模板 */
+export function downloadImportWorkerTemplate(classId: string) {
+  return http.download(`${BASE_URL}/download/importWorker/template/${classId}`)
+}
+
+
+/** @desc 获取机构对应的项目-班级-考生级联选择 */
+export function getSelectProjectClassByType(type:number) {
+  return http.get<any[]>(`${BASE_URL}/select/project/class/type/${type}`)
+}
+
 /** @desc 机构预报名 */
 export function applyPre(data: any) {
   return http.post(`${BASE_URL}/apply/pre`, data)
