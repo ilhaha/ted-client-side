@@ -37,4 +37,13 @@ export async function downloadExamTicket(userId, examNumber) {
   // 若 http 封装返回 res.data，则直接返回
   return res?.data || res
 }
+/**
+ * @desc 根据考试计划ID和考生ID获取缴费审核信息
+ * @param {number} examPlanId - 考试计划ID
+ * @param {number} examineeId - 考生ID
+ */
+export async function getExamineePaymentAuditInfo(examPlanId: number, examineeId: string) {
+  return http.get('/exam/examineePaymentAudit/info', { examPlanId, examineeId });
+}
+
 

@@ -24,6 +24,7 @@ declare module 'vue' {
     DocumentReUpload: typeof import('./../components/DocumentReUpload/index.vue')['default']
     DocumentUpload: typeof import('./../components/DocumentUpload/index.vue')['default']
     EducationApplicant: typeof import('./../components/DocumentApplicant/EducationApplicant.vue')['default']
+    ExamineePayment: typeof import('./../components/SpecialCertificationApplicant/ExamineePayment.vue')['default']
     ExamPlanList: typeof import('./../components/ExamPlanList.vue')['default']
     ExpertList: typeof import('./../components/ExpertList.vue')['default']
     FilePreview: typeof import('./../components/FilePreview/index.vue')['default']

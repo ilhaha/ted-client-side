@@ -256,9 +256,7 @@
                           identityCard.examNumber
                         )
                       "
-                      v-if="
-                        identityCard.showStatus == 1
-                      "
+                      v-if="identityCard.showStatus == 1"
                     >
                       下载准考证 PDF
                     </a-button>
@@ -348,39 +346,12 @@
         @upload-application-success="handleUploadSuccess"
       ></SpecialCertificationApplicant>
 
-      <!-- 添加支付模态框 -->
-      <a-modal
-        v-model:visible="paymentModalVisible"
-        title="考试缴费"
-        :footer="false"
-        :mask-closable="false"
-      >
-        <div class="payment-content">
-          <div class="qr-code">
-            <img src="/static/images/test.jpg" alt="支付二维码" />
-          </div>
-          <div class="payment-methods">
-            <a-button type="primary" class="payment-btn">
-              <template #icon>
-                <IconWechatpay />
-              </template>
-              微信支付
-            </a-button>
-            <a-button type="primary" class="payment-btn">
-              <template #icon>
-                <IconAlipayCircle />
-              </template>
-              支付宝支付
-            </a-button>
-            <a-button type="primary" class="payment-btn">
-              <template #icon>
-                <IconApps />
-              </template>
-              银行转账
-            </a-button>
-          </div>
-        </div>
-      </a-modal>
+      <ExamineePayment
+        :visible="isNotFillInPayment"
+        @close="handleModalClosePayment"
+        @upload-application-success="handleUploadSuccessPayment"
+      ></ExamineePayment>
+
       <!-- 选择机构项目弹窗 -->
       <a-modal
         v-model:visible="selectProjectModalVisible"
@@ -423,8 +394,9 @@ import ProjectList from "@/components/ProjectList.vue";
 import CourseList from "@/components/CourseList.vue";
 import AgencyList from "@/components/AgencyList.vue";
 import SpecialCertificationApplicant from "@/components/SpecialCertificationApplicant/index.vue";
+import ExamineePayment from "@/components/SpecialCertificationApplicant/ExamineePayment.vue";
 import { listTraining } from "@/apis/training/training";
-import { downloadExamTicket } from "@/apis/plan/enroll";
+import { downloadExamTicket, getExamineePaymentAuditInfo } from "@/apis/plan/enroll";
 
 import {
   type EnrollResp,
@@ -454,11 +426,11 @@ const visible = ref(false);
 const selectedItem = ref(null);
 const selectedType = ref("certificate");
 const isNotFillIn = ref(false);
+const isNotFillInPayment = ref(false);
 const planId = ref(null);
 const isQualifications = ref(false);
 
 // 添加支付相关状态
-const paymentModalVisible = ref(false);
 const selectProjectModalVisible = ref(false);
 const getCertificateDesc = (cert) => {
   return [
@@ -498,6 +470,9 @@ const showCertDetail = (cert) => {
 const handleModalClose = () => {
   isNotFillIn.value = false;
 };
+const handleModalClosePayment = () => {
+  isNotFillInPayment.value = false;
+};
 
 // 确认上传申请表
 const handleUploadSuccess = async (imageUrl: string) => {
@@ -511,6 +486,31 @@ const handleUploadSuccess = async (imageUrl: string) => {
     fetchQualification(Number(planId.value));
   } else {
     Message.error("申请表上传成功");
+  }
+};
+
+const handleUploadSuccessPayment = async () => {
+  
+  const { planId: examPlanId, candidatesId: examineeId } = qualificationInfo.value || {};
+
+  if (!examPlanId || !examineeId) {
+    console.error("❌ 缺少 planId 或 candidatesId，无法查询审核信息");
+    return;
+  }
+
+  // 打开缴费弹窗
+  isNotFillInPayment.value = true;
+
+  // 调接口查询缴费审核信息
+  try {
+    const auditInfo = await getExamineePaymentAuditInfo(examPlanId, examineeId);
+    console.log("✅ 缴费审核信息：", auditInfo);
+
+    // 如果需要传参给弹窗，比如用于展示审核信息，可以这么做：
+    // paymentAuditData.value = auditInfo;
+
+  } catch (error) {
+    console.error("❌ 获取缴费审核信息失败：", error);
   }
 };
 
@@ -995,11 +995,8 @@ const showAgencyDetail = async (agency) => {
 
 // 处理支付按钮点击
 const handlePayment = () => {
-  if (selectedItem.value?.enrollStatus != "1") {
-    Message.warning("请先报名考试");
-    return;
-  }
-  paymentModalVisible.value = true;
+  isNotFillInPayment.value = true;
+  handleUploadSuccessPayment();   
 };
 
 const isWindowIdentityCard = ref(false);
