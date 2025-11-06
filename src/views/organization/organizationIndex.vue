@@ -1,127 +1,129 @@
 <template>
-  <div class="main-container">
-    <div class="organization-container">
-      <!-- 右侧内容区 -->
-      <div class="right-content">
-        <div class="user-id"></div>
+  <a-spin :loading="importLoading" tip="正在努力解析您的文件，请耐心等待😊" dot>
+    <div class="main-container">
+      <div class="organization-container">
+        <!-- 右侧内容区 -->
+        <div class="right-content">
+          <div class="user-id"></div>
 
-        <!-- 导航菜单 -->
-        <div class="nav-menu">
-          <a-menu v-model:selected-keys="activeTab" mode="horizontal" @menu-item-click="handleTabChange">
-            <a-menu-item key="1"> 考试计划 </a-menu-item>
-            <a-menu-item key="2"> 班级管理 </a-menu-item>
-            <a-menu-item key="6"> 培训申请 </a-menu-item>
-            <a-menu-item key="3"> 培训名单 </a-menu-item>
-            <a-menu-item key="5"> 专家管理 </a-menu-item>
-            <a-menu-item key="7"> 培训管理 </a-menu-item>
-          </a-menu>
-        </div>
+          <!-- 导航菜单 -->
+          <div class="nav-menu">
+            <a-menu v-model:selected-keys="activeTab" mode="horizontal" @menu-item-click="handleTabChange">
+              <a-menu-item key="1"> 考试计划 </a-menu-item>
+              <a-menu-item key="2"> 班级管理 </a-menu-item>
+              <a-menu-item key="6"> 培训申请 </a-menu-item>
+              <a-menu-item key="3"> 培训名单 </a-menu-item>
+              <a-menu-item key="5"> 专家管理 </a-menu-item>
+              <a-menu-item key="7"> 培训管理 </a-menu-item>
+            </a-menu>
+          </div>
 
-        <!-- 内容区域 -->
-        <div class="list-content">
-          <div v-if="activeTab === '1'" class="tab-content">
-            <organizationExamPlanList :exams="examPlanList"/>
-          </div>
-          <div v-if="activeTab === '2'" class="project-list">
-            <orgClassList />
-          </div>
-          <div v-if="activeTab === '3'" class="tab-content">
-            <div class="action-buttons">
-              <a-space>
-                <a-button @click="handleBatchSignUp">
-                  <template #icon>
-                    <IconDownload />
-                  </template>
-                  批量注册
-                </a-button>
-              </a-space>
+          <!-- 内容区域 -->
+          <div class="list-content">
+            <div v-if="activeTab === '1'" class="tab-content">
+              <organizationExamPlanList :exams="examPlanList" />
             </div>
-            <a-table :data="studentApplyFortList" :columns="studentApplyFortColumns" :loading="studentApplyFortLoading"
-              :pagination="{
-                total: studentTotal,
-                current: studentCurrentPage,
-                pageSize: studentPageSize,
-                showTotal: true,
-                onChange: handleStudentPageChange,
-              }">
-              <template #operations="{ record }">
-                <a-button type="text" @click="handleViewCertificate(record.candidateId)">
-                  <template #icon>
-                    <IconEye />
-                  </template>
-                  证书查询
-                </a-button>
-                <!-- 新增查看资料按钮 -->
-                <a-button type="text" @click="handleViewDocuments(record.candidateId)">
-                  <template #icon>
-                    <IconFile />
-                  </template>
-                  查看资料
-                </a-button>
-                <a-button @click="handleUploadData(record.candidateId)">
-                  <template #icon>
-                    <IconFile />
-                  </template>
-                  上传资料
-                </a-button>
-                <a-button type="text" status="danger" @click="handleRemoveStudent(record.orgId, record.candidateId)">
-                  <template #icon>
-                    <IconDelete />
-                  </template>
-                  移除学生
-                </a-button>
-              </template>
-            </a-table>
-            <DocumentUpload :visible="uploadVisible" title="上传资料" @close="uploadVisible = false"
-              @upload-success="handleUploadSuccess">
-            </DocumentUpload>
+            <div v-if="activeTab === '2'" class="project-list">
+              <orgClassList @setImportLoading="handSetImportLoading" />
+            </div>
+            <div v-if="activeTab === '3'" class="tab-content">
+              <div class="action-buttons">
+                <a-space>
+                  <a-button @click="handleBatchSignUp">
+                    <template #icon>
+                      <IconDownload />
+                    </template>
+                    批量注册
+                  </a-button>
+                </a-space>
+              </div>
+              <a-table :data="studentApplyFortList" :columns="studentApplyFortColumns"
+                :loading="studentApplyFortLoading" :pagination="{
+                  total: studentTotal,
+                  current: studentCurrentPage,
+                  pageSize: studentPageSize,
+                  showTotal: true,
+                  onChange: handleStudentPageChange,
+                }">
+                <template #operations="{ record }">
+                  <a-button type="text" @click="handleViewCertificate(record.candidateId)">
+                    <template #icon>
+                      <IconEye />
+                    </template>
+                    证书查询
+                  </a-button>
+                  <!-- 新增查看资料按钮 -->
+                  <a-button type="text" @click="handleViewDocuments(record.candidateId)">
+                    <template #icon>
+                      <IconFile />
+                    </template>
+                    查看资料
+                  </a-button>
+                  <a-button @click="handleUploadData(record.candidateId)">
+                    <template #icon>
+                      <IconFile />
+                    </template>
+                    上传资料
+                  </a-button>
+                  <a-button type="text" status="danger" @click="handleRemoveStudent(record.orgId, record.candidateId)">
+                    <template #icon>
+                      <IconDelete />
+                    </template>
+                    移除学生
+                  </a-button>
+                </template>
+              </a-table>
+              <DocumentUpload :visible="uploadVisible" title="上传资料" @close="uploadVisible = false"
+                @upload-success="handleUploadSuccess">
+              </DocumentUpload>
 
-            <!-- 新增资料弹窗 -->
-            <Drawer v-model:visible="showDocumentModal" title="学员资料" :footer="false" width="500px"
-              @close="handleCloseDocument">
-              <div class="document-drawer-content">
-                <div v-if="documentLoading" class="loading-container">
-                  <a-spin size="large" />
-                </div>
-                <div v-else-if="documentList.length" class="document-list">
-                  <div v-for="(doc, index) in documentList" :key="index" class="document-card">
-                    <div class="document-image">
-                      <a-image :src="doc.documentUrl" :alt="doc.documentName" :preview="true" fit="cover"
-                        @error="handleImageError" />
-                    </div>
-                    <div class="document-info">
-                      <div class="document-header">
-                        <h3>{{ doc.documentName }}</h3>
-                        <a-tag :color="getDocStatusColor(doc.status)">
-                          {{ getDocStatusText(doc.status) }}
-                        </a-tag>
+              <!-- 新增资料弹窗 -->
+              <Drawer v-model:visible="showDocumentModal" title="学员资料" :footer="false" width="500px"
+                @close="handleCloseDocument">
+                <div class="document-drawer-content">
+                  <div v-if="documentLoading" class="loading-container">
+                    <a-spin size="large" />
+                  </div>
+                  <div v-else-if="documentList.length" class="document-list">
+                    <div v-for="(doc, index) in documentList" :key="index" class="document-card">
+                      <div class="document-image">
+                        <a-image :src="doc.documentUrl" :alt="doc.documentName" :preview="true" fit="cover"
+                          @error="handleImageError" />
+                      </div>
+                      <div class="document-info">
+                        <div class="document-header">
+                          <h3>{{ doc.documentName }}</h3>
+                          <a-tag :color="getDocStatusColor(doc.status)">
+                            {{ getDocStatusText(doc.status) }}
+                          </a-tag>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <div v-else class="no-data">
+                    <a-empty description="暂无资料信息" />
+                  </div>
                 </div>
-                <div v-else class="no-data">
-                  <a-empty description="暂无资料信息" />
-                </div>
-              </div>
-            </Drawer>
-          </div>
-          <div v-if="activeTab === '4'" class="tab-content">
-            <TrainingLesson />
-          </div>
-          <div v-if="activeTab === '5'" class="tab-content">
-            <ExpertList />
-          </div>
-          <div v-if="activeTab === '6'" class="tab-content">
-            <orgCandidateList />
-          </div>
-          <!-- 新增培训管理内容 -->
-          <div v-if="activeTab === '7'" class="tab-content">
-            <TrainingManagement v-if="activeTab === '7'" />
+              </Drawer>
+            </div>
+            <div v-if="activeTab === '4'" class="tab-content">
+              <TrainingLesson />
+            </div>
+            <div v-if="activeTab === '5'" class="tab-content">
+              <ExpertList />
+            </div>
+            <div v-if="activeTab === '6'" class="tab-content">
+              <orgCandidateList />
+            </div>
+            <!-- 新增培训管理内容 -->
+            <div v-if="activeTab === '7'" class="tab-content">
+              <TrainingManagement v-if="activeTab === '7'" />
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </a-spin>
   <!-- 批量注册弹窗 -->
   <Modal v-model:visible="showBatchSignUpModal" title="批量注册学员" :footer="false" width="400px" @close="handleFileClose">
     <div class="batch-modal-content">
@@ -355,7 +357,8 @@
             <template #studentStatus="{ record }">
               <a-space direction="vertical">
                 <a-space>
-                  <a-link :status="record.studentStatus ? 'success' : 'warning'">{{ record.studentStatus ? "已提交" : "未提交"
+                  <a-link :status="record.studentStatus ? 'success' : 'warning'">{{ record.studentStatus ? "已提交" :
+                    "未提交"
                   }}</a-link>
                 </a-space>
               </a-space>
@@ -366,20 +369,12 @@
       <a-button type="primary" @click="onClose">确定</a-button>
     </template>
   </a-drawer>
+
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
 import { Drawer, Message, Modal } from "@arco-design/web-vue";
-import {
-  IconBook,
-  IconCalendar,
-  IconDownload,
-  IconEye,
-  IconFile,
-  IconLocation,
-  IconUpload,
-} from "@arco-design/web-vue/es/icon";
 import * as XLSX from "xlsx";
 import { getToken } from "@/utils/auth";
 import {
@@ -421,7 +416,11 @@ const certificateList = ref<any[]>([]);
 const showDocumentModal = ref(false);
 const documentLoading = ref(false);
 const documentList = ref<Document[]>([]);
+const importLoading = ref(false)
 
+const handSetImportLoading = (res: any) => {
+  importLoading.value = res
+}
 // 查看资料方法
 const handleViewDocuments = async (candidateId: string) => {
   showDocumentModal.value = true;

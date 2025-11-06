@@ -106,6 +106,8 @@ http.interceptors.response.use(
     return Promise.reject(new Error(msg || '服务器端错误'))
   },
   (error: AxiosError) => {
+    console.log(error);
+    
     if (!error.response) {
       handleError('网络连接失败，请检查您的网络')
       return Promise.reject(error)

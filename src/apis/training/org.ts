@@ -56,7 +56,9 @@ export interface OrgPageQuery extends OrgQuery, PageQuery {}
 
 /** @desc 通过excel导入作业人员信息 */
 export function importWorker(file: any,classId:string) {
-  return http.post(`${BASE_URL}/import/worker/${classId}`, file)
+  return http.post(`${BASE_URL}/import/worker/${classId}`, file,{
+    timeout: 1800000,
+  })
 }
 
 

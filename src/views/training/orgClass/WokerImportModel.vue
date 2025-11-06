@@ -1,63 +1,72 @@
 <template>
-  <a-modal v-model:visible="visible" title="作业人员信息导入" :mask-closable="false" :width="600" :footer="false"
-    @close="handClose">
-    <div class="import-modal-content">
-      <a-alert>如果需下载导入模板，请先选择再下载模板。</a-alert>
-      <div class="cascader-container">
-        <a-form layout="vertical">
-          <a-form-item label="作业人员班级" field="classId">
-            <a-cascader placeholder="请选择班级" :options="orgCategoryClassOptions" v-model="selectedClass" />
-          </a-form-item>
-        </a-form>
-      </div>
+  <div>
+    <a-modal v-model:visible="visible" title="作业人员信息导入" :mask-closable="false" :width="600" :footer="false"
+      @close="handClose">
+      <div class="import-modal-content">
+        <a-alert>如果需下载导入模板，请先选择再下载模板。</a-alert>
+        <div class="cascader-container">
+          <a-form layout="vertical">
+            <a-form-item label="作业人员班级" field="classId">
+              <a-cascader placeholder="请选择班级" :options="orgCategoryClassOptions" v-model="selectedClass" />
+            </a-form-item>
+          </a-form>
+        </div>
 
-      <div class="action-buttons">
-        <a-button type="outline" @click="downloadTemplate" :loading="downloadTemplateLoadding">
-          <template #icon>
-            <icon-download />
-          </template>
-          下载模板
-        </a-button>
-        <!-- 手动选择文件 -->
-        <a-space direction="vertical" :style="{ width: '100%' }">
+        <div class="action-buttons">
+          <a-button type="outline" @click="downloadTemplate" :loading="downloadTemplateLoadding">
+            <template #icon><icon-download /></template>
+            下载模板
+          </a-button>
           <a-upload :show-file-list="false" accept=".xlsx" :disabled="!selectedClass" @before-upload="beforeUpload"
-            :custom-request="customRequest" />
-        </a-space>
+            :custom-request="customRequest">
+            <a-button type="primary">上传文件</a-button>
+          </a-upload>
+        </div>
       </div>
-    </div>
-  </a-modal>
+    </a-modal>
+    <WorkerImportResult ref="WorkerImportResultRef" :improtFileName="improtFileName" />
+  </div>
 </template>
 
 <script setup lang="ts">
+import WorkerImportResult from '@/views/training/orgClass/WokerImportResult.vue'
 import { ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { getSelectProjectClassByType, downloadImportWorkerTemplate, importWorker } from '@/apis/training/org'
 import { Modal } from '@arco-design/web-vue';
-
+const emit = defineEmits<{
+  (e: 'setUploadLoading', payload: any): void
+}>()
 const visible = ref(false)
 const orgCategoryClassOptions = ref<any[]>([])
 const selectedClass = ref<string>('')
 const downloadTemplateLoadding = ref(false)
+const improtFileName = ref<string>('')
+// 打开作业人员导入结果弹窗
+const WorkerImportResultRef = ref<InstanceType<typeof WorkerImportResult>>()
 
 // 自定义上传逻辑
 const customRequest = async (options: any) => {
-  console.log(options);
-
   const file = options.fileItem.file
+  improtFileName.value = file.name
   // 弹出确认框
   Modal.confirm({
     title: '确认导入',
-    content: `确定要上传文件「${file.name}」进行导入吗？`,
+    content: `确定要上传文件「${improtFileName.value}」进行导入吗？`,
     okText: '确认',
     cancelText: '取消',
     async onOk() {
+      visible.value = false
       const formData = new FormData()
       formData.append('file', file)
+      emit("setUploadLoading", true)
       try {
         const response = await importWorker(formData, selectedClass.value)
-        Message.success('导入成功')
-        visible.value = false
+        const data = response.data;
+        WorkerImportResultRef.value?.onOpen(data.successList, data.failedList)
       } catch (error) {
+      } finally {
+        emit("setUploadLoading", false)
       }
     },
   })
@@ -147,6 +156,7 @@ defineExpose({ onOpen })
   display: flex;
   flex-direction: column;
   gap: 16px;
+
 }
 
 .cascader-container {
@@ -155,8 +165,8 @@ defineExpose({ onOpen })
 
 .action-buttons {
   display: flex;
+  justify-content: flex-end;
   gap: 16px;
-  justify-content: center;
-  margin-top: 24px;
+  width: 100%;
 }
 </style>

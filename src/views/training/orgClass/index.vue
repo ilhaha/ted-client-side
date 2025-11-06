@@ -42,7 +42,7 @@
     </GiTable>
 
     <OrgClassAddModal ref="OrgClassAddModalRef" @save-success="search" />
-    <WokerImportModel ref="WokerImportModelRef" />
+    <WokerImportModel ref="WokerImportModelRef" @setUploadLoading="handSetUploadLoading" />
   </div>
 </template>
 
@@ -52,7 +52,6 @@ import WokerImportModel from './WokerImportModel.vue'
 import { type OrgClassResp, type OrgClassQuery, deleteOrgClass, exportOrgClass, listOrgClass } from '@/apis/training/orgClass'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { type ProjectCategoryVO, getSelectCategoryProject } from '@/apis/training/org'
-
 import { useDownload, useTable } from '@/hooks'
 import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
@@ -60,6 +59,9 @@ import has from '@/utils/has'
 
 defineOptions({ name: 'OrgClass' })
 
+const emit = defineEmits<{
+  (e: 'setImportLoading', payload: any): void
+}>()
 
 const queryForm = reactive<OrgClassQuery>({
   projectId: undefined,
@@ -75,6 +77,7 @@ const {
   search,
   handleDelete
 } = useTable((page) => listOrgClass({ ...queryForm, ...page }), { immediate: true })
+
 const columns = ref<TableInstanceColumns[]>([
   { title: '考试项目', dataIndex: 'projectName', slotName: 'projectName' },
   { title: '班级名称', dataIndex: 'className', slotName: 'className' },
@@ -89,6 +92,10 @@ const columns = ref<TableInstanceColumns[]>([
     fixed: !isMobile() ? 'right' : undefined,
     show: has.hasPermOr(['training:orgClass:detail', 'training:orgClass:update', 'training:orgClass:delete'])
   }])
+
+const handSetUploadLoading = (res: any) => {
+  emit("setImportLoading", res)
+}
 
 // 打开作业人员导入弹窗
 const WokerImportModelRef = ref<InstanceType<typeof WokerImportModel>>()
