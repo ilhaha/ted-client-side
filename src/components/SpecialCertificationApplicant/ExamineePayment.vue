@@ -2,7 +2,7 @@
   <div class="special-certification-applicant">
     <a-modal
       :visible="visible"
-      title="上传缴费凭证"
+      :title="modalTitle"
       @cancel="handleCancel"
       :mask-closable="false"
       :footer="false"
@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { Message } from "@arco-design/web-vue";
 import { getToken } from "@/utils/auth";
 
@@ -70,7 +70,6 @@ const uploadUrl = `${import.meta.env.VITE_API_PREFIX}/upload/file`;
 // 上传之后的图片url
 const imageUrl = ref("");
 
-// 定义上传文件项的类型
 interface UploadItem {
   uid: string;
   name: string;
@@ -80,27 +79,22 @@ interface UploadItem {
 }
 
 const props = defineProps({
-  visible: {
-    type: Boolean,
-    default: false,
-  },
+  visible: { type: Boolean, default: false },
+  paymentAuditData: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(["close", "upload-application-success"]);
 
-// 文件列表
 const fileList = ref<UploadItem[]>([]);
 
 const handleCancel = () => {
   emit("close");
 };
 
-// 处理上传成功
 const handleSuccess = (file: any) => {
   imageUrl.value = file.response.data.url;
 };
 
-// 上传前校验
 const beforeUpload = (file: File) => {
   const allowedTypes = [
     'application/pdf',
@@ -132,21 +126,14 @@ const handleError = (error: any) => {
 };
 
 const handleDownloadTemplate = () => {
-  // 下载本地文件
-  const filePath = "/static/file/特种设备作业人员资格申请表.docx";
-
-  // 创建一个a标签来触发下载
-  const link = document.createElement("a");
-  link.href = filePath;
-  link.download = "特种设备作业人员资格申请表.docx";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  Message.success("下载申请表模板成功");
+  const url = props.paymentAuditData?.auditNoticeUrl;
+  if (url) {
+    window.open(url, "_blank");
+  } else {
+    Message.error("未找到缴费通知单文件地址");
+  }
 };
 
-// 确认上传
 const confirmUpload = () => {
   if (fileList.value.length === 0) {
     Message.warning("请先选择要上传的文件");
@@ -155,6 +142,30 @@ const confirmUpload = () => {
   emit("upload-application-success", imageUrl.value);
   emit("close");
 };
+
+// 根据状态动态显示 Modal 标题
+const modalTitle = computed(() => {
+  const status = props.paymentAuditData?.auditStatus;
+  switch (status) {
+    case 0:
+    case 1:
+      return "上传缴费凭证";
+    case 2:
+      return "缴费审核已通过，确定要退款吗，退款将被取消报名资格";
+    case 3:
+      return "补正缴费凭证";
+    case 4:
+      return "补正审核中，可更新上传";
+    case 5:
+      return "退款审核中，可更新上传";
+    case 6:
+      return "已退款，禁止上传";
+    case 7: 
+      return "退款被驳回，重新上传申请退款";
+    default:
+      return "上传缴费凭证";
+  }
+});
 </script>
 
 <style scoped>

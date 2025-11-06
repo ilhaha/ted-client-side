@@ -45,5 +45,25 @@ export async function downloadExamTicket(userId, examNumber) {
 export async function getExamineePaymentAuditInfo(examPlanId: number, examineeId: string) {
   return http.get('/exam/examineePaymentAudit/info', { examPlanId, examineeId });
 }
+/**
+ * @desc 考生提交缴费凭证（保存上传的URL）
+ * @param {number} examPlanId - 考试计划ID
+ * @param {string} examineeId - 考生ID
+ * @param {string} paymentProofUrl - 上传后的缴费凭证URL
+ */
+export async function submitExamineePaymentProof(
+  examPlanId: number,
+  examineeId: string,
+  paymentProofUrl: string,
+  auditStatus:number
+) {
+  return http.post('/exam/examineePaymentAudit/payment/uploadProof', {
+    examPlanId,
+    examineeId,
+    paymentProofUrl,
+    auditStatus
+  });
+}
+
 
 

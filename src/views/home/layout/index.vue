@@ -281,12 +281,28 @@
                 >
                   取消报名
                 </a-button>
+                <!-- 上传缴费按钮 -->
                 <a-button
                   type="primary"
-                  :disabled="selectedItem?.enrollStatus != '1'"
+                  :disabled="
+                    selectedItem.enrollStatus !== 1 || // 报名状态不是 1
+                    qualificationInfo.auditStatus === 2 || // 缴费审核通过时禁用
+                    qualificationInfo.auditStatus === 7 ||
+                    qualificationInfo.auditStatus === 5 ||
+                    qualificationInfo.auditStatus === 6 
+                  "
                   @click="handlePayment"
                 >
-                  立即缴费
+                  {{ getExampaymentText() }}
+                </a-button>
+
+                <!-- 申请退款按钮 -->
+                <a-button
+                  v-if="showRefundButton()"
+                  type="primary"
+                  @click="handlePayment"
+                >
+                  {{ getRefundText() }}
                 </a-button>
               </div>
             </template>
@@ -349,6 +365,7 @@
       <ExamineePayment
         :visible="isNotFillInPayment"
         @close="handleModalClosePayment"
+        :paymentAuditData="paymentAuditData"
         @upload-application-success="handleUploadSuccessPayment"
       ></ExamineePayment>
 
@@ -396,7 +413,11 @@ import AgencyList from "@/components/AgencyList.vue";
 import SpecialCertificationApplicant from "@/components/SpecialCertificationApplicant/index.vue";
 import ExamineePayment from "@/components/SpecialCertificationApplicant/ExamineePayment.vue";
 import { listTraining } from "@/apis/training/training";
-import { downloadExamTicket, getExamineePaymentAuditInfo } from "@/apis/plan/enroll";
+import {
+  downloadExamTicket,
+  getExamineePaymentAuditInfo,
+  submitExamineePaymentProof,
+} from "@/apis/plan/enroll";
 
 import {
   type EnrollResp,
@@ -488,32 +509,35 @@ const handleUploadSuccess = async (imageUrl: string) => {
     Message.error("申请表上传成功");
   }
 };
+const paymentAuditData = ref<any>(null);
+const fileList = ref([]); // 和子组件 v-model 绑定的文件列表
 
-const handleUploadSuccessPayment = async () => {
-  
-  const { planId: examPlanId, candidatesId: examineeId } = qualificationInfo.value || {};
-
-  if (!examPlanId || !examineeId) {
-    console.error("❌ 缺少 planId 或 candidatesId，无法查询审核信息");
+const handleUploadSuccessPayment = async (paymentProofUrl: string) => {
+  const {
+    planId: examPlanId,
+    candidatesId: examineeId,
+    auditStatus: auditStatus,
+  } = qualificationInfo.value || {};
+  if (!examPlanId || !examineeId || !auditStatus) {
+    Message.error("缺少考试计划或考生信息");
     return;
   }
-
-  // 打开缴费弹窗
-  isNotFillInPayment.value = true;
-
-  // 调接口查询缴费审核信息
   try {
-    const auditInfo = await getExamineePaymentAuditInfo(examPlanId, examineeId);
-    console.log("✅ 缴费审核信息：", auditInfo);
+    await submitExamineePaymentProof(
+      examPlanId,
+      examineeId,
+      paymentProofUrl,
+      auditStatus
+    );
+    Message.success("缴费凭证上传成功，已提交审核！");
 
-    // 如果需要传参给弹窗，比如用于展示审核信息，可以这么做：
-    // paymentAuditData.value = auditInfo;
-
+    //  上传成功后清空文件列表
+    fileList.value = [];
+    isNotFillInPayment.value = false; // 可同步关闭弹窗
   } catch (error) {
-    console.error("❌ 获取缴费审核信息失败：", error);
+    Message.error("提交缴费凭证失败，请稍后再试");
   }
 };
-
 const onClose = () => {
   visible.value = false;
   selectedItem.value = null;
@@ -650,7 +674,11 @@ const getExamDesc = (exam) => {
       value: getExamStatusText(exam.enrollStatus),
       color: getExamStatusColor(exam.enrollStatus),
     },
-    { label: "审核通知", value: qualificationInfo.value?.remark || "无" },
+    { label: "报名审核通知", value: qualificationInfo.value?.remark || "无" },
+    {
+      label: "缴费审核通知",
+      value: qualificationInfo.value?.rejectReason || "无",
+    },
 
     // ✅ 新增：申请表链接
     qualificationInfo.value?.imageUrl
@@ -755,6 +783,50 @@ const getExamActionText = () => {
   return "";
 };
 
+const getExampaymentText = () => {
+  const auditStatus = qualificationInfo.value?.auditStatus;
+  switch (auditStatus) {
+    case 0:
+      return "立即缴费"; // 待缴费
+    case 1:
+      return "待审核"; // 已缴费待审核
+    case 2:
+      return "缴费审核通过";
+    case 3:
+      return "补正"; // 补正/驳回
+    case 4:
+      return "补正审核中";
+    case 5:
+      return "退款审核中";
+    case 6:
+      return "已退款";
+    case 7:
+      return "退款被驳回";
+    default:
+      return "立即缴费"; // 未知状态，默认
+  }
+};
+// 退款按钮文字显示
+const getRefundText = () => {
+  const auditStatus = qualificationInfo.value?.auditStatus;
+  switch (auditStatus) {
+    case 2: // 审核通过
+      return "申请退款";
+    case 5: // 退款审核中
+      return "退款审核中";
+    case 7: // 退款被驳回
+      return "退款被驳回";
+    default:
+      return ""; // 其他状态不显示文字
+  }
+};
+
+// 是否显示按钮
+const showRefundButton = () => {
+  const text = getRefundText();
+  return text !== "";
+};
+
 const handleExamRegister = async () => {
   // 处理考试报名逻辑
   // 校验考试时间
@@ -782,11 +854,9 @@ const handleExamRegister = async () => {
 };
 
 const qualificationInfo = ref(null);
-
 const fetchQualification = async (examPlanId: string) => {
   const response = await getCandidatesId(Number(examPlanId));
   qualificationInfo.value = response.data; // 保存完整数据
-  console.log("qualificationInfo:", qualificationInfo.value); // 打印资格信息
 
   // 审核状态处理
   if (response.data == null) {
@@ -993,10 +1063,23 @@ const showAgencyDetail = async (agency) => {
   await fetchAgencyStatus(agency.id);
 };
 
-// 处理支付按钮点击
-const handlePayment = () => {
+// 上传缴费凭证
+const handlePayment = async () => {
+  const { planId: examPlanId, candidatesId: examineeId } =
+    qualificationInfo.value || {};
+  if (!examPlanId || !examineeId) {
+    console.error("❌ 缺少 planId 或 candidatesId，无法查询审核信息");
+    return;
+  }
+  // 打开缴费弹窗
   isNotFillInPayment.value = true;
-  handleUploadSuccessPayment();   
+  // 调接口查询缴费审核信息
+  try {
+    const auditInfo = await getExamineePaymentAuditInfo(examPlanId, examineeId);
+    paymentAuditData.value = auditInfo?.data; // 注意这里 data 的结构
+  } catch (error) {
+    console.error("❌ 获取缴费审核信息失败：", error);
+  }
 };
 
 const isWindowIdentityCard = ref(false);
