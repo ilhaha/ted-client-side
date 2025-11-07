@@ -270,26 +270,28 @@
                 >
                   {{ getExamActionText() }}
                 </a-button>
-                <!-- 添加取消报名按钮 -->
+                <!-- 取消报名按钮 -->
                 <a-button
                   type="primary"
                   v-if="
-                    selectedItem?.enrollStatus != '0' &&
-                    selectedItem?.enrollStatus != '6'
+                    ![0, 6].includes(selectedItem?.enrollStatus) && 
+                    ![2, 5, 7].includes(qualificationInfo?.auditStatus)
                   "
                   @click="handleCancelRegistration"
                 >
                   取消报名
                 </a-button>
+
                 <!-- 上传缴费按钮 -->
                 <a-button
                   type="primary"
                   :disabled="
-                    selectedItem.enrollStatus !== 1 || // 报名状态不是 1
-                    qualificationInfo.auditStatus === 2 || // 缴费审核通过时禁用
-                    qualificationInfo.auditStatus === 7 ||
-                    qualificationInfo.auditStatus === 5 ||
-                    qualificationInfo.auditStatus === 6 
+                    selectedItem?.enrollStatus !== 1 || 
+                    [2, 5, 6, 7].includes(qualificationInfo?.auditStatus) 
+                  "
+                  v-if="
+                    ![5, 7].includes(qualificationInfo?.auditStatus) || 
+                    qualificationInfo?.auditStatus == null
                   "
                   @click="handlePayment"
                 >
@@ -518,25 +520,23 @@ const handleUploadSuccessPayment = async (paymentProofUrl: string) => {
     candidatesId: examineeId,
     auditStatus: auditStatus,
   } = qualificationInfo.value || {};
-  if (!examPlanId || !examineeId || !auditStatus) {
-    Message.error("缺少考试计划或考生信息");
-    return;
-  }
-  try {
-    await submitExamineePaymentProof(
-      examPlanId,
-      examineeId,
-      paymentProofUrl,
-      auditStatus
-    );
-    Message.success("缴费凭证上传成功，已提交审核！");
+  // if (!examPlanId || !examineeId || !auditStatus) {
+  //   Message.error("缺少考试计划或考生信息");
+  //   return;
+  // }
 
-    //  上传成功后清空文件列表
-    fileList.value = [];
-    isNotFillInPayment.value = false; // 可同步关闭弹窗
-  } catch (error) {
-    Message.error("提交缴费凭证失败，请稍后再试");
-  }
+  await submitExamineePaymentProof(
+    examPlanId,
+    examineeId,
+    paymentProofUrl,
+    auditStatus
+  );
+  Message.success("凭证上传成功，已提交审核！");
+  //  上传成功后清空文件列表
+  fileList.value = [];
+  isNotFillInPayment.value = false; // 可同步关闭弹窗
+  await getCandidatesId(examPlanId);
+  await getExamPlanDetail(examPlanId);
 };
 const onClose = () => {
   visible.value = false;

@@ -14,6 +14,7 @@ declare module 'vue' {
     CellCopy: typeof import('./../components/CellCopy/index.vue')['default']
     CertificateList: typeof import('./../components/CertificateList.vue')['default']
     Chart: typeof import('./../components/Chart/index.vue')['default']
+    CorrectionUpload: typeof import('./../components/CorrectionUpload.vue')['default']
     CourseList: typeof import('./../components/CourseList.vue')['default']
     CronForm: typeof import('./../components/GenCron/CronForm/index.vue')['default']
     CronModal: typeof import('./../components/GenCron/CronModal/index.vue')['default']
