@@ -9,7 +9,13 @@
     @before-ok="save"
     @close="reset"
   >
-    <GiForm ref="formRef" v-model="form" :columns="columns" />
+    <!-- 让 GiForm 自动识别 hidden -->
+<GiForm
+  ref="formRef"
+  v-model="form"
+  :columns="isUpdate ? columns.filter(c => c.field !== 'projectId') : columns"
+/>
+
   </a-modal>
 </template>
 
@@ -19,55 +25,78 @@ import { useWindowSize } from '@vueuse/core'
 import { getOrgTrainingPrice, addOrgTrainingPrice, updateOrgTrainingPrice } from '@/apis/training/orgTrainingPrice'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useResetReactive } from '@/hooks'
-import { useDict } from '@/hooks/app'
+import { type ProjectCategoryVO, getSelectCategoryProject } from '@/apis/training/org'
 
-const emit = defineEmits<{
-  (e: 'save-success'): void
-}>()
+const emit = defineEmits<{ (e: 'save-success'): void }>()
 
 const { width } = useWindowSize()
-
 const dataId = ref('')
 const visible = ref(false)
 const isUpdate = computed(() => !!dataId.value)
-const title = computed(() => (isUpdate.value ? '修改机构培训价格（仅核心字段：主键、八大类ID、机构ID、价格）' : '新增机构培训价格（仅核心字段：主键、八大类ID、机构ID、价格）'))
+const title = computed(() => (isUpdate.value ? '修改机构培训价格' : '新增机构培训价格'))
 const formRef = ref<InstanceType<typeof GiForm>>()
 
+// 表单数据
 const [form, resetForm] = useResetReactive({
-  // todo 待补充
+  projectId: undefined,
+  price: undefined
 })
 
+// 分类选项
+const categoryOptions = ref<ProjectCategoryVO[]>([])
+
+// 表单列定义
 const columns: ColumnItem[] = reactive([
   {
-    label: '八大类ID（关联八大类字典表主键）',
-    field: 'categoryId',
-    type: 'input',
+    label: '培训项目',
+    field: 'projectId',
+    type: 'cascader',
     span: 24,
-    rules: [{ required: true, message: '请输入八大类ID（关联八大类字典表主键）' }]
+    hidden: false, // 🟢 初始显示（新增用）
+    props: {
+      allowSearch: true,
+      multiple: false,
+      options: categoryOptions,
+      fieldNames: { label: 'label', value: 'value' }
+    },
+    rules: [{ required: true, message: '请选择考试项目' }]
   },
   {
-    label: '机构ID（关联机构表主键）',
-    field: 'orgId',
-    type: 'input',
-    span: 24,
-    rules: [{ required: true, message: '请输入机构ID（关联机构表主键）' }]
-  },
-  {
-    label: '培训价格（元，精确到分，对应“价格表”核心需求）',
+    label: '培训价格（元）',
     field: 'price',
-    type: 'input',
+    type: 'InputNumber',
     span: 24,
-    rules: [{ required: true, message: '请输入培训价格（元，精确到分，对应“价格表”核心需求）' }]
-  },
+    props: {
+      min: 0.01,
+      step: 0.01,
+      precision: 2,
+      placeholder: '请输入培训价格（元）'
+    },
+    rules: [
+      { required: true, message: '请输入培训价格（元）' },
+      {
+        validator: (_, value) => {
+          if (value === null || value === undefined || value === '') {
+            return Promise.reject('请输入培训价格（元）')
+          }
+          if (value <= 0) {
+            return Promise.reject('价格必须大于0元')
+          }
+          return Promise.resolve()
+        },
+        trigger: 'blur'
+      }
+    ]
+  }
 ])
 
-// 重置
+// 🔄 重置表单
 const reset = () => {
   formRef.value?.formRef?.resetFields()
   resetForm()
 }
 
-// 保存
+// 💾 保存数据
 const save = async () => {
   try {
     const isInvalid = await formRef.value?.formRef?.validate()
@@ -86,23 +115,31 @@ const save = async () => {
   }
 }
 
-// 新增
+// 🟢 新增：显示“培训项目”
 const onAdd = async () => {
   reset()
   dataId.value = ''
   visible.value = true
+  const projectColumn = columns.find(c => c.field === 'projectId')
+  if (projectColumn) projectColumn.hidden = false
 }
 
-// 修改
+// 🔒 修改：隐藏“培训项目”
 const onUpdate = async (id: string) => {
   reset()
   dataId.value = id
   const { data } = await getOrgTrainingPrice(id)
   Object.assign(form, data)
   visible.value = true
+  const projectColumn = columns.find(c => c.field === 'projectId')
+  if (projectColumn) projectColumn.hidden = true
 }
+
+// 初始化分类数据
+onMounted(async () => {
+  const res = await getSelectCategoryProject()
+  categoryOptions.value = res.data
+})
 
 defineExpose({ onAdd, onUpdate })
 </script>
-
-<style scoped lang="scss"></style>

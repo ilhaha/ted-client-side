@@ -18,7 +18,7 @@ export interface OrgTrainingPriceResp {
 }
 export interface OrgTrainingPriceDetailResp {
   id: string
-  categoryId: string
+  projectId: string
   orgId: string
   price: string
   createUser: string
@@ -30,7 +30,7 @@ export interface OrgTrainingPriceDetailResp {
   updateUserString: string
 }
 export interface OrgTrainingPriceQuery {
-  categoryId: string | undefined
+  projectId: string | undefined
   orgId: string | undefined
   price: string | undefined
   sort: Array<string>

@@ -1,7 +1,7 @@
 <template>
   <div class="gi_table_page">
     <GiTable
-      title="机构培训价格（仅核心字段：主键、八大类ID、机构ID、价格）管理"
+      title="机构培训价格管理"
       row-key="id"
       :data="dataList"
       :columns="columns"
@@ -13,9 +13,7 @@
       @refresh="search"
     >
       <template #toolbar-left>
-	    <a-input-search v-model="queryForm.categoryId" placeholder="请输入八大类ID（关联八大类字典表主键）" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.orgId" placeholder="请输入机构ID（关联机构表主键）" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.price" placeholder="请输入培训价格（元，精确到分，对应“价格表”核心需求）" allow-clear @search="search" />
+	    <a-input-search v-model="queryForm.categoryId" placeholder="请输入八大类ID" allow-clear @search="search" />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -33,7 +31,7 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['training:orgTrainingPrice:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+          <!-- <a-link v-permission="['training:orgTrainingPrice:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <a-link v-permission="['training:orgTrainingPrice:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <a-link
             v-permission="['training:orgTrainingPrice:delete']"
@@ -67,7 +65,7 @@ defineOptions({ name: 'OrgTrainingPrice' })
 
 
 const queryForm = reactive<OrgTrainingPriceQuery>({
-  categoryId: undefined,
+  projectId: undefined,
   orgId: undefined,
   price: undefined,
   sort: ['id,desc']
@@ -81,15 +79,11 @@ const {
   handleDelete
 } = useTable((page) => listOrgTrainingPrice({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
-  { title: '主键ID（自增唯一标识）', dataIndex: 'id', slotName: 'id' },
-  { title: '八大类ID（关联八大类字典表主键）', dataIndex: 'categoryId', slotName: 'categoryId' },
-  { title: '机构ID（关联机构表主键）', dataIndex: 'orgId', slotName: 'orgId' },
-  { title: '培训价格（元，精确到分，对应“价格表”核心需求）', dataIndex: 'price', slotName: 'price' },
+  { title: '培训项目', dataIndex: 'projectName', slotName: 'projectName' },
+  { title: '培训价格（元）', dataIndex: 'price', slotName: 'price' },
   { title: '创建人', dataIndex: 'createUserString', slotName: 'createUser' },
-  { title: '更新人', dataIndex: 'updateUserString', slotName: 'updateUser' },
   { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
   { title: '更新时间', dataIndex: 'updateTime', slotName: 'updateTime' },
-  { title: '是否删除（0否，1是）', dataIndex: 'isDeleted', slotName: 'isDeleted' },
   {
     title: '操作',
     dataIndex: 'action',
@@ -103,7 +97,7 @@ const columns = ref<TableInstanceColumns[]>([
 
 // 重置
 const reset = () => {
-  queryForm.categoryId = undefined
+  queryForm.projectId = undefined
   queryForm.orgId = undefined
   queryForm.price = undefined
   search()

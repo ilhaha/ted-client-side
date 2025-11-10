@@ -8,10 +8,16 @@
 
           <!-- 导航菜单 -->
           <div class="nav-menu">
-            <a-menu v-model:selected-keys="activeTab" mode="horizontal" @menu-item-click="handleTabChange">
+            <a-menu
+              v-model:selected-keys="activeTab"
+              mode="horizontal"
+              @menu-item-click="handleTabChange"
+            >
               <a-menu-item key="1"> 考试计划 </a-menu-item>
               <a-menu-item key="2"> 班级管理 </a-menu-item>
+              <a-menu-item key="8"> 培训价格管理 </a-menu-item>
               <a-menu-item key="6"> 培训申请 </a-menu-item>
+              <a-menu-item key="9"> 培训缴费审核 </a-menu-item>
               <a-menu-item key="3"> 培训名单 </a-menu-item>
               <a-menu-item key="5"> 专家管理 </a-menu-item>
               <a-menu-item key="7"> 培训管理 </a-menu-item>
@@ -37,23 +43,33 @@
                   </a-button>
                 </a-space>
               </div>
-              <a-table :data="studentApplyFortList" :columns="studentApplyFortColumns"
-                :loading="studentApplyFortLoading" :pagination="{
+              <a-table
+                :data="studentApplyFortList"
+                :columns="studentApplyFortColumns"
+                :loading="studentApplyFortLoading"
+                :pagination="{
                   total: studentTotal,
                   current: studentCurrentPage,
                   pageSize: studentPageSize,
                   showTotal: true,
                   onChange: handleStudentPageChange,
-                }">
+                }"
+              >
                 <template #operations="{ record }">
-                  <a-button type="text" @click="handleViewCertificate(record.candidateId)">
+                  <a-button
+                    type="text"
+                    @click="handleViewCertificate(record.candidateId)"
+                  >
                     <template #icon>
                       <IconEye />
                     </template>
                     证书查询
                   </a-button>
                   <!-- 新增查看资料按钮 -->
-                  <a-button type="text" @click="handleViewDocuments(record.candidateId)">
+                  <a-button
+                    type="text"
+                    @click="handleViewDocuments(record.candidateId)"
+                  >
                     <template #icon>
                       <IconFile />
                     </template>
@@ -65,7 +81,13 @@
                     </template>
                     上传资料
                   </a-button>
-                  <a-button type="text" status="danger" @click="handleRemoveStudent(record.orgId, record.candidateId)">
+                  <a-button
+                    type="text"
+                    status="danger"
+                    @click="
+                      handleRemoveStudent(record.orgId, record.candidateId)
+                    "
+                  >
                     <template #icon>
                       <IconDelete />
                     </template>
@@ -73,22 +95,40 @@
                   </a-button>
                 </template>
               </a-table>
-              <DocumentUpload :visible="uploadVisible" title="上传资料" @close="uploadVisible = false"
-                @upload-success="handleUploadSuccess">
+              <DocumentUpload
+                :visible="uploadVisible"
+                title="上传资料"
+                @close="uploadVisible = false"
+                @upload-success="handleUploadSuccess"
+              >
               </DocumentUpload>
 
               <!-- 新增资料弹窗 -->
-              <Drawer v-model:visible="showDocumentModal" title="学员资料" :footer="false" width="500px"
-                @close="handleCloseDocument">
+              <Drawer
+                v-model:visible="showDocumentModal"
+                title="学员资料"
+                :footer="false"
+                width="500px"
+                @close="handleCloseDocument"
+              >
                 <div class="document-drawer-content">
                   <div v-if="documentLoading" class="loading-container">
                     <a-spin size="large" />
                   </div>
                   <div v-else-if="documentList.length" class="document-list">
-                    <div v-for="(doc, index) in documentList" :key="index" class="document-card">
+                    <div
+                      v-for="(doc, index) in documentList"
+                      :key="index"
+                      class="document-card"
+                    >
                       <div class="document-image">
-                        <a-image :src="doc.documentUrl" :alt="doc.documentName" :preview="true" fit="cover"
-                          @error="handleImageError" />
+                        <a-image
+                          :src="doc.documentUrl"
+                          :alt="doc.documentName"
+                          :preview="true"
+                          fit="cover"
+                          @error="handleImageError"
+                        />
                       </div>
                       <div class="document-info">
                         <div class="document-header">
@@ -119,19 +159,40 @@
             <div v-if="activeTab === '7'" class="tab-content">
               <TrainingManagement v-if="activeTab === '7'" />
             </div>
+               <div v-if="activeTab === '8'" class="tab-content">
+              <OrgTrainingPrice />
+            </div>
+               <div v-if="activeTab === '9'" class="tab-content">
+              <orgTrainingPaymentAudit />
+            </div>
           </div>
         </div>
       </div>
     </div>
   </a-spin>
   <!-- 批量注册弹窗 -->
-  <Modal v-model:visible="showBatchSignUpModal" title="批量注册学员" :footer="false" width="400px" @close="handleFileClose">
+  <Modal
+    v-model:visible="showBatchSignUpModal"
+    title="批量注册学员"
+    :footer="false"
+    width="400px"
+    @close="handleFileClose"
+  >
     <div class="batch-modal-content">
       <a-space direction="vertical" size="large" fill>
-        <a-upload v-model:file-list="fileList" :action="`${uploadUrl}/training/org/upload`" :headers="{
-          Authorization: `Bearer ${getToken()}`,
-        }" :limit="1" accept=".xls,.xlsx" list-type="text" @success="handleSuccess" @before-upload="beforeUpload"
-          @error="handleError">
+        <a-upload
+          v-model:file-list="fileList"
+          :action="`${uploadUrl}/training/org/upload`"
+          :headers="{
+            Authorization: `Bearer ${getToken()}`,
+          }"
+          :limit="1"
+          accept=".xls,.xlsx"
+          list-type="text"
+          @success="handleSuccess"
+          @before-upload="beforeUpload"
+          @error="handleError"
+        >
           <template #upload-button>
             <a-button type="primary">
               <template #icon>
@@ -157,23 +218,40 @@
             <li>请严格按照模板格式填写数据</li>
           </ul>
         </div>
-        <a-button type="primary" class="confirm-upload-btn" :disabled="!fileList.length" @click="handleConfirmUpload">
+        <a-button
+          type="primary"
+          class="confirm-upload-btn"
+          :disabled="!fileList.length"
+          @click="handleConfirmUpload"
+        >
           确认上传
         </a-button>
       </a-space>
     </div>
   </Modal>
   <!-- 查看证书抽屉 -->
-  <Drawer v-model:visible="showCertificateModal" title="查看证书" :footer="false" width="500px"
-    @close="handleCloseCertificate">
+  <Drawer
+    v-model:visible="showCertificateModal"
+    title="查看证书"
+    :footer="false"
+    width="500px"
+    @close="handleCloseCertificate"
+  >
     <div class="certificate-drawer-content">
       <div v-if="certificateLoading" class="loading-container">
         <a-spin size="large" />
       </div>
       <div v-else-if="certificateList?.length > 0" class="certificate-list">
-        <div v-for="(cert, index) in certificateList" :key="index" class="certificate-card">
+        <div
+          v-for="(cert, index) in certificateList"
+          :key="index"
+          class="certificate-card"
+        >
           <div class="certificate-image">
-            <img :src="cert.imageUrl || '/static/images/default-cert.jpg'" :alt="cert.certificateTypeName" />
+            <img
+              :src="cert.imageUrl || '/static/images/default-cert.jpg'"
+              :alt="cert.certificateTypeName"
+            />
           </div>
           <div class="certificate-info">
             <div class="certificate-header">
@@ -209,7 +287,10 @@
     <template #title>
       <div class="drawer-title">
         <span class="title-text">{{ selectedItem?.projectName }}</span>
-        <a-tag v-if="selectedType === 'project'" :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'">
+        <a-tag
+          v-if="selectedType === 'project'"
+          :color="selectedItem?.projectStatus === '1' ? 'green' : 'blue'"
+        >
           {{ selectedItem?.projectStatus === "1" ? "已上架" : "进行中" }}
         </a-tag>
       </div>
@@ -217,7 +298,10 @@
 
     <div v-if="selectedItem" class="detail-content">
       <div class="detail-image">
-        <img :src="selectedItem?.imageUrl || '/static/images/test.jpg'" :alt="selectedItem?.projectName" />
+        <img
+          :src="selectedItem?.imageUrl || '/static/images/test.jpg'"
+          :alt="selectedItem?.projectName"
+        />
       </div>
       <a-descriptions :data="getDescriptionData()" layout="inline-vertical" />
       <a-divider />
@@ -233,8 +317,15 @@
       <div v-if="activeTab === '1'" class="certificate-card">
         <h4>证书信息</h4>
         <a-card :bordered="true" class="info-card">
-          <div v-if="selectedItem?.certificates?.length" class="certificate-list">
-            <div v-for="(cert, index) in selectedItem.certificates" :key="index" class="cert-item">
+          <div
+            v-if="selectedItem?.certificates?.length"
+            class="certificate-list"
+          >
+            <div
+              v-for="(cert, index) in selectedItem.certificates"
+              :key="index"
+              class="cert-item"
+            >
               <div class="cert-name">{{ cert.certificateName }}</div>
               <div class="cert-number">
                 证书编号：{{ cert.certificateNumber || "暂无" }}
@@ -252,7 +343,12 @@
         <h4>所需资料</h4>
         <a-card :bordered="true" class="info-card">
           <div v-if="selectedItem?.documentList?.length" class="document-tags">
-            <a-tag v-for="(doc, index) in selectedItem.documentList" :key="index" size="medium" class="doc-tag">
+            <a-tag
+              v-for="(doc, index) in selectedItem.documentList"
+              :key="index"
+              size="medium"
+              class="doc-tag"
+            >
               <template #icon>
                 <IconFile />
               </template>
@@ -268,7 +364,12 @@
         <h4>所需资料</h4>
         <a-card :bordered="true" class="info-card">
           <div v-if="selectedItem?.documentNames?.length" class="document-tags">
-            <a-tag v-for="(doc, index) in selectedItem.documentNames" :key="index" size="medium" class="doc-tag">
+            <a-tag
+              v-for="(doc, index) in selectedItem.documentNames"
+              :key="index"
+              size="medium"
+              class="doc-tag"
+            >
               <template #icon>
                 <IconFile />
               </template>
@@ -286,8 +387,12 @@
         <h4>考试地点</h4>
         <a-card :bordered="true" class="info-card">
           <div v-if="selectedItem?.locationList?.length" class="location-tags">
-            <a-tag v-for="(location, index) in selectedItem.locationList" :key="index" size="medium"
-              class="location-tag">
+            <a-tag
+              v-for="(location, index) in selectedItem.locationList"
+              :key="index"
+              size="medium"
+              class="location-tag"
+            >
               <template #icon>
                 <IconLocation />
               </template>
@@ -305,30 +410,60 @@
       <a-spin dot />
     </div>
     <template #footer>
-      <a-button v-if="activeTab === '1'" type="primary" @click="handleClick">选择考生</a-button>
-      <a-modal :visible="selectStudent" draggable :width="800" :mask-closable="false" ok-text="选择" @ok="handleUpload"
-        @cancel="handleCloseUpload">
+      <a-button v-if="activeTab === '1'" type="primary" @click="handleClick"
+        >选择考生</a-button
+      >
+      <a-modal
+        :visible="selectStudent"
+        draggable
+        :width="800"
+        :mask-closable="false"
+        ok-text="选择"
+        @ok="handleUpload"
+        @cancel="handleCloseUpload"
+      >
         <template #title> 选择需要提交申请表的考生 </template>
         <div class="search">
           <div class="nickname">
             <input v-model="nickname" type="text" placeholder="搜索考生名称" />
             <a-button type="primary" @click="searchByNickName">搜索</a-button>
             <a-button @click="resetName">重置</a-button>
-            <a-modal :visible="studentUploadVisible" :width="900" :mask-closable="false">
+            <a-modal
+              :visible="studentUploadVisible"
+              :width="900"
+              :mask-closable="false"
+            >
               <template #title> 上传资料申请表 </template>
               <div>
-                <a-table :columns="uploadColumns" :data="uploadList" :virtual-list-props="{ height: 300 }"
-                  :pagination="false" style="width: 800px; min-height: 342px; margin-left: 25px">
+                <a-table
+                  :columns="uploadColumns"
+                  :data="uploadList"
+                  :virtual-list-props="{ height: 300 }"
+                  :pagination="false"
+                  style="width: 800px; min-height: 342px; margin-left: 25px"
+                >
                   <template #upload="{ record }">
-                    <a-upload :file-list="getUploadFileList(record.id)" list-type="picture-card"
-                      :action="studentFileUploadUrl" :limit="1" :data="uploadData"
+                    <a-upload
+                      :file-list="getUploadFileList(record.id)"
+                      list-type="picture-card"
+                      :action="studentFileUploadUrl"
+                      :limit="1"
+                      :data="uploadData"
                       style="display: flex; justify-content: center"
-                      :headers="{ Authorization: `Bearer ${getToken()}` }" accept="image/jpeg,image/png,image/jpg"
-                      image-preview @success="(file) => handleStudentSuccess([file, record])"
-                      @error="(error) => handleStudentError(error, record.id)" />
+                      :headers="{ Authorization: `Bearer ${getToken()}` }"
+                      accept="image/jpeg,image/png,image/jpg"
+                      image-preview
+                      @success="(file) => handleStudentSuccess([file, record])"
+                      @error="(error) => handleStudentError(error, record.id)"
+                    />
                   </template>
                   <template #cancel="{ record }">
-                    <a-popconfirm content="确定取消上传吗?" cancel-text="不取消" ok-text="确定取消" @ok="handleStudentCancel(record)">
+                    <a-popconfirm
+                      content="确定取消上传吗?"
+                      cancel-text="不取消"
+                      ok-text="确定取消"
+                      @ok="handleStudentCancel(record)"
+                    >
                       <a-link>取消上传</a-link>
                     </a-popconfirm>
                   </template>
@@ -339,27 +474,41 @@
                   <div />
                   <div>
                     <a-button @click="handleStudentUploadCancel">取消</a-button>
-                    <a-button type="primary" :loading="studentUploadLoading"
-                      @click="handleStudentUploadOk">确定</a-button>
+                    <a-button
+                      type="primary"
+                      :loading="studentUploadLoading"
+                      @click="handleStudentUploadOk"
+                      >确定</a-button
+                    >
                   </div>
                 </div>
               </template>
             </a-modal>
           </div>
-          <a-table v-model:selected-keys="checkboxList" :data="studentList" :columns="studentColumns"
-            :loading="studentLoading" :row-selection="rowSelection" :pagination="{
+          <a-table
+            v-model:selected-keys="checkboxList"
+            :data="studentList"
+            :columns="studentColumns"
+            :loading="studentLoading"
+            :row-selection="rowSelection"
+            :pagination="{
               total,
               current: currentPage,
               pageSize,
               showTotal: true,
               onChange: handlePageChange,
-            }" row-key="id" style="width: 700px; min-height: 300px; margin-left: 25px" @select="handleCheckbox">
+            }"
+            row-key="id"
+            style="width: 700px; min-height: 300px; margin-left: 25px"
+            @select="handleCheckbox"
+          >
             <template #studentStatus="{ record }">
               <a-space direction="vertical">
                 <a-space>
-                  <a-link :status="record.studentStatus ? 'success' : 'warning'">{{ record.studentStatus ? "已提交" :
-                    "未提交"
-                  }}</a-link>
+                  <a-link
+                    :status="record.studentStatus ? 'success' : 'warning'"
+                    >{{ record.studentStatus ? "已提交" : "未提交" }}</a-link
+                  >
                 </a-space>
               </a-space>
             </template>
@@ -369,7 +518,6 @@
       <a-button type="primary" @click="onClose">确定</a-button>
     </template>
   </a-drawer>
-
 </template>
 
 <script setup lang="ts">
@@ -394,6 +542,8 @@ import TrainingLesson from "@/components/TrainingLesson.vue";
 import ExpertList from "@/components/ExpertList.vue";
 import { getCertificateByCandidateId } from "@/apis/certificates/certificates";
 import TrainingManagement from "@/views/organization/train/index.vue";
+import OrgTrainingPrice from "@/views/training/orgTrainingPrice/index.vue"
+import orgTrainingPaymentAudit from "@/views/training/orgTrainingPaymentAudit/index.vue" 
 import type { EnrollResp } from "@/apis/plan/examPlan";
 import {
   candidatesUploads,
@@ -416,11 +566,11 @@ const certificateList = ref<any[]>([]);
 const showDocumentModal = ref(false);
 const documentLoading = ref(false);
 const documentList = ref<Document[]>([]);
-const importLoading = ref(false)
+const importLoading = ref(false);
 
 const handSetImportLoading = (res: any) => {
-  importLoading.value = res
-}
+  importLoading.value = res;
+};
 // 查看资料方法
 const handleViewDocuments = async (candidateId: string) => {
   showDocumentModal.value = true;
@@ -552,33 +702,32 @@ const orgInfo = ref({
 
 const handleRemoveStudent = (orgId, candidateId) => {
   Modal.confirm({
-    title: '确认移除学生',
-    content: '确定要将该学生从机构中移除吗？此操作不可撤销。',
-    okText: '确认',
-    cancelText: '取消',
+    title: "确认移除学生",
+    content: "确定要将该学生从机构中移除吗？此操作不可撤销。",
+    okText: "确认",
+    cancelText: "取消",
 
     async onOk() {
       try {
-        const res = await agencyRemoveStudent(orgId, candidateId)
-        if (res.code === '0' && res.success) {
-          Message.success('学生已成功移除')
-          loadStudentList()
+        const res = await agencyRemoveStudent(orgId, candidateId);
+        if (res.code === "0" && res.success) {
+          Message.success("学生已成功移除");
+          loadStudentList();
         } else {
-          Message.warning(res.msg || '移除失败')
+          Message.warning(res.msg || "移除失败");
         }
       } catch (error) {
         // 兼容网络异常或 500 报错
         // Message.error(error?.message || '移除失败')
       }
     },
-  })
-}
-
+  });
+};
 
 // 刷新学生列表
 const loadStudentList = async () => {
   await fetchStudentList();
-}
+};
 
 const examPlanList = ref<EnrollResp[]>([]);
 
@@ -703,7 +852,6 @@ const handleCloseCertificate = () => {
   showCertificateModal.value = false;
   certificateList.value = [];
 };
-
 
 // 修改 handleTabChange 方法，在切换到学员名单时获取数据
 const handleTabChange = (key: string) => {
@@ -1157,8 +1305,6 @@ const handleImageError = (e: Event) => {
   box-sizing: border-box;
 }
 
-
-
 .action-buttons {
   display: flex;
   justify-content: flex-end;
@@ -1504,7 +1650,7 @@ const handleImageError = (e: Event) => {
   }
 }
 
-.table-button>button {
+.table-button > button {
   margin-right: 5px;
 }
 
@@ -1513,7 +1659,7 @@ const handleImageError = (e: Event) => {
   text-align: center;
 }
 
-.nickname>input {
+.nickname > input {
   width: 200px;
   height: 30px;
   outline: none;
@@ -1523,7 +1669,7 @@ const handleImageError = (e: Event) => {
   padding-left: 5px;
 }
 
-.nickname>button {
+.nickname > button {
   margin-right: 5px;
 }
 

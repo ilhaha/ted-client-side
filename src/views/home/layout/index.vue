@@ -678,6 +678,7 @@ const getExamDesc = (exam) => {
     {
       label: "缴费审核通知",
       value: qualificationInfo.value?.rejectReason || "无",
+      
     },
 
     // ✅ 新增：申请表链接

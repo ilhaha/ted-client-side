@@ -13,7 +13,6 @@
       @refresh="search"
     >
       <template #toolbar-left>
-	    <a-input-search v-model="queryForm.orgId" placeholder="请输入关联机构ID（关联机构表主键）" allow-clear @search="search" />
 	    <a-input-search v-model="queryForm.trainingId" placeholder="请输入关联培训ID（关联机构培训价格表主键）" allow-clear @search="search" />
 	    <a-input-search v-model="queryForm.categoryId" placeholder="请输入关联八大类ID（关联八大类字典表主键）" allow-clear @search="search" />
 	    <a-input-search v-model="queryForm.candidateId" placeholder="请输入考生ID（缴费考生，关联用户表主键）" allow-clear @search="search" />
