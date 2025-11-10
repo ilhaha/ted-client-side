@@ -66,8 +66,8 @@ const columns: ColumnItem[] = reactive([
       multiple: false,
       disabled: isUpdate.value,
       options: [
-        { label: '作业人员', value: 0 },
-        { label: '检验人员', value: 1 }
+        { label: '作业班', value: 0 },
+        { label: '检验班', value: 1 }
       ],
       fieldNames: { label: 'label', value: 'value' }
     })),

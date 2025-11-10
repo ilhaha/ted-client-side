@@ -40,3 +40,13 @@ export interface WorkerApplyPageQuery extends WorkerApplyQuery, PageQuery {}
 export function orgImport(data: any[]) {
   return http.post(`${BASE_URL}/org/import`, data)
 }
+
+/** @desc 查询作业人员报名列表 */
+export function listWorkerApply(query: WorkerApplyPageQuery) {
+  return http.get<PageRes<WorkerApplyResp[]>>(`${BASE_URL}`, query)
+}
+
+/** @desc 删除作业人员报名 */
+export function deleteWorkerApply(id: string) {
+  return http.del(`${BASE_URL}/${id}`)
+}

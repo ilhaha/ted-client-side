@@ -6,8 +6,8 @@
       <template #toolbar-left>
         <a-select v-model="queryForm.classType" placeholder="班级类型" allow-clear class="search-input ml-2"
           @change="search">
-          <a-option value="0">作业人员</a-option>
-          <a-option value="1">检验人员</a-option>
+          <a-option value="0">作业班</a-option>
+          <a-option value="1">检验班</a-option>
         </a-select>
         <a-cascader v-model="queryForm.projectId" :options="categoryOptions" placeholder="请选择考试项目" allow-clear
           @change="search" />
@@ -27,6 +27,11 @@
           <template #default>导入作业人员名单</template>
         </a-button>
       </template>
+      <template #classType="{ record }">
+        <a-tag :color="getClassTypeColor(record.classType)">
+          {{ getClassTypeText(record.classType) }}
+        </a-tag>
+      </template>
       <template #qrcodeApplyUrl="{ record }">
         <a-space v-if="record.qrcodeApplyUrl">
           <a-image width="80" height="60" :src="record.qrcodeApplyUrl" :preview-props="{ zoomRate: 1.5 }"
@@ -36,6 +41,9 @@
       </template>
       <template #action="{ record }">
         <a-space>
+          <a-link v-permission="['worker:workerApply:list']" title="资料明细" @click="openWorkerList(record)">资料明细</a-link>
+        </a-space>
+        <a-space>
           <a-link v-permission="['training:orgClass:update']" title="修改" @click="onUpdate(record)">修改</a-link>
         </a-space>
       </template>
@@ -43,17 +51,22 @@
 
     <OrgClassAddModal ref="OrgClassAddModalRef" @save-success="search" />
     <WokerImportModel ref="WokerImportModelRef" @setUploadLoading="handSetUploadLoading" />
+    <a-modal v-model:visible="showWokerListVisible" title="学员名单" :mask-closable="false" :esc-to-close="false"
+      width="90%" draggable :footer="null" modal-class="no-padding-modal" @close="handClose">
+      <WokerList ref="WokerListRef" />
+    </a-modal>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import OrgClassAddModal from './OrgClassAddModal.vue'
 import WokerImportModel from './WokerImportModel.vue'
+import WokerList from '@/views/workerApply/index.vue'
 import { type OrgClassResp, type OrgClassQuery, deleteOrgClass, exportOrgClass, listOrgClass } from '@/apis/training/orgClass'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { type ProjectCategoryVO, getSelectCategoryProject } from '@/apis/training/org'
 import { useDownload, useTable } from '@/hooks'
-import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
 
@@ -62,6 +75,7 @@ defineOptions({ name: 'OrgClass' })
 const emit = defineEmits<{
   (e: 'setImportLoading', payload: any): void
 }>()
+
 
 const queryForm = reactive<OrgClassQuery>({
   projectId: undefined,
@@ -81,6 +95,7 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   { title: '考试项目', dataIndex: 'projectName', slotName: 'projectName' },
   { title: '班级名称', dataIndex: 'className', slotName: 'className' },
+  { title: '班级类型', dataIndex: 'classType', slotName: 'classType' },
   { title: '作业人员报考二维码', dataIndex: 'qrcodeApplyUrl', slotName: 'qrcodeApplyUrl' },
   { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
   {
@@ -93,10 +108,18 @@ const columns = ref<TableInstanceColumns[]>([
     show: has.hasPermOr(['training:orgClass:detail', 'training:orgClass:update', 'training:orgClass:delete'])
   }])
 
+const showWokerListVisible = ref(false)
+// 查看作业人员名单
+const WokerListRef = ref<InstanceType<typeof WokerList>>()
+const openWorkerList = (res: any) => {
+  WokerListRef.value?.onOpen(res.id)
+  showWokerListVisible.value = true
+}
+
+
 const handSetUploadLoading = (res: any) => {
   emit("setImportLoading", res)
 }
-
 // 打开作业人员导入弹窗
 const WokerImportModelRef = ref<InstanceType<typeof WokerImportModel>>()
 const openImport = () => {
@@ -129,6 +152,28 @@ const reset = () => {
   queryForm.classType = undefined
   search()
 }
+
+const getClassTypeColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return 'blue'
+    case 1:
+      return 'orange'
+    default:
+      return 'gray'
+  }
+}
+
+const getClassTypeText = (status: number) => {
+  switch (status) {
+    case 0:
+      return '作业班'
+    case 1:
+      return '检验班'
+    default:
+      return ''
+  }
+}
 onMounted(async () => {
   const res = await getSelectCategoryProject()
   categoryOptions.value = res.data
@@ -136,4 +181,8 @@ onMounted(async () => {
 
 </script>
 
-<style scoped lang="scss"></style>
+<style>
+.no-padding-modal .arco-modal-body {
+  padding: 0 !important;
+}
+</style>
