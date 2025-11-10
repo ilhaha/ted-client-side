@@ -9,6 +9,11 @@
         }}</a-tag>
       </template>
       <template #toolbar-left>
+        <a-select v-model="queryForm.planType" placeholder="考试人员类型" allow-clear class="search-input ml-2"
+          @change="search">
+          <a-option :value="0">作业人员</a-option>
+          <a-option :value="1">检验人员</a-option>
+        </a-select>
         <!-- <div class="search-container"> -->
         <a-input-search v-model="queryForm.examPlanName" placeholder="搜索计划名称" allow-clear @search="search" />
         <a-input-search v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear @search="search" />
@@ -37,7 +42,11 @@
       <template #enrollStartTime="{ record }">
         {{ record.enrollStartTime + " ~ " + record.enrollEndTime }}
       </template>
-
+      <template #planType="{ record }">
+        <a-tag :color="getPlanTypeColor(record.planType)" bordered>
+          {{ getPlanTypeText(record.planType) }}
+        </a-tag>
+      </template>
       <template #status="{ record }">
         <a-tag :color="getStatusColor(record.status)" bordered>
           {{ getStatusText(record.status) }}
@@ -45,9 +54,10 @@
       </template>
       <template #action="{ record }">
         <a-space :size="2">
-          <a-link v-if="record.status == 3 && record.remainingSlots > 0" title="报考"
-            @click="openClassSignUp(record)">报考</a-link>
-          <a-link v-if="record.status == 3" title="报考名单" @click="openApplyList(record)">报考名单</a-link>
+          <a-link v-if="record.status == 3 && record.remainingSlots > 0 && record.planType == 0" title="报考"
+            @click="openClassSignUp(record)" v-permission="['exam:enroll:add']">报考</a-link>
+          <a-link v-if="record.status == 3 && record.planType == 0" title="报考人员" @click="openApplyList(record)"
+            v-permission="['exam:enroll:list']">报考人员</a-link>
           <!-- <a-link v-if="record.status == 5 || record.status == 6" title="考生信息"
             @click="openExamInfo(record)">考生信息</a-link> -->
         </a-space>
@@ -57,7 +67,8 @@
 
     <ProjectDetailDrawer ref="ProjectDetailDrawerRef" />
     <CertificateDetailDrawer ref="CertificateDetailDrawerRef" />
-    <OrgEnroll ref="OrgEnrollRef" />
+    <OrgEnroll ref="OrgEnrollRef" @applySuccess="handApplySuccess" />
+    <ApplyList ref="ApplyListRef" />
   </div>
 </template>
 
@@ -65,6 +76,7 @@
 import ProjectDetailDrawer from "@/views/organization/project/ProjectDetailDrawer.vue";
 import CertificateDetailDrawer from "@/views/organization/certificate/CertificateDetailDrawer.vue";
 import OrgEnroll from '@/views/training/orgEnroll/index.vue'
+import ApplyList from '@/views/training/orgEnroll/ApplyList.vue'
 import { onMounted, ref, computed } from 'vue'
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { isMobile } from "@/utils";
@@ -74,6 +86,7 @@ import { orgGetPlanList } from '@/apis/plan/examPlan'
 defineOptions({ name: "ExamPlan" });
 
 const queryForm = reactive<ExamPlanQuery>({
+  planType: 0,
   sort: ["tep.enroll_end_time,asc"],
 });
 
@@ -112,10 +125,16 @@ const openClassSignUp = (record: any) => {
   OrgEnrollRef.value?.onOpen(record);
 };
 
+
+const ApplyListRef = ref<InstanceType<typeof ApplyList>>();
+
 const openApplyList = (record: any) => {
-  console.log("考生信息", record);
+  ApplyListRef.value?.onOpen(record.examPlanId);
 };
 
+const handApplySuccess = () => {
+  search()
+}
 
 // 获取项目详情
 const ProjectDetailDrawerRef = ref<InstanceType<typeof ProjectDetailDrawer>>();
@@ -142,6 +161,12 @@ const columns = ref<TableInstanceColumns[]>([
     title: "所属八大类",
     dataIndex: "categoryName",
     slotName: "categoryName",
+    show: true,
+  },
+  {
+    title: "考试人员类型",
+    dataIndex: "planType",
+    slotName: "planType",
     show: true,
   },
   {
@@ -217,6 +242,7 @@ const reset = () => {
   queryForm.examPlanName = undefined;
   queryForm.projectName = undefined;
   queryForm.status = undefined;
+  queryForm.planType = 0
   search();
 };
 
@@ -225,6 +251,7 @@ const search = async () => {
     examPlanName: queryForm.examPlanName || '',
     projectName: queryForm.projectName || '',
     status: queryForm.status || 3,
+    planType: queryForm.planType,
     page: String(currentPage.value),
     size: String(pageSize.value),
   }).toString()
@@ -256,6 +283,28 @@ const getExamTypeText = (status: number) => {
       return "实操考试";
     default:
       return "未知状态";
+  }
+};
+
+const getPlanTypeColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "orange";
+    case 1:
+      return "cyan";
+    default:
+      return "default";
+  }
+};
+
+const getPlanTypeText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "作业人员";
+    case 1:
+      return "检验人员";
+    default:
+      return "未知类型";
   }
 };
 

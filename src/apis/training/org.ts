@@ -52,11 +52,11 @@ export interface ProjectCategoryVO {
   children?: ProjectCategoryVO[]
 }
 
-export interface OrgPageQuery extends OrgQuery, PageQuery {}
+export interface OrgPageQuery extends OrgQuery, PageQuery { }
 
 /** @desc 通过excel导入作业人员信息 */
-export function importWorker(file: any,classId:string) {
-  return http.post(`${BASE_URL}/import/worker/${classId}`, file,{
+export function importWorker(file: any, classId: string) {
+  return http.post(`${BASE_URL}/import/worker/${classId}`, file, {
     timeout: 1800000,
   })
 }
@@ -69,33 +69,33 @@ export function downloadImportWorkerTemplate(classId: string) {
 
 
 /** @desc 获取机构对应的项目-班级-考生级联选择 */
-export function getSelectProjectClassByType(type:number) {
+export function getSelectProjectClassByType(type: number) {
   return http.get<any[]>(`${BASE_URL}/select/project/class/type/${type}`)
 }
 
 /** @desc 机构预报名 */
-export function applyPre(data: any) {
-  return http.post(`${BASE_URL}/apply/pre`, data)
+export function orgApply(data: any) {
+  return http.post(`${BASE_URL}/apply`, data)
 }
 
 /** @desc 获取机构对应的项目-班级-考生级联选择 */
-export function getSelectProjectClassCandidate(projectId:string) {
-  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/project/class/candidate`,{projectId})
+export function getSelectProjectClassCandidate(projectId: string, planType: number, planId: string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/project/class/candidate/${planType}`, { projectId, planId })
 }
 
 /** @desc 获取机构对应的项目-班级级联选择 */
-export function getSelectProjectClass(orgId:string,projectId:string) {
-  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/project/class`,{orgId,projectId})
+export function getSelectProjectClass(orgId: string, projectId: string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/project/class`, { orgId, projectId })
 }
 
 /** @desc 获取机构对应的分类-项目-班级级联选择 */
-export function getSelectCategoryProjectClass(orgId:string) {
-  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project/class`,{orgId})
+export function getSelectCategoryProjectClass(orgId: string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project/class`, { orgId })
 }
 
 /** @desc 获取机构八大类-项目级联选择器 */
-export function getSelectCategoryProject(orgId:string) {
-  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project`,{orgId})
+export function getSelectCategoryProject(orgId: string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project`, { orgId })
 }
 
 /** @desc 查询机构信息列表 */
@@ -129,7 +129,7 @@ export function exportOrg(query: OrgQuery) {
 }
 
 /**@desc 导入机构考生关联信息 */
-export function getStudents(id:string) {
+export function getStudents(id: string) {
   return http.get(`${BASE_URL}/${id}`)
 }
 

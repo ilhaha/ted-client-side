@@ -156,7 +156,9 @@ const columns = computed(() => {
 const remove = async (record: WorkerApplyResp) => {
   await deleteWorkerApply(record.id)
   Message.success("操作成功")
+  search()
 }
+
 const onOpen = async (classId: string) => {
   queryForm.classId = classId
   reset()
