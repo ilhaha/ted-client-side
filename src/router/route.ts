@@ -13,9 +13,9 @@ export const systemRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   {
-    path: '/org/apply/upload',
-    name: 'ApplyUpload',
-    component: () => import('@/views/training/apply/index.vue'),
+    path: '/worker/payment-voucher/upload',
+    name: 'WorkerPaymentVoucherUpload',
+    component: () => import('@/views/worker/PaymentVoucherIndex.vue'),
     meta: { hidden: true },
   },
   /* 公告 轮播图页 */
@@ -23,7 +23,7 @@ export const systemRoutes: RouteRecordRaw[] = [
     path: '/carousel/:id',
     name: 'Carousel',
     component: () => import('@/views/login/components/info/carousel.vue'),
-    meta: { },
+    meta: {},
     props: true,
   },
   {
@@ -31,13 +31,13 @@ export const systemRoutes: RouteRecordRaw[] = [
     name: 'Dashboard',
     component: Layout,
     redirect: '/home',
-    meta: { },
+    meta: {},
     children: [
       {
         path: '/home',
         name: 'Home',
         component: () => import('@/views/home/index.vue'),
-        meta: { },
+        meta: {},
       },
       {
         path: '/training/:id',
@@ -77,14 +77,14 @@ export const systemRoutes: RouteRecordRaw[] = [
     path: '/organization',
     name: 'Organization',
     component: Layout,
-    meta: { },
+    meta: {},
     props: true,
     children: [
       {
         path: '/organization/index',
         name: 'OrganizationDetail',
         component: () => import('@/views/organization/organizationIndex.vue'),
-        meta: { },
+        meta: {},
         props: true,
       },
     ],

@@ -1,7 +1,7 @@
 <template>
     <div>
         <a-modal v-model:visible="visible" title="机构报考" :mask-closable="false" :esc-to-close="false"
-            :width="width >= 600 ? 600 : '100%'" draggable @close="openCancle">
+            :width="width >= 600 ? 600 : '100%'" draggable @close="openCancle" :closable="!applyLodding">
             <a-form ref="formRef" :model="form" layout="vertical">
                 <a-form-item field="examPlanName" label="报考八大类" :rules="[{ required: true, message: '请输入八大类' }]">
                     <a-input v-model="form.projectName" placeholder="请输入八大类" disabled />
@@ -17,7 +17,7 @@
             </a-form>
             <template #footer>
                 <a-space>
-                    <a-button @click="openCancle">取消</a-button>
+                    <a-button @click="openCancle" :disabled="applyLodding">取消</a-button>
                     <a-button type="primary" @click="apply" :loading="applyLodding">确定</a-button>
                 </a-space>
             </template>

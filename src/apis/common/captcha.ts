@@ -40,3 +40,14 @@ export function checkBehaviorCaptcha(req: any) {
 export function getSmsCaptchaStatus(phone: string, captcha: string) {
   return http.get<boolean>(`${BASE_URL}/getSmsCaptchaStatus`, { phone, captcha })
 }
+
+/** @desc 作业人员获取上传考试缴费凭证短信验证码 */
+export function getPaySmsCaptcha(phone: string, captchaReq: T.BehaviorCaptchaReq, candidateId: string) {
+  return http.get<boolean>(`${BASE_URL}/pay/sms?phone=${phone}&captchaVerification=${encodeURIComponent(captchaReq.captchaVerification || '')}&candidateId=${candidateId}`)
+}
+
+
+/** @desc 验证作业人员手机验证码，用于上传考试缴费凭证 */
+export function getPaySmsCaptchaStatus(phone: string, captcha: string) {
+  return http.get<boolean>(`${BASE_URL}/pay/getSmsCaptchaStatus`, { phone, captcha })
+}
