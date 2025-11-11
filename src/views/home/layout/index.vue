@@ -274,7 +274,7 @@
                 <a-button
                   type="primary"
                   v-if="
-                    ![0, 6].includes(selectedItem?.enrollStatus) && 
+                    ![0, 6].includes(selectedItem?.enrollStatus) &&
                     ![2, 5, 7].includes(qualificationInfo?.auditStatus)
                   "
                   @click="handleCancelRegistration"
@@ -286,11 +286,11 @@
                 <a-button
                   type="primary"
                   :disabled="
-                    selectedItem?.enrollStatus !== 1 || 
-                    [2, 5, 6, 7].includes(qualificationInfo?.auditStatus) 
+                    selectedItem?.enrollStatus !== 1 ||
+                    [2, 5, 6, 7].includes(qualificationInfo?.auditStatus)
                   "
                   v-if="
-                    ![5, 7].includes(qualificationInfo?.auditStatus) || 
+                    ![5, 7].includes(qualificationInfo?.auditStatus) ||
                     qualificationInfo?.auditStatus == null
                   "
                   @click="handlePayment"
@@ -308,48 +308,75 @@
                 </a-button>
               </div>
             </template>
+
+            <!-- 第一个按钮组（agencyStatus 相关）：加外层 div 并留右间距 -->
             <template v-if="selectedType === 'agency'">
-              <!-- 状态为0：显示发送申请 -->
-              <a-popconfirm
-                content="确定要给当前机构发送申请吗"
-                @ok="openAddAgency"
-              >
-                <a-button v-show="agencyStatus === 0" type="primary"
-                  >发送申请</a-button
+              <div style="display: inline-block; margin-right: 20px">
+                <!-- 与第二个组的间距 -->
+                <!-- 状态为0：显示发送申请 -->
+                <a-popconfirm
+                  content="确定要给当前机构发送申请吗"
+                  @ok="openAddAgency"
                 >
-              </a-popconfirm>
+                  <a-button v-show="agencyStatus === 0" type="primary"
+                    >发送申请</a-button
+                  >
+                </a-popconfirm>
 
-              <!-- 状态为1：显示撤回申请 -->
-              <a-popconfirm content="确定撤回当前申请吗" @ok="handleDelAgency">
-                <a-button v-show="agencyStatus === 1" type="primary"
-                  >撤回申请</a-button
-                >
-              </a-popconfirm>
-
-              <!-- 状态为-1：同时显示撤回申请 + 重新申请 -->
-              <template v-if="agencyStatus === -1">
+                <!-- 状态为1：显示撤回申请 -->
                 <a-popconfirm
                   content="确定撤回当前申请吗"
                   @ok="handleDelAgency"
                 >
-                  <a-button type="primary" style="margin-right: 8px"
+                  <a-button v-show="agencyStatus === 1" type="primary"
                     >撤回申请</a-button
                   >
                 </a-popconfirm>
-                <a-popconfirm
-                  content="确定重新向当前机构发送申请吗"
-                  @ok="openAddAgency"
-                >
-                  <a-button type="primary">重新申请</a-button>
-                </a-popconfirm>
-              </template>
 
-              <!-- 状态为2：显示退出机构 -->
-              <a-popconfirm content="确定退出当前机构吗" @ok="handleQuitAgency">
-                <a-button v-show="agencyStatus === 2" type="primary"
-                  >退出机构</a-button
+                <!-- 状态为-1：同时显示撤回申请 + 重新申请 -->
+                <template v-if="agencyStatus === -1">
+                  <a-popconfirm
+                    content="确定撤回当前申请吗"
+                    @ok="handleDelAgency"
+                  >
+                    <a-button type="primary" style="margin-right: 10px"
+                      >撤回申请</a-button
+                    >
+                    <!-- 组内按钮间距 -->
+                  </a-popconfirm>
+                  <a-popconfirm
+                    content="确定重新向当前机构发送申请吗"
+                    @ok="openAddAgency"
+                  >
+                    <a-button type="primary">重新申请</a-button>
+                  </a-popconfirm>
+                </template>
+
+                <!-- 状态为2：显示退出机构 -->
+                <a-popconfirm
+                  content="确定退出当前机构吗"
+                  @ok="handleQuitAgency"
                 >
-              </a-popconfirm>
+                  <a-button v-show="agencyStatus === 2" type="primary"
+                    >退出机构</a-button
+                  >
+                </a-popconfirm>
+              </div>
+            </template>
+
+            <!-- 第二个按钮组（paymentStatus 相关）：加外层 div -->
+
+            <template v-if="selectedType === 'agency'">
+              <div style="display: inline-block">
+                <a-button
+                  :class="['custom-status-btn', `status-${paymentStatus}`]"
+                  :disabled="!isButtonClickable"
+                  @click="handleAuditTrainingPaymentNotice"
+                  style="margin-right: 8px; position: relative; z-index: 999"
+                >
+                  {{ getButtonText }}
+                </a-button>
+              </div>
             </template>
           </div>
           <!-- 添加加载状态 -->
@@ -370,6 +397,13 @@
         :paymentAuditData="paymentAuditData"
         @upload-application-success="handleUploadSuccessPayment"
       ></ExamineePayment>
+
+      <OrgTrainingPayment
+        :visible="isNotFillInTrainingPayment"
+        @close="handleModalCloseTrainingPayment"
+        :TrainingpaymentAuditData="TrainingpaymentAuditData"
+        @upload-application-success="handleUploadSuccessTrainingPayment"
+      ></OrgTrainingPayment>
 
       <!-- 选择机构项目弹窗 -->
       <a-modal
@@ -414,12 +448,17 @@ import CourseList from "@/components/CourseList.vue";
 import AgencyList from "@/components/AgencyList.vue";
 import SpecialCertificationApplicant from "@/components/SpecialCertificationApplicant/index.vue";
 import ExamineePayment from "@/components/SpecialCertificationApplicant/ExamineePayment.vue";
+import OrgTrainingPayment from "@/views/training/orgTrainingPaymentAudit/orgTrainingPayment.vue";
 import { listTraining } from "@/apis/training/training";
 import {
   downloadExamTicket,
   getExamineePaymentAuditInfo,
   submitExamineePaymentProof,
 } from "@/apis/plan/enroll";
+import {
+  getTrainingPaymentAuditInfo,
+  submitTrainingPaymentProof,
+} from "@/apis/training/orgTrainingPaymentAudit";
 
 import {
   type EnrollResp,
@@ -450,6 +489,7 @@ const selectedItem = ref(null);
 const selectedType = ref("certificate");
 const isNotFillIn = ref(false);
 const isNotFillInPayment = ref(false);
+const isNotFillInTrainingPayment = ref(false);
 const planId = ref(null);
 const isQualifications = ref(false);
 
@@ -496,6 +536,44 @@ const handleModalClose = () => {
 const handleModalClosePayment = () => {
   isNotFillInPayment.value = false;
 };
+const handleModalCloseTrainingPayment = () => {
+  isNotFillInTrainingPayment.value = false;
+};
+
+const statusConfig = {
+  0: { text: "待缴费", clickable: true, type: "primary" },
+  1: { text: "审核中", clickable: true, type: "default" },
+  2: { text: "审核通过", clickable: false, type: "success" },
+  3: { text: "审核驳回", clickable: true, type: "danger" },
+  4: { text: "补正审核中", clickable: true, type: "warning" },
+  // 5: { text: "退款审核", clickable: false, type: "default" },
+  // 6: { text: "已退款", clickable: false, type: "default" },
+  // 7: { text: "退款驳回", clickable: true, type: "danger" },
+  // 必须加默认配置，避免 config 为 undefined
+  default: { text: "未知状态", clickable: false, type: "default" },
+};
+
+// 计算属性：依赖 paymentStatus，自动响应变化
+const getButtonText = computed(() => {
+  const config = statusConfig[paymentStatus.value] || statusConfig.default;
+  return config.text;
+});
+
+const getButtonType = computed(() => {
+  const config = statusConfig[paymentStatus.value] || statusConfig.default;
+  return config.type;
+});
+
+const isButtonClickable = computed(() => {
+  const config = statusConfig[paymentStatus.value] || statusConfig.default;
+  const clickable = config.clickable || false;
+  console.log("按钮可点击性调试：", {
+    paymentStatus: paymentStatus.value,
+    config: config,
+    clickable: clickable,
+  });
+  return clickable;
+});
 
 // 确认上传申请表
 const handleUploadSuccess = async (imageUrl: string) => {
@@ -512,6 +590,7 @@ const handleUploadSuccess = async (imageUrl: string) => {
   }
 };
 const paymentAuditData = ref<any>(null);
+const TrainingpaymentAuditData = ref<any>(null);
 const fileList = ref([]); // 和子组件 v-model 绑定的文件列表
 
 const handleUploadSuccessPayment = async (paymentProofUrl: string) => {
@@ -537,6 +616,62 @@ const handleUploadSuccessPayment = async (paymentProofUrl: string) => {
   isNotFillInPayment.value = false; // 可同步关闭弹窗
   await getCandidatesId(examPlanId);
   await getExamPlanDetail(examPlanId);
+};
+
+// 上传培训机构缴费审核
+const handleUploadSuccessTrainingPayment = async (
+  TrainingpaymentProofUrl: string
+) => {
+  const { auditStatus } = TrainingpaymentAuditData.value || {};
+  // 校验 orgId 和 enrollId（有效数字）
+  if (
+    typeof orgId.value !== "number" ||
+    isNaN(orgId.value) ||
+    orgId.value === 0
+  ) {
+    console.error("机构ID无效", { orgId: orgId.value });
+    Message.warning("机构ID不存在/格式错误，无法提交！");
+    return;
+  }
+  if (
+    typeof enrollId.value !== "number" ||
+    isNaN(enrollId.value) ||
+    enrollId.value === 0
+  ) {
+    console.error("报名ID无效", { enrollId: enrollId.value });
+    Message.warning("报名ID不存在/格式错误，无法提交！");
+    return;
+  }
+  // 校验上传凭证URL
+  if (!TrainingpaymentProofUrl || TrainingpaymentProofUrl.trim() === "") {
+    console.error("缴费凭证URL为空");
+    Message.warning("缴费凭证上传失败，请重新上传！");
+    return;
+  }
+  // 校验 auditStatus（有效数字，根据业务调整允许的状态值）
+  if (typeof auditStatus !== "number" || isNaN(auditStatus)) {
+    console.error("审核状态无效", { auditStatus });
+    Message.warning("审核状态异常，无法提交！");
+    return;
+  }
+  try {
+    // 提交请求（参数顺序和类型与接口保持一致）
+    await submitTrainingPaymentProof(
+      orgId.value,
+      enrollId.value,
+      TrainingpaymentProofUrl,
+      auditStatus // 直接传解构后的 auditStatus（已校验是有效数字）
+    );
+
+    Message.success("凭证上传成功，已提交审核！");
+    // 上传成功后重置状态
+    fileList.value = [];
+    isNotFillInPayment.value = false;
+  } catch (error) {
+    //  异常处理（增加错误提示，便于排查）
+    console.error("❌ 缴费凭证提交失败：", error);
+    Message.error("凭证提交失败，请重试！");
+  }
 };
 const onClose = () => {
   visible.value = false;
@@ -678,7 +813,6 @@ const getExamDesc = (exam) => {
     {
       label: "缴费审核通知",
       value: qualificationInfo.value?.rejectReason || "无",
-      
     },
 
     // ✅ 新增：申请表链接
@@ -918,7 +1052,7 @@ const openAddAgency = async () => {
 //取消当前机构
 const handleDelAgency = async () => {
   const res = await studentDelAgency(selectedItem.value.id);
-  if (res.data == 2) {
+  if (res.success == true) {
     Message.success("取消机构申请成功");
   } else {
     Message.error("取消机构申请失败");
@@ -944,6 +1078,33 @@ const handleQuitAgency = async () => {
   visible.value = false;
   await agencyRef.value.fetchAgencyList();
 };
+
+//上缴审核培训缴费通知单
+const handleAuditTrainingPaymentNotice = async () => {
+  if (
+    !orgId.value ||
+    isNaN(orgId.value) ||
+    !enrollId.value ||
+    isNaN(enrollId.value)
+  ) {
+    console.error("缺少有效 orgId 或 enrollId，无法查询审核信息", {
+      orgId: orgId.value,
+      enrollId: enrollId.value,
+    });
+    Message.warning("机构ID或报名ID不存在/格式错误，无法审核！");
+    return;
+  }
+
+  // 打开缴费弹窗
+  isNotFillInTrainingPayment.value = true;
+  // 调接口查询缴费审核信息（传数字类型的 value）
+  const auditInfo = await getTrainingPaymentAuditInfo(
+    orgId.value,
+    enrollId.value
+  );
+  TrainingpaymentAuditData.value = auditInfo?.data || {}; // 兜底空对象，避免报错
+};
+
 // 添加课程数据
 const courseList = ref([]);
 const fetchCourseList = async () => {
@@ -1032,6 +1193,9 @@ const fetchProjectDetail = async (projectId: string) => {
 
 // 发送申请、已发送申请、退出机构(0、1、2)
 const agencyStatus = ref(0);
+const paymentStatus = ref(0);
+const enrollId = ref(0);
+const orgId = ref(0);
 let remark = "";
 
 const fetchAgencyDetail = async (agencyId: string) => {
@@ -1048,9 +1212,12 @@ const fetchAgencyDetail = async (agencyId: string) => {
   }
 };
 
-const fetchAgencyStatus = async (orgId: any) => {
-  const ref = await getAgencyStatus(orgId);
+const fetchAgencyStatus = async (agencyId: any) => {
+  const ref = await getAgencyStatus(agencyId);
+  enrollId.value = ref.data.data.id;
   agencyStatus.value = ref.data.data.status;
+  paymentStatus.value = ref.data.data.paymentStatus;
+  orgId.value = ref.data.data.orgId;
   remark = ref.data.data.remark;
 };
 
@@ -1375,5 +1542,6 @@ async function handleDownload(userId, name, examPlanName, examNumber) {
       min-width: 120px;
     }
   }
+
 }
 </style>

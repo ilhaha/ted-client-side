@@ -92,3 +92,27 @@ export function deleteOrgTrainingPaymentAudit(id: string) {
 export function exportOrgTrainingPaymentAudit(query: OrgTrainingPaymentAuditQuery) {
   return http.download(`${BASE_URL}/export`, query)
 }
+// 接口定义修改：examineeId 类型从 string → number
+export async function getTrainingPaymentAuditInfo(orgId: number, enrollId: number) {
+  return http.get(`${BASE_URL}/info`, { orgId, enrollId });
+}
+
+/**
+ * @desc 考生提交缴费凭证（保存上传的URL）
+ * @param {number} orgId -机构名称
+ * @param {string} examineeId - 考生申请加入机构id
+ * @param {string} paymentProofUrl - 上传后的培训缴费凭证URL
+ */
+export async function submitTrainingPaymentProof(
+  orgId: number,
+  enrollId: number,
+  paymentProofUrl: string,
+  auditStatus:number
+) {
+  return http.post(`${BASE_URL}/uploadProof`, {
+    orgId,
+    enrollId,
+    paymentProofUrl,
+    auditStatus
+  });
+}

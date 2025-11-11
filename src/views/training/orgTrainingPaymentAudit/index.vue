@@ -1,7 +1,7 @@
 <template>
   <div class="gi_table_page">
     <GiTable
-      title="机构培训缴费审核（记录考生参与机构培训的缴费及审核流程）管理"
+      title="机构培训缴费审核管理"
       row-key="id"
       :data="dataList"
       :columns="columns"
@@ -13,18 +13,18 @@
       @refresh="search"
     >
       <template #toolbar-left>
-	    <a-input-search v-model="queryForm.trainingId" placeholder="请输入关联培训ID（关联机构培训价格表主键）" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.categoryId" placeholder="请输入关联八大类ID（关联八大类字典表主键）" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.candidateId" placeholder="请输入考生ID（缴费考生，关联用户表主键）" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.enrollId" placeholder="请输入关联报名记录ID（关联机构培训报名记录表主键）" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.noticeNo" placeholder="请输入缴费通知单编号（格式：ORG_PAY_时间戳_随机数）" allow-clear @search="search" />
+	    <a-input-search v-model="queryForm.trainingId" placeholder="请输入关联培训ID" allow-clear @search="search" />
+	    <a-input-search v-model="queryForm.categoryId" placeholder="请输入关联八大类ID" allow-clear @search="search" />
+	    <a-input-search v-model="queryForm.candidateId" placeholder="请输入考生ID" allow-clear @search="search" />
+	    <a-input-search v-model="queryForm.enrollId" placeholder="请输入关联报名记录ID" allow-clear @search="search" />
+	    <a-input-search v-model="queryForm.noticeNo" placeholder="请输入缴费通知单编号）" allow-clear @search="search" />
 	    <a-input-search v-model="queryForm.paymentAmount" placeholder="请输入缴费金额（元）" allow-clear @search="search" />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
         </a-button>
       </template>
-      <template #toolbar-right>
+      <!-- <template #toolbar-right>
         <a-button v-permission="['training:orgTrainingPaymentAudit:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
@@ -33,7 +33,7 @@
           <template #icon><icon-download /></template>
           <template #default>导出</template>
         </a-button>
-      </template>
+      </template> -->
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['training:orgTrainingPaymentAudit:detail']" title="详情" @click="onDetail(record)">详情</a-link>
@@ -89,25 +89,23 @@ const {
 } = useTable((page) => listOrgTrainingPaymentAudit({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
   { title: '主键ID', dataIndex: 'id', slotName: 'id' },
-  { title: '关联机构ID（关联机构表主键）', dataIndex: 'orgId', slotName: 'orgId' },
-  { title: '关联培训ID（关联机构培训价格表主键）', dataIndex: 'trainingId', slotName: 'trainingId' },
-  { title: '关联八大类ID（关联八大类字典表主键）', dataIndex: 'categoryId', slotName: 'categoryId' },
-  { title: '考生ID（缴费考生，关联用户表主键）', dataIndex: 'candidateId', slotName: 'candidateId' },
-  { title: '关联报名记录ID（关联机构培训报名记录表主键）', dataIndex: 'enrollId', slotName: 'enrollId' },
-  { title: '缴费通知单编号（格式：ORG_PAY_时间戳_随机数）', dataIndex: 'noticeNo', slotName: 'noticeNo' },
+  { title: '关联机构ID', dataIndex: 'orgId', slotName: 'orgId' },
+  { title: '关联培训ID', dataIndex: 'trainingId', slotName: 'trainingId' },
+  { title: '关联八大类ID', dataIndex: 'categoryId', slotName: 'categoryId' },
+  { title: '考生ID', dataIndex: 'candidateId', slotName: 'candidateId' },
+  { title: '关联报名记录ID', dataIndex: 'enrollId', slotName: 'enrollId' },
+  { title: '缴费通知单编号', dataIndex: 'noticeNo', slotName: 'noticeNo' },
   { title: '缴费金额（元）', dataIndex: 'paymentAmount', slotName: 'paymentAmount' },
   { title: '缴费时间', dataIndex: 'paymentTime', slotName: 'paymentTime' },
-  { title: '缴费凭证URL（考生上传的缴费截图/凭证）', dataIndex: 'paymentProofUrl', slotName: 'paymentProofUrl' },
-  { title: '缴费通知单URL（生成的缴费通知PDF地址）', dataIndex: 'auditNoticeUrl', slotName: 'auditNoticeUrl' },
-  { title: '审核状态：0-待缴费，1-已缴费待审核，2-审核通过，3-审核驳回，4-补正审核，5-退款审核，6-已退款，7-退款驳回', dataIndex: 'auditStatus', slotName: 'auditStatus' },
-  { title: '驳回原因（审核驳回/退款驳回时填写）', dataIndex: 'rejectReason', slotName: 'rejectReason' },
-  { title: '审核人ID（关联管理员表主键）', dataIndex: 'auditorId', slotName: 'auditorId' },
+  { title: '缴费凭证URL', dataIndex: 'paymentProofUrl', slotName: 'paymentProofUrl' },
+  { title: '缴费通知单URL', dataIndex: 'auditNoticeUrl', slotName: 'auditNoticeUrl' },
+  { title: '审核状态', dataIndex: 'auditStatus', slotName: 'auditStatus' },
+  { title: '驳回原因', dataIndex: 'rejectReason', slotName: 'rejectReason' },
+  { title: '审核人', dataIndex: 'auditorId', slotName: 'auditorId' },
   { title: '审核时间', dataIndex: 'auditTime', slotName: 'auditTime' },
-  { title: '创建人（考生/系统）', dataIndex: 'createUserString', slotName: 'createUser' },
-  { title: '更新人（考生/审核员）', dataIndex: 'updateUserString', slotName: 'updateUser' },
+  { title: '更新人', dataIndex: 'updateUserString', slotName: 'updateUser' },
   { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
   { title: '更新时间', dataIndex: 'updateTime', slotName: 'updateTime' },
-  { title: '是否删除（0否，1是）', dataIndex: 'isDeleted', slotName: 'isDeleted' },
   {
     title: '操作',
     dataIndex: 'action',
