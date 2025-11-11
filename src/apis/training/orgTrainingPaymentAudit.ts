@@ -116,3 +116,8 @@ export async function submitTrainingPaymentProof(
     auditStatus
   });
 }
+
+/** @desc 考生培训缴费审核 */
+export function reviewTrainingPayment(query: OrgTrainingPaymentAuditQuery) {
+  return http.post(`${BASE_URL}/reviewTrainingPayment`, query)
+}
