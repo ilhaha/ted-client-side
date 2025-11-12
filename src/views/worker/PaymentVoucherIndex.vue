@@ -283,7 +283,7 @@ const getCaptcha = async (captchaReq: BehaviorCaptchaReq) => {
         captchaLoading.value = true
         captchaBtnName.value = '发送中...'
         // 这里需要调用接口获取验证码
-        await getPaySmsCaptcha(phoneVerifiedForm.phone, captchaReq, candidateId.value)
+        await getPaySmsCaptcha(phoneVerifiedForm.phone, captchaReq, encodeURIComponent(candidateId.value))
         captchaLoading.value = false
         captchaDisable.value = true
         captchaBtnName.value = `获取验证码(${(captchaTime.value -= 1)}s)`

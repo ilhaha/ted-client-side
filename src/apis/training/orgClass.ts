@@ -7,7 +7,7 @@ export interface OrgClassResp {
   orgId: string
   projectId: string
   className: string
-  classType:string | undefined
+  classType: string | undefined
   createUser: string
   updateUser: string
   createTime: string
@@ -26,7 +26,7 @@ export interface OrgClassDetailResp {
   updateUser: string
   createTime: string
   updateTime: string
-  classType:string | undefined
+  classType: string | undefined
   isDeleted: string
   createUserString: string
   updateUserString: string
@@ -34,10 +34,20 @@ export interface OrgClassDetailResp {
 export interface OrgClassQuery {
   projectId: string | undefined
   className: string | undefined
-  classType:string | undefined
+  classType: string | undefined
   sort: Array<string>
 }
-export interface OrgClassPageQuery extends OrgClassQuery, PageQuery {}
+export interface OrgClassPageQuery extends OrgClassQuery, PageQuery { }
+
+/**
+ * 根据项目类型和班级类型获取班级选择器
+ * @param id 
+ * @returns 
+ */
+export function getSelectClassByProject(projectId: string, classType: number) {
+  return http.get<any[]>(`${BASE_URL}//select/${projectId}/${classType}`)
+}
+
 
 /** @desc 查询培训机构班级列表 */
 export function listOrgClass(query: OrgClassPageQuery) {

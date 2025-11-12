@@ -129,7 +129,7 @@ const openClassSignUp = (record: any) => {
 const ApplyListRef = ref<InstanceType<typeof ApplyList>>();
 
 const openApplyList = (record: any) => {
-  ApplyListRef.value?.onOpen(record.examPlanId);
+  ApplyListRef.value?.onOpen(record.examPlanId, record.projectId);
 };
 
 const handApplySuccess = () => {

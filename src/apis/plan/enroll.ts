@@ -44,12 +44,22 @@ export interface EnrollQuery {
   enrollStatus: string | undefined
   sort: Array<string>
 }
-export interface EnrollPageQuery extends EnrollQuery, PageQuery {}
+export interface EnrollPageQuery extends EnrollQuery, PageQuery { }
 
 export interface EnrollReq {
   enrollStatus: number;
   examPlanId: number;
 }
+// 下载某个班级的考试缴费通知单
+export function downloadBatchAuditNotice(classId: number, planId: number) {
+  return http.download(`${BASE_URL}/download/batch/auditNotice/${classId}/${planId}`)
+}
+
+// 下载某个考试的缴费通知单
+export function downloadAuditNoticeSingle(id: number) {
+  return http.download(`${BASE_URL}/download/auditNotice/${id}`)
+}
+
 /** @desc 考生考试报名*/
 export function singUp(data: EnrollReq) {
   return http.post(`${BASE_URL}/singUp`, data)
