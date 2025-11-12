@@ -543,12 +543,12 @@ const handleModalCloseTrainingPayment = () => {
 const statusConfig = {
   0: { text: "待缴费", clickable: true, type: "primary" },
   1: { text: "审核中", clickable: true, type: "default" },
-  2: { text: "审核通过，等待加入班级", clickable: false, type: "success" },
+  2: { text: "缴费审核通过", clickable: false, type: "success" },
   3: { text: "审核驳回", clickable: true, type: "danger" },
   4: { text: "补正审核中", clickable: true, type: "warning" },
-  // 5: { text: "退款审核", clickable: false, type: "default" },
-  // 6: { text: "已退款", clickable: false, type: "default" },
-  // 7: { text: "退款驳回", clickable: true, type: "danger" },
+  5: { text: "退款审核", clickable: false, type: "default" },
+  6: { text: "已退款", clickable: false, type: "default" },
+  7: { text: "退款驳回", clickable: true, type: "danger" },
   // 必须加默认配置，避免 config 为 undefined
   default: { text: "未知状态", clickable: false, type: "default" },
 };

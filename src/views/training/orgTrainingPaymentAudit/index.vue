@@ -87,7 +87,14 @@
             @click="onExamine(record)"
             >审核</a-link
           >
-          <!--          <a-link v-permission="['document:document:update']" title="修改" @click="onUpdate(record)">修改</a-link>-->
+          <a-link
+            v-permission="['document:document:delete']"
+            v-if="record.auditStatus === 2"
+            title="退费"
+            @click="onRefund(record)"
+          >
+            退费
+          </a-link>
           <!--          <a-link-->
           <!--            v-permission="['document:document:delete']"-->
           <!--            status="danger"-->
@@ -125,7 +132,10 @@
     <OrgTrainingPaymentAuditDetailDrawer
       ref="OrgTrainingPaymentAuditDetailDrawerRef"
     />
-    <TrainingPaymentModal ref="TrainingPaymentModalRef" @save-success="search" />
+    <TrainingPaymentModal
+      ref="TrainingPaymentModalRef"
+      @save-success="search"
+    />
   </div>
 </template>
 
@@ -138,6 +148,7 @@ import {
   deleteOrgTrainingPaymentAudit,
   exportOrgTrainingPaymentAudit,
   listOrgTrainingPaymentAudit,
+  refundTrainingPayment,
 } from "@/apis/training/orgTrainingPaymentAudit";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
@@ -145,7 +156,6 @@ import { useDict } from "@/hooks/app";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
 import TrainingPaymentModal from "./TrainingPanymentModal.vue";
-
 defineOptions({ name: "OrgTrainingPaymentAudit" });
 
 const queryForm = reactive<OrgTrainingPaymentAuditQuery>({
@@ -304,6 +314,24 @@ const onExamine = async (record: OrgTrainingPaymentAuditResp) => {
     record.candidateId,
     record.enrollId
   );
+};
+const onRefund = async (record) => {
+  const ok = window.confirm(`确定要退费给「${record.name || "该考生"}」吗？`);
+  if (!ok) return;
+
+  try {
+    const res = await refundTrainingPayment(record.id);
+    if (res) {
+      alert("退费成功");
+      // 刷新当前页面
+      window.location.reload();
+    } else {
+      alert("退费失败");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("退费异常");
+  }
 };
 
 const getPreviewUrl = (url: string) => {

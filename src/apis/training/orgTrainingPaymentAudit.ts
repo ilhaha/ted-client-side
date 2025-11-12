@@ -121,3 +121,8 @@ export async function submitTrainingPaymentProof(
 export function reviewTrainingPayment(query: OrgTrainingPaymentAuditQuery) {
   return http.post(`${BASE_URL}/reviewTrainingPayment`, query)
 }
+/** @desc 培训缴费退费 */
+export function refundTrainingPayment(id: number) {
+  return http.post(`${BASE_URL}/refundTrainingPayment?id=${id}`)
+}
+
