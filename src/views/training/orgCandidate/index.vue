@@ -118,8 +118,8 @@ const columns = ref<TableInstanceColumns[]>([
 ]);
 const categoryProjectClassOptions = ref<ProjectCategoryVO[]>([])
 
-const openReview = async (record: OrgCandidateResp) => {  
-  const res = await getSelectProjectClass(record.orgId,record.projectId)
+const openReview = async (record: OrgCandidateResp) => {
+  const res = await getSelectProjectClass(record.orgId, record.projectId, 1)
   categoryProjectClassOptions.value = res.data
   visible.value = true
   form.id = record.id
@@ -157,7 +157,7 @@ const categoryOptions = ref<ProjectCategoryVO[]>([])
 
 onMounted(async () => {
   const res = await getSelectCategoryProject()
-  categoryOptions.value = res.data  
+  categoryOptions.value = res.data
 })
 
 

@@ -84,8 +84,8 @@ export function getSelectProjectClassCandidate(projectId: string, planType: numb
 }
 
 /** @desc 获取机构对应的项目-班级级联选择 */
-export function getSelectProjectClass(orgId: string, projectId: string) {
-  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/project/class`, { orgId, projectId })
+export function getSelectProjectClass(orgId: string, projectId: string, classType: number) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/project/class/${classType}`, { orgId, projectId })
 }
 
 /** @desc 获取机构对应的分类-项目-班级级联选择 */
