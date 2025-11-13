@@ -59,6 +59,8 @@ export interface OrgTrainingPaymentAuditQuery {
   enrollId: string | undefined
   noticeNo: string | undefined
   paymentAmount: string | undefined
+  projectId:string | undefined
+  candidateName:string | undefined
   sort: Array<string>
 }
 export interface OrgTrainingPaymentAuditPageQuery extends OrgTrainingPaymentAuditQuery, PageQuery {}

@@ -1,7 +1,7 @@
 <template>
   <div class="gi_table_page">
     <GiTable
-      title="机构培训缴费审核管理"
+      title=""
       row-key="id"
       :data="dataList"
       :columns="columns"
@@ -13,47 +13,29 @@
       @refresh="search"
     >
       <template #toolbar-left>
+        <a-cascader
+          v-model="queryForm.projectId"
+          :options="categoryOptions"
+          placeholder="请选择培训项目"
+          allow-clear
+          @change="search"
+        />
         <a-input-search
-          v-model="queryForm.trainingId"
-          placeholder="请输入关联培训ID"
+          v-model="queryForm.candidateName"
+          placeholder="请输入考生姓名"
           allow-clear
           @search="search"
         />
-        <a-input-search
-          v-model="queryForm.categoryId"
-          placeholder="请输入关联八大类ID"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.candidateId"
-          placeholder="请输入考生ID"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.enrollId"
-          placeholder="请输入关联报名记录ID"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.noticeNo"
-          placeholder="请输入缴费通知单编号）"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.paymentAmount"
-          placeholder="请输入缴费金额（元）"
-          allow-clear
-          @search="search"
-        />
+        <a-button type="primary" @click="search">
+          <template #icon><icon-search /></template>
+          搜索
+        </a-button>
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
         </a-button>
       </template>
+
       <template #auditNoticeUrl="{ record }">
         <a-link
           @click="getPreviewUrl(record.auditNoticeUrl)"
@@ -157,6 +139,10 @@ import { isMobile } from "@/utils";
 import has from "@/utils/has";
 import TrainingPaymentModal from "./TrainingPanymentModal.vue";
 defineOptions({ name: "OrgTrainingPaymentAudit" });
+import {
+  type ProjectCategoryVO,
+  getSelectCategoryProject,
+} from "@/apis/training/org";
 
 const queryForm = reactive<OrgTrainingPaymentAuditQuery>({
   orgId: undefined,
@@ -166,6 +152,8 @@ const queryForm = reactive<OrgTrainingPaymentAuditQuery>({
   enrollId: undefined,
   noticeNo: undefined,
   paymentAmount: undefined,
+  projectId:undefined,
+  candidateName:undefined,
   sort: ["id,desc"],
 });
 
@@ -354,6 +342,12 @@ const getPreviewUrl = (url: string) => {
     Message.warning("暂不支持此文件类型预览");
   }
 };
+const categoryOptions = ref<ProjectCategoryVO[]>([]);
+
+onMounted(async () => {
+  const res = await getSelectCategoryProject();
+  categoryOptions.value = res.data;
+});
 </script>
 
 <style scoped lang="scss"></style>
