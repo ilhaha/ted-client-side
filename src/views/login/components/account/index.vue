@@ -89,7 +89,7 @@ const rules: FormInstance['rules'] = {
       if (!value) return callback()
       // 仅当角色需要身份证时才验证
       if (form.role === '1' && !idCardReg.test(value)) {
-        return callback('考生请使用身份证进行登录')
+        return callback('检验人员请使用身份证进行登录')
       }
       callback()
     },

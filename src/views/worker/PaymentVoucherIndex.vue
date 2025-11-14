@@ -393,6 +393,7 @@ onMounted(() => {
 
         if (!hasAllParams) {
             Message.error('二维码已被篡改或参数缺失，请重新获取')
+            return
         }
         initInfo({
             classId: classId.value,

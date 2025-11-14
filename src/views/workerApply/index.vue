@@ -47,10 +47,9 @@
           @click="getPreviewUrl(record.qualificationPath)">预览</a-link>
       </template>
       <template v-for="col in docColumns" :key="col.title" #[`doc_${col.title}`]="{ record }">
-        <span v-if="record.docMap && record.docMap[col.title]">
+        <span v-if="record.docMap && record.docMap[col.title]" class="preview-image">
           <a-image v-for="(path, index) in record.docMap[col.title].split(',')" :key="index" width="80" height="60"
-            :src="path" :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover"
-            @error="handleImageError" />
+            :src="path" :preview-props="{ zoomRate: 1.5 }" fit="cover" @error="handleImageError" />
         </span>
         <span v-else>-</span>
       </template>
@@ -322,5 +321,14 @@ defineExpose({ onOpen })
 <style scoped>
 .arco-modal-body {
   padding: 0;
+}
+
+.preview-image {
+  display: flex;
+  /* 横向排列 */
+  flex-wrap: wrap;
+  /* 空间不足自动换行 */
+  gap: 8px;
+  /* 图片间距，可调 */
 }
 </style>

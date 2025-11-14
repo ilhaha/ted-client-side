@@ -32,6 +32,11 @@
           {{ getClassTypeText(record.classType) }}
         </a-tag>
       </template>
+      <template #status="{ record }">
+        <a-tag :color="getStatusColor(record.status)">
+          {{ getStatusText(record.status) }}
+        </a-tag>
+      </template>
       <template #qrcodeApplyUrl="{ record }">
         <a-space v-if="record.qrcodeApplyUrl">
           <a-image width="80" height="60" :src="record.qrcodeApplyUrl" :preview-props="{ zoomRate: 1.5 }"
@@ -41,7 +46,7 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['worker:workerApply:list']" title="资料明细" @click="openWorkerList(record)">资料明细</a-link>
+          <a-link v-permission="['worker:workerApply:list']" title="人员" @click="openWorkerList(record)">人员</a-link>
         </a-space>
         <a-space>
           <a-link v-permission="['training:orgClass:update']" title="修改" @click="onUpdate(record)">修改</a-link>
@@ -51,7 +56,7 @@
 
     <OrgClassAddModal ref="OrgClassAddModalRef" @save-success="search" />
     <WokerImportModel ref="WokerImportModelRef" @setUploadLoading="handSetUploadLoading" />
-    <a-modal v-model:visible="showWokerListVisible" title="学员名单" :mask-closable="false" :esc-to-close="false"
+    <a-modal v-model:visible="showWokerListVisible" title="班级人员" :mask-closable="false" :esc-to-close="false"
       width="90%" draggable :footer="null" modal-class="no-padding-modal" @close="handClose">
       <WokerList ref="WokerListRef" />
     </a-modal>
@@ -96,7 +101,8 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '考试项目', dataIndex: 'projectName', slotName: 'projectName' },
   { title: '班级名称', dataIndex: 'className', slotName: 'className' },
   { title: '班级类型', dataIndex: 'classType', slotName: 'classType' },
-  { title: '作业人员报考二维码', dataIndex: 'qrcodeApplyUrl', slotName: 'qrcodeApplyUrl' },
+  { title: '报考二维码', dataIndex: 'qrcodeApplyUrl', slotName: 'qrcodeApplyUrl' },
+  { title: '状态', dataIndex: 'status', slotName: 'status' },
   { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
   {
     title: '操作',
@@ -151,6 +157,28 @@ const reset = () => {
   queryForm.className = undefined
   queryForm.classType = undefined
   search()
+}
+
+const getStatusColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return 'green'
+    case 1:
+      return 'red'
+    default:
+      return 'gray'
+  }
+}
+
+const getStatusText = (status: number) => {
+  switch (status) {
+    case 0:
+      return '可报名'
+    case 1:
+      return '暂停报名'
+    default:
+      return ''
+  }
 }
 
 const getClassTypeColor = (status: number) => {

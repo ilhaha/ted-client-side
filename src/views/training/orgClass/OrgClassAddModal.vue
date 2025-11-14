@@ -29,32 +29,33 @@ const formRef = ref<InstanceType<typeof GiForm>>()
 const [form, resetForm] = useResetReactive({
   projectId: undefined,
   className: undefined,
-  classType: 0
-  // todo 待补充
+  classType: 0,
+  status: 0
 })
 
 const categoryOptions = ref<ProjectCategoryVO[]>([])
 
 const columns: ColumnItem[] = reactive([
   {
+    label: '班级名称',
+    field: 'className',
+    type: 'input',
+    span: 24,
+    rules: [{ required: true, message: '请输入班级名称' }]
+  },
+  {
     label: '考试项目',
     field: 'projectId',
     type: 'cascader',
     span: 24,
     props: {
+      disabled: computed(() => isUpdate.value),
       allowSearch: true,
       multiple: false,
       options: categoryOptions,
       fieldNames: { label: 'label', value: 'value' }
     },
     rules: [{ required: true, message: '请选择考试项目' }]
-  },
-  {
-    label: '班级名称',
-    field: 'className',
-    type: 'input',
-    span: 24,
-    rules: [{ required: true, message: '请输入班级名称' }]
   },
   {
     label: '班级类型',
@@ -72,6 +73,22 @@ const columns: ColumnItem[] = reactive([
       fieldNames: { label: 'label', value: 'value' }
     })),
     rules: [{ required: true, message: '请选择班级类型' }]
+  },
+  {
+    label: '招生状态',
+    field: 'status',
+    type: 'select',
+    span: 24,
+    props: computed(() => ({
+      allowSearch: false,
+      multiple: false,
+      options: [
+        { label: '可报名', value: 0 },
+        { label: '停止报名', value: 1 }
+      ],
+      fieldNames: { label: 'label', value: 'value' }
+    })),
+    rules: [{ required: true, message: '请选择招生状态' }]
   }
 
 
